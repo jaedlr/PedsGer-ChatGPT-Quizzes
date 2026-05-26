@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSA II Genitourinary Diseases Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A girl begins breast development due to estrogen production from the ovaries. Which pubertal term describes this finding",
+    "topic": "Puberty terminology",
+    "options": {
+      "A": "Menarche",
+      "B": "Pubarche",
+      "C": "Thelarche",
+      "D": "Spermarche"
+    },
+    "correct": "C",
+    "explanation": "Thelarche is the beginning of breast development due to ovarian estrogen and is usually the first visible sign of puberty in girls.",
+    "optionExplanations": {
+      "A": "Menarche is the first menstrual period.",
+      "B": "Pubarche is pubic/axillary hair, body odor, and acne due mainly to adrenal androgens.",
+      "C": "Correct. Thelarche is the beginning of breast development due to ovarian estrogen and is usually the first visible sign of puberty in girls.",
+      "D": "Spermarche is the male equivalent of menarche."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A girl has her first menstrual period. Which pubertal term describes this event",
+    "topic": "Puberty terminology",
+    "options": {
+      "A": "Thelarche",
+      "B": "Pubarche",
+      "C": "Adrenarche only",
+      "D": "Menarche"
+    },
+    "correct": "D",
+    "explanation": "Menarche is the first menstrual period. Early menstrual cycles are often anovulatory.",
+    "optionExplanations": {
+      "A": "Thelarche is breast development.",
+      "B": "Pubarche is pubic hair development.",
+      "C": "Adrenarche refers to adrenal androgen production; menarche is the first period.",
+      "D": "Correct. Menarche is the first menstrual period. Early menstrual cycles are often anovulatory."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A child develops pubic hair, axillary hair, body odor, and acne mainly from adrenal androgen production. Which term best describes this",
+    "topic": "Puberty terminology",
+    "options": {
+      "A": "Pubarche",
+      "B": "Menarche",
+      "C": "Thelarche",
+      "D": "Peak height velocity"
+    },
+    "correct": "A",
+    "explanation": "Pubarche is the appearance of pubic hair and often axillary hair, body odor, and acne caused mainly by adrenal androgens from adrenarche.",
+    "optionExplanations": {
+      "A": "Correct. Pubarche is the appearance of pubic hair and often axillary hair, body odor, and acne caused mainly by adrenal androgens from adrenarche.",
+      "B": "Menarche is first menstrual period.",
+      "C": "Thelarche is breast budding.",
+      "D": "Peak height velocity is the fastest phase of growth, not the term for pubic hair development."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A 7-year-old girl has breast budding and rapid growth acceleration. Which classification is most appropriate",
+    "topic": "Precocious puberty",
+    "options": {
+      "A": "Normal puberty because girls may start any time after age 6",
+      "B": "Precocious puberty because breast development before age 8 in girls warrants evaluation",
+      "C": "Delayed puberty because menarche has not occurred",
+      "D": "Constitutional delay"
+    },
+    "correct": "B",
+    "explanation": "Precocious puberty in the United States is breast development before age 8 in girls, especially if accompanied by rapid progression or growth acceleration.",
+    "optionExplanations": {
+      "A": "The section uses age 8 as the threshold for evaluation.",
+      "B": "Correct. Precocious puberty in the United States is breast development before age 8 in girls, especially if accompanied by rapid progression or growth acceleration.",
+      "C": "Absence of menarche is not delayed at age 7.",
+      "D": "This describes late puberty, not early puberty."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "An 8-year-old boy has testicular enlargement. Which classification is most appropriate",
+    "topic": "Precocious puberty",
+    "options": {
+      "A": "Normal puberty because boys commonly start before age 9",
+      "B": "Delayed puberty",
+      "C": "Menarche",
+      "D": "Precocious puberty because testicular enlargement before age 9 in boys warrants evaluation"
+    },
+    "correct": "D",
+    "explanation": "Precocious puberty in boys is testicular enlargement before age 9.",
+    "optionExplanations": {
+      "A": "The section uses testicular enlargement before 9 as concerning.",
+      "B": "Delayed puberty in boys is no puberty by age 14.",
+      "C": "Menarche is a female pubertal event.",
+      "D": "Correct. Precocious puberty in boys is testicular enlargement before age 9."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "Which feature most supports further evaluation for precocious puberty",
+    "topic": "Precocious puberty evaluation",
+    "options": {
+      "A": "Stable Tanner stage 1 exam",
+      "B": "Menarche 2.5 years after thelarche in an adolescent",
+      "C": "Fast progression of secondary sex characteristics with rapid growth acceleration",
+      "D": "Testicular enlargement beginning after age 12"
+    },
+    "correct": "C",
+    "explanation": "Evaluation for precocious puberty depends on degree/rate of maturation, family history, progression of findings, rapid growth acceleration, and early secondary sex characteristics.",
+    "optionExplanations": {
+      "A": "Tanner 1 is completely prepubertal.",
+      "B": "That timing is typical.",
+      "C": "Correct. Evaluation for precocious puberty depends on degree/rate of maturation, family history, progression of findings, rapid growth acceleration, and early secondary sex characteristics.",
+      "D": "This is within usual pubertal timing, not precocious."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A 13-year-old girl has no pubertal signs and no menarche. Which classification fits the United States threshold in the notes",
+    "topic": "Delayed puberty",
+    "options": {
+      "A": "Delayed puberty",
+      "B": "Precocious puberty",
+      "C": "Normal because no evaluation until age 16",
+      "D": "Thelarche"
+    },
+    "correct": "A",
+    "explanation": "Delayed puberty is absence of pubertal signs by an age when 97–99% of peers have started. The section gives girls as no puberty/no menarche by age 13.",
+    "optionExplanations": {
+      "A": "Correct. Delayed puberty is absence of pubertal signs by an age when 97–99% of peers have started. The section gives girls as no puberty/no menarche by age 13.",
+      "B": "Precocious puberty is early puberty, not absence of puberty.",
+      "C": "The threshold listed is age 13 for girls.",
+      "D": "Thelarche is breast development, which is absent here."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A 14-year-old boy has no pubertal development. Which classification fits the threshold in the notes",
+    "topic": "Delayed puberty",
+    "options": {
+      "A": "Precocious puberty",
+      "B": "Normal because boys are not evaluated until age 18",
+      "C": "Spermarche",
+      "D": "Delayed puberty"
+    },
+    "correct": "D",
+    "explanation": "Delayed puberty in boys is no puberty by age 14.",
+    "optionExplanations": {
+      "A": "Precocious puberty in boys is before age 9.",
+      "B": "The listed threshold is age 14.",
+      "C": "Spermarche refers to first sperm ejaculation/nocturnal emission, not absence of puberty.",
+      "D": "Correct. Delayed puberty in boys is no puberty by age 14."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A child is completely prepubertal with no breast tissue, no pubic hair, and prepubertal genitalia. Which Tanner stage is this",
+    "topic": "Tanner staging",
+    "options": {
+      "A": "Tanner stage 2",
+      "B": "Tanner stage 1",
+      "C": "Tanner stage 4",
+      "D": "Tanner stage 5"
+    },
+    "correct": "B",
+    "explanation": "Tanner stage 1 is completely prepubertal.",
+    "optionExplanations": {
+      "A": "Stage 2 marks the beginning of puberty.",
+      "B": "Correct. Tanner stage 1 is completely prepubertal.",
+      "C": "Stage 4 has adult-like characteristics but not fully mature.",
+      "D": "Stage 5 is full adult maturation."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A girl has small breast mound formation from breast budding. Which Tanner breast stage is this",
+    "topic": "Female Tanner staging",
+    "options": {
+      "A": "Tanner breast stage 1",
+      "B": "Tanner breast stage 4",
+      "C": "Tanner breast stage 2",
+      "D": "Tanner breast stage 5"
+    },
+    "correct": "C",
+    "explanation": "Breast budding/thelarche with a small mound is Tanner breast stage 2.",
+    "optionExplanations": {
+      "A": "Stage 1 has no breast tissue.",
+      "B": "Stage 4 has areola and nipple projecting as a secondary mound.",
+      "C": "Correct. Breast budding/thelarche with a small mound is Tanner breast stage 2.",
+      "D": "Stage 5 is mature adult breast."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A boy begins puberty with testicular enlargement greater than 4 mL. Which Tanner genital stage corresponds to the first sign of male puberty",
+    "topic": "Male Tanner staging",
+    "options": {
+      "A": "Tanner genital stage 1",
+      "B": "Tanner genital stage 4",
+      "C": "Tanner genital stage 5",
+      "D": "Tanner genital stage 2"
+    },
+    "correct": "D",
+    "explanation": "Testicular enlargement greater than 4 mL is Tanner genital stage 2 and is the first sign of puberty in boys.",
+    "optionExplanations": {
+      "A": "Stage 1 is prepubertal testes/genitalia.",
+      "B": "Stage 4 has penile widening/glans development and larger testes.",
+      "C": "Stage 5 is adult genitalia.",
+      "D": "Correct. Testicular enlargement greater than 4 mL is Tanner genital stage 2 and is the first sign of puberty in boys."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A boy has penis lengthening after testicular enlargement. Which Tanner genital stage is most consistent",
+    "topic": "Male Tanner staging",
+    "options": {
+      "A": "Tanner genital stage 3",
+      "B": "Tanner genital stage 1",
+      "C": "Tanner genital stage 2",
+      "D": "Tanner genital stage 5"
+    },
+    "correct": "A",
+    "explanation": "Male Tanner genital stage 3 is when penis length increases after testicular enlargement begins.",
+    "optionExplanations": {
+      "A": "Correct. Male Tanner genital stage 3 is when penis length increases after testicular enlargement begins.",
+      "B": "Stage 1 is prepubertal.",
+      "C": "Stage 2 is first testicular enlargement.",
+      "D": "Stage 5 is adult genitalia."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A boy has penile widening, glans development, and larger testes, but not full adult genitalia. Which Tanner genital stage is this",
+    "topic": "Male Tanner staging",
+    "options": {
+      "A": "Tanner genital stage 1",
+      "B": "Tanner genital stage 2",
+      "C": "Tanner genital stage 4",
+      "D": "Tanner genital stage 5"
+    },
+    "correct": "C",
+    "explanation": "Male Tanner genital stage 4 includes penile widening/glans development with larger testes.",
+    "optionExplanations": {
+      "A": "Stage 1 is prepubertal.",
+      "B": "Stage 2 is initial testicular enlargement.",
+      "C": "Correct. Male Tanner genital stage 4 includes penile widening/glans development with larger testes.",
+      "D": "Stage 5 is adult genitalia."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A child has sparse, light pubic hair. Which pubic hair Tanner stage is this",
+    "topic": "Pubic hair Tanner staging",
+    "options": {
+      "A": "Stage 1",
+      "B": "Tanner pubic hair stage 2",
+      "C": "Stage 4",
+      "D": "Stage 5"
+    },
+    "correct": "B",
+    "explanation": "Pubic hair Tanner stage 2 is sparse/light hair.",
+    "optionExplanations": {
+      "A": "Stage 1 has no pubic hair.",
+      "B": "Correct. Pubic hair Tanner stage 2 is sparse/light hair.",
+      "C": "Stage 4 has adult-like hair but limited area.",
+      "D": "Stage 5 has adult distribution extending to thighs."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A child has darker, coarser, curlier pubic hair. Which pubic hair Tanner stage is this",
+    "topic": "Pubic hair Tanner staging",
+    "options": {
+      "A": "Stage 1",
+      "B": "Stage 2",
+      "C": "Stage 5",
+      "D": "Tanner pubic hair stage 3"
+    },
+    "correct": "D",
+    "explanation": "Pubic hair Tanner stage 3 is darker, coarser, curlier hair.",
+    "optionExplanations": {
+      "A": "Stage 1 has no pubic hair.",
+      "B": "Stage 2 is sparse/light hair.",
+      "C": "Stage 5 is adult distribution extending to thighs.",
+      "D": "Correct. Pubic hair Tanner stage 3 is darker, coarser, curlier hair."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A child has adult-like pubic hair but limited area. Which pubic hair Tanner stage is this",
+    "topic": "Pubic hair Tanner staging",
+    "options": {
+      "A": "Tanner pubic hair stage 4",
+      "B": "Stage 1",
+      "C": "Stage 2",
+      "D": "Stage 5"
+    },
+    "correct": "A",
+    "explanation": "Pubic hair Tanner stage 4 is adult-like hair but limited in area.",
+    "optionExplanations": {
+      "A": "Correct. Pubic hair Tanner stage 4 is adult-like hair but limited in area.",
+      "B": "Stage 1 has no pubic hair.",
+      "C": "Stage 2 is sparse/light pubic hair.",
+      "D": "Stage 5 is adult distribution extending to the thighs."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A girl begins puberty. What is usually the earliest visible secondary sex characteristic",
+    "topic": "Female pubertal sequence",
+    "options": {
+      "A": "Menarche",
+      "B": "Breast budding / thelarche",
+      "C": "Spermarche",
+      "D": "Penile growth"
+    },
+    "correct": "B",
+    "explanation": "In girls, the earliest visible secondary sex characteristic is usually breast budding/thelarche.",
+    "optionExplanations": {
+      "A": "Menarche occurs later, about 2–2.5 years after puberty starts.",
+      "B": "Correct. In girls, the earliest visible secondary sex characteristic is usually breast budding/thelarche.",
+      "C": "Spermarche is a male pubertal event.",
+      "D": "Penile growth occurs in boys."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "Which sequence best matches female pubertal maturation from the notes",
+    "topic": "Female pubertal sequence",
+    "options": {
+      "A": "Menarche → thelarche → ovarian enlargement → pubarche",
+      "B": "Testicular enlargement → penile growth → spermarche",
+      "C": "Pubarche → spermarche → menarche",
+      "D": "Ovarian enlargement/growth acceleration → thelarche → pubarche → growth spurt → leukorrhea → menarche"
+    },
+    "correct": "D",
+    "explanation": "The notes list female sequence as ovarian enlargement/growth acceleration, breast budding, pubic hair development, growth spurt, leukorrhea, then menarche about 2–2.5 years after puberty starts.",
+    "optionExplanations": {
+      "A": "Menarche occurs later, not first.",
+      "B": "This is the male sequence.",
+      "C": "This mixes male and female events and has the sequence wrong.",
+      "D": "Correct. The notes list female sequence as ovarian enlargement/growth acceleration, breast budding, pubic hair development, growth spurt, leukorrhea, then menarche about 2–2.5 years after puberty starts."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A girl began breast development 2.5 years ago and now has her first period. How does this timing compare with the notes",
+    "topic": "Menarche timing",
+    "options": {
+      "A": "Always pathologic",
+      "B": "Too early by definition",
+      "C": "Typical; menarche occurs about 2–2.5 years after thelarche",
+      "D": "Delayed puberty by definition"
+    },
+    "correct": "C",
+    "explanation": "Menarche usually occurs about 2–2.5 years after thelarche and about 0.5 years after peak height velocity.",
+    "optionExplanations": {
+      "A": "This timing is expected.",
+      "B": "The timing after thelarche is normal.",
+      "C": "Correct. Menarche usually occurs about 2–2.5 years after thelarche and about 0.5 years after peak height velocity.",
+      "D": "Menarche after typical thelarche timing is not delayed by itself."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A girl has pubic hair before breast budding. What does the notes say about this possibility",
+    "topic": "Female puberty variation",
+    "options": {
+      "A": "It can occur; about 15% of girls have pubic hair first",
+      "B": "It is impossible in normal puberty",
+      "C": "It means menarche has already occurred",
+      "D": "It is Tanner stage 5 by definition"
+    },
+    "correct": "A",
+    "explanation": "The notes state that about 15% of girls have pubic hair first instead of breast budding.",
+    "optionExplanations": {
+      "A": "Correct. The notes state that about 15% of girls have pubic hair first instead of breast budding.",
+      "B": "The notes state this variation occurs in about 15% of girls.",
+      "C": "Pubic hair can occur before menarche.",
+      "D": "Sparse/light pubic hair can be Tanner stage 2, not automatically adult distribution."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "What is the first sign of puberty in boys",
+    "topic": "Male pubertal sequence",
+    "options": {
+      "A": "Penile growth",
+      "B": "Pubic hair",
+      "C": "Spermarche",
+      "D": "Testicular enlargement"
+    },
+    "correct": "D",
+    "explanation": "Testicular enlargement is the first sign of puberty in boys and occurs about 6 months before penile growth or pubic hair.",
+    "optionExplanations": {
+      "A": "Penile growth follows testicular enlargement.",
+      "B": "Pubic hair follows testicular enlargement in the listed sequence.",
+      "C": "Spermarche occurs later after peak height velocity.",
+      "D": "Correct. Testicular enlargement is the first sign of puberty in boys and occurs about 6 months before penile growth or pubic hair."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "Which sequence best matches male pubertal maturation from the notes",
+    "topic": "Male pubertal sequence",
+    "options": {
+      "A": "Menarche → thelarche → pubarche",
+      "B": "Testicular enlargement → seminiferous tubule growth → penile growth → pubic hair → growth spurt → spermarche/nocturnal emissions",
+      "C": "Pubic hair → menarche → leukorrhea",
+      "D": "Penile growth first → testicular enlargement last"
+    },
+    "correct": "B",
+    "explanation": "The notes list male sequence as testicular enlargement, seminiferous tubule growth, penile growth, pubic hair, growth spurt, then spermarche/nocturnal emissions.",
+    "optionExplanations": {
+      "A": "This uses female events and is incorrectly ordered.",
+      "B": "Correct. The notes list male sequence as testicular enlargement, seminiferous tubule growth, penile growth, pubic hair, growth spurt, then spermarche/nocturnal emissions.",
+      "C": "This uses female events and is not the male sequence.",
+      "D": "Testicular enlargement is first."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "Spermarche is best described as",
+    "topic": "Male puberty",
+    "options": {
+      "A": "The first sign of puberty in boys",
+      "B": "Female breast budding",
+      "C": "The male equivalent of menarche",
+      "D": "Adrenal-driven pubic hair development only"
+    },
+    "correct": "C",
+    "explanation": "The notes describe spermarche as the male equivalent of menarche and state it occurs after peak height velocity.",
+    "optionExplanations": {
+      "A": "The first sign in boys is testicular enlargement.",
+      "B": "That is thelarche.",
+      "C": "Correct. The notes describe spermarche as the male equivalent of menarche and state it occurs after peak height velocity.",
+      "D": "That is pubarche/adrenarche."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "Which comparison of growth spurts in puberty is most accurate",
+    "topic": "Growth spurt comparison",
+    "options": {
+      "A": "Girls have an earlier growth spurt; boys have a later growth spurt with greater magnitude",
+      "B": "Boys and girls have identical growth spurt timing and magnitude",
+      "C": "Boys have earlier and smaller growth spurts",
+      "D": "Growth spurt occurs only after menarche in all children"
+    },
+    "correct": "A",
+    "explanation": "The high-yield comparison table states that girls have earlier growth spurt timing, while boys have later growth spurts of greater magnitude.",
+    "optionExplanations": {
+      "A": "Correct. The high-yield comparison table states that girls have earlier growth spurt timing, while boys have later growth spurts of greater magnitude.",
+      "B": "The table contrasts timing and magnitude.",
+      "C": "This reverses the comparison.",
+      "D": "Menarche is female-specific and occurs after peak height velocity."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "Which hormone is mainly responsible for breast development in girls",
+    "topic": "Pubertal hormones",
+    "options": {
+      "A": "Testosterone",
+      "B": "Estrogen",
+      "C": "Adrenal androgens only",
+      "D": "PTH"
+    },
+    "correct": "B",
+    "explanation": "Thelarche/breast development is due to estrogen production from the ovaries.",
+    "optionExplanations": {
+      "A": "Testosterone is mainly responsible for male pubertal changes.",
+      "B": "Correct. Thelarche/breast development is due to estrogen production from the ovaries.",
+      "C": "Adrenal androgens drive pubarche, not breast development.",
+      "D": "PTH regulates calcium/phosphate physiology."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "Which hormone is mainly responsible for male pubertal development in the comparison table",
+    "topic": "Pubertal hormones",
+    "options": {
+      "A": "Estrogen",
+      "B": "TSH",
+      "C": "Insulin",
+      "D": "Testosterone"
+    },
+    "correct": "D",
+    "explanation": "The high-yield comparison table lists testosterone as the main male pubertal hormone.",
+    "optionExplanations": {
+      "A": "Estrogen is mainly responsible for female pubertal development.",
+      "B": "TSH regulates thyroid hormone production, not male puberty.",
+      "C": "Insulin regulates glucose metabolism.",
+      "D": "Correct. The high-yield comparison table lists testosterone as the main male pubertal hormone."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "Which hormone source mainly causes pubic hair in girls",
+    "topic": "Pubarche hormones",
+    "options": {
+      "A": "Ovarian estrogen only",
+      "B": "Thyroid hormone only",
+      "C": "Adrenal androgens",
+      "D": "Insulin only"
+    },
+    "correct": "C",
+    "explanation": "Pubic hair in girls is due to adrenal androgens from adrenarche.",
+    "optionExplanations": {
+      "A": "Ovarian estrogen drives breast development.",
+      "B": "Thyroid hormone is not the main pubic hair driver.",
+      "C": "Correct. Pubic hair in girls is due to adrenal androgens from adrenarche.",
+      "D": "Insulin is not the main pubic hair driver."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "Which hormone source mainly causes pubic hair in boys according to the comparison table",
+    "topic": "Pubarche hormones",
+    "options": {
+      "A": "Estrogen only",
+      "B": "Adrenal and testicular androgens",
+      "C": "TSH and T4",
+      "D": "PTH and calcitonin"
+    },
+    "correct": "B",
+    "explanation": "The comparison table lists pubic hair in boys as due to adrenal/testicular androgens.",
+    "optionExplanations": {
+      "A": "Estrogen is not the main male pubic hair driver.",
+      "B": "Correct. The comparison table lists pubic hair in boys as due to adrenal/testicular androgens.",
+      "C": "These regulate thyroid physiology.",
+      "D": "These regulate calcium physiology."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A renal anomaly is described as lower renal poles fused, crossing midline anterior to the great vessels. Which anomaly is this",
+    "topic": "Renal anomalies",
+    "options": {
+      "A": "Horseshoe kidney",
+      "B": "Ectopic kidney",
+      "C": "Hypoplastic kidney",
+      "D": "AR polycystic kidney disease"
+    },
+    "correct": "A",
+    "explanation": "Horseshoe kidney has fused lower poles and crosses the midline anterior to the great vessels.",
+    "optionExplanations": {
+      "A": "Correct. Horseshoe kidney has fused lower poles and crosses the midline anterior to the great vessels.",
+      "B": "An ectopic kidney is usually pelvic.",
+      "C": "A hypoplastic kidney fails to reach normal size.",
+      "D": "ARPKD has enlarged immature collecting ducts and cysts."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "Which congenital urinary tract defect is described as the most common cause of hydronephrosis in children",
+    "topic": "Ureter/bladder defects",
+    "options": {
+      "A": "Vesicoureteral reflux",
+      "B": "Double ureters",
+      "C": "Bladder diverticula",
+      "D": "UPJ obstruction"
+    },
+    "correct": "D",
+    "explanation": "UPJ obstruction is listed as the most common cause of hydronephrosis in children.",
+    "optionExplanations": {
+      "A": "VUR increases ascending infection and pyelonephritis risk.",
+      "B": "Double ureters are two separate ureters from one kidney to the bladder.",
+      "C": "Bladder diverticula are pouch-like bladder wall invaginations.",
+      "D": "Correct. UPJ obstruction is listed as the most common cause of hydronephrosis in children."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

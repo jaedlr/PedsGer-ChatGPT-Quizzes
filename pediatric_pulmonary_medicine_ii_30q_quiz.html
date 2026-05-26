@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pediatric Pulmonary Medicine II Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A clinician evaluates a coughing child. Which respiratory history/exam set best matches the pediatric respiratory approach emphasized in the section",
+    "topic": "Pediatric respiratory approach",
+    "options": {
+      "A": "Focus only on adult-type chest pain and ignore growth chart",
+      "B": "Avoid caregiver history because it is unreliable",
+      "C": "Ask dyspnea, cough, wheeze, snoring/apnea/cyanosis, timing/triggers; assess pulse ox, growth, stridor/wheeze, retractions, cyanosis, and auscultation",
+      "D": "Assume tachypnea severity always correlates with hypoxemia"
+    },
+    "correct": "C",
+    "explanation": "The section emphasizes caregiver history, chronicity/timing, triggers such as exercise/feeding/URI exposure, and exam including vitals/pulse ox, growth, stridor/wheeze, retractions, cyanosis, and auscultation. Tachypnea severity does not always correlate with hypoxemia/hypercarbia.",
+    "optionExplanations": {
+      "A": "Growth chart and pediatric-specific symptoms are important.",
+      "B": "History is mostly from caregivers in pediatrics.",
+      "C": "Correct. The section emphasizes caregiver history, chronicity/timing, triggers such as exercise/feeding/URI exposure, and exam including vitals/pulse ox, growth, stridor/wheeze, retractions, cyanosis, and auscultation. Tachypnea severity does not always correlate with hypoxemia/hypercarbia.",
+      "D": "The notes specifically warn that it does not always correlate."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "Which anatomic/physiologic fact helps explain why infants can develop significant respiratory difficulty from upper airway congestion",
+    "topic": "Pediatric airway physiology",
+    "options": {
+      "A": "Infants have wider airways than adults",
+      "B": "Infants have slower respiratory rates than adults",
+      "C": "Infants have no nasal airway growth during the first 6 months",
+      "D": "Young infants are obligate nose breathers with a large tongue and narrow airway"
+    },
+    "correct": "D",
+    "explanation": "Infants/neonates have faster HR/RR, a large tongue and narrow airway, are obligate nose breathers, and the internal nasal airway doubles in the first 6 months.",
+    "optionExplanations": {
+      "A": "The notes emphasize narrow airway.",
+      "B": "Infants have faster respiratory rates.",
+      "C": "The internal nasal airway doubles in the first 6 months.",
+      "D": "Correct. Infants/neonates have faster HR/RR, a large tongue and narrow airway, are obligate nose breathers, and the internal nasal airway doubles in the first 6 months."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A child has rhinorrhea, sneezing, congestion, and itching. The parent reports frequent colds. Which pathogen is most common and what is the best general management",
+    "topic": "Acute rhinitis / URI",
+    "options": {
+      "A": "Rhinovirus; supportive care with nasal saline and no cough suppressant",
+      "B": "Group A strep; penicillin for all cases",
+      "C": "Hib; airway control and ceftriaxone",
+      "D": "Parainfluenza; nebulized epinephrine for all cases"
+    },
+    "correct": "A",
+    "explanation": "Acute rhinitis/URI is most commonly due to rhinovirus, though adenovirus, parainfluenza, and RSV can also cause it. Treatment is supportive with nasal saline; cough suppressants are not recommended.",
+    "optionExplanations": {
+      "A": "Correct. Acute rhinitis/URI is most commonly due to rhinovirus, though adenovirus, parainfluenza, and RSV can also cause it. Treatment is supportive with nasal saline; cough suppressants are not recommended.",
+      "B": "GAS is a cause of pharyngitis, not the most common cause of URI/rhinitis.",
+      "C": "This fits epiglottitis concern.",
+      "D": "Parainfluenza commonly causes croup; epinephrine is for moderate/severe croup."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A 9-year-old has sore throat, headache, abdominal pain, vomiting, enlarged tonsils, and petechiae on the soft palate. Which diagnostic/treatment approach is most appropriate",
+    "topic": "Acute pharyngitis",
+    "options": {
+      "A": "No testing and routine broad-spectrum antibiotics",
+      "B": "Throat swab/culture; treat GAS with penicillin or amoxicillin",
+      "C": "CT neck first for every sore throat",
+      "D": "Oseltamivir for all pharyngitis"
+    },
+    "correct": "B",
+    "explanation": "Strep pharyngitis clues include headache, abdominal pain, vomiting, enlarged tonsils, and petechial soft palate, especially age 5–15. Throat swab/culture is used; GAS is treated with penicillin/amoxicillin.",
+    "optionExplanations": {
+      "A": "Testing is part of the approach; broad-spectrum antibiotics are not routine.",
+      "B": "Correct. Strep pharyngitis clues include headache, abdominal pain, vomiting, enlarged tonsils, and petechial soft palate, especially age 5–15. Throat swab/culture is used; GAS is treated with penicillin/amoxicillin.",
+      "C": "CT is used when deep neck infection such as retropharyngeal abscess is suspected.",
+      "D": "Oseltamivir is influenza treatment."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A child has cough, nasal discharge, fever, rare facial pain, and mild periorbital edema after an upper respiratory infection. Which organisms and treatment approach fit acute bacterial sinusitis",
+    "topic": "Sinusitis",
+    "options": {
+      "A": "RSV only; no supportive care",
+      "B": "GAS/oral anaerobes/S. aureus; CT and surgical drainage for all",
+      "C": "Parvovirus B19; phototherapy",
+      "D": "S. pneumoniae, Moraxella catarrhalis, and H. influenzae; supportive unless persistent, severe, or double-sickening, then amoxicillin"
+    },
+    "correct": "D",
+    "explanation": "Sinusitis pathogens include S. pneumoniae, Moraxella catarrhalis, and H. influenzae. Treatment is supportive unless persistent, severe, or double-sickening, then amoxicillin is used.",
+    "optionExplanations": {
+      "A": "RSV is more bronchiolitis-associated and supportive care is important.",
+      "B": "This fits retropharyngeal abscess more than uncomplicated sinusitis.",
+      "C": "Parvovirus causes fifth disease; phototherapy treats neonatal jaundice.",
+      "D": "Correct. Sinusitis pathogens include S. pneumoniae, Moraxella catarrhalis, and H. influenzae. Treatment is supportive unless persistent, severe, or double-sickening, then amoxicillin is used."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A 2-year-old has fever, irritability, poor oral intake, drooling, dysphagia, and posterior neck pain. CT shows bulging of the posterior pharyngeal wall. Which diagnosis is most likely",
+    "topic": "Retropharyngeal abscess",
+    "options": {
+      "A": "Croup",
+      "B": "Bronchiolitis",
+      "C": "Retropharyngeal abscess",
+      "D": "Acute bronchitis"
+    },
+    "correct": "C",
+    "explanation": "Retropharyngeal abscess is classically in children under 3 with fever, irritability, poor PO intake, drooling, dysphagia, and posterior neck pain. CT may show bulging posterior pharyngeal wall.",
+    "optionExplanations": {
+      "A": "Croup causes barky/brassy cough, URI prodrome, fever, and inspiratory stridor.",
+      "B": "Bronchiolitis is lower airway inflammation in children under 2 with wheezing/crackles after URI.",
+      "C": "Correct. Retropharyngeal abscess is classically in children under 3 with fever, irritability, poor PO intake, drooling, dysphagia, and posterior neck pain. CT may show bulging posterior pharyngeal wall.",
+      "D": "Acute bronchitis causes a viral URI followed by cough lasting 2–3 weeks."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "Which treatment is appropriate for retropharyngeal abscess",
+    "topic": "Retropharyngeal abscess treatment",
+    "options": {
+      "A": "IV clindamycin, ceftriaxone, or ampicillin/sulbactam with possible surgical drainage",
+      "B": "Supportive care only for all cases",
+      "C": "Adenotonsillectomy first-line",
+      "D": "Dornase alfa and hypertonic saline"
+    },
+    "correct": "A",
+    "explanation": "Retropharyngeal abscess pathogens include GAS, oral anaerobes, and S. aureus. Treatment includes IV clindamycin, ceftriaxone, or ampicillin/sulbactam, with surgical drainage when needed.",
+    "optionExplanations": {
+      "A": "Correct. Retropharyngeal abscess pathogens include GAS, oral anaerobes, and S. aureus. Treatment includes IV clindamycin, ceftriaxone, or ampicillin/sulbactam, with surgical drainage when needed.",
+      "B": "Deep neck abscess needs antibiotics and sometimes drainage.",
+      "C": "This is first-line for many pediatric OSA cases.",
+      "D": "These are cystic fibrosis airway therapies."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A child has acute high fever, severe sore throat, dyspnea, rapid distress, tripod positioning, stridor, drooling, dysphagia, dysphonia, and distress. Which diagnosis is most likely",
+    "topic": "Epiglottitis",
+    "options": {
+      "A": "Croup",
+      "B": "Acute rhinitis",
+      "C": "Protracted bacterial bronchitis",
+      "D": "Epiglottitis"
+    },
+    "correct": "D",
+    "explanation": "Epiglottitis presents with acute high fever, severe sore throat, dyspnea, rapid distress, tripod posture, stridor, and the 4 D’s: drooling, dysphagia, dysphonia, distress.",
+    "optionExplanations": {
+      "A": "Croup causes barky/brassy cough, URI prodrome, and steeple sign.",
+      "B": "Acute rhinitis causes rhinorrhea, sneezing, congestion, and itching.",
+      "C": "This causes chronic wet cough >4 weeks.",
+      "D": "Correct. Epiglottitis presents with acute high fever, severe sore throat, dyspnea, rapid distress, tripod posture, stridor, and the 4 D’s: drooling, dysphagia, dysphonia, distress."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A child with suspected epiglottitis is stable enough for imaging. Which finding and management are most appropriate",
+    "topic": "Epiglottitis diagnosis/treatment",
+    "options": {
+      "A": "Steeple sign; humidified air only",
+      "B": "Thumbprint sign; secure airway and give ceftriaxone/cefotaxime with possible MRSA coverage",
+      "C": "Target sign; pneumatic enema",
+      "D": "Double bubble; urgent abdominal surgery"
+    },
+    "correct": "B",
+    "explanation": "Epiglottitis can show a thumbprint sign if stable. Management prioritizes securing the airway, then ceftriaxone/cefotaxime with possible MRSA coverage, steroids, and IV fluids.",
+    "optionExplanations": {
+      "A": "Steeple sign is croup; humidified/cool air is for mild croup.",
+      "B": "Correct. Epiglottitis can show a thumbprint sign if stable. Management prioritizes securing the airway, then ceftriaxone/cefotaxime with possible MRSA coverage, steroids, and IV fluids.",
+      "C": "This is intussusception.",
+      "D": "This is duodenal obstruction/malrotation context."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A child has barky/brassy cough, inspiratory stridor, fever, and URI prodrome. X-ray shows steeple sign. Which pathogen is classically associated",
+    "topic": "Croup",
+    "options": {
+      "A": "Hib",
+      "B": "Parvovirus B19",
+      "C": "Parainfluenza",
+      "D": "Pseudomonas aeruginosa"
+    },
+    "correct": "C",
+    "explanation": "Croup classically causes barky/brassy cough, inspiratory stridor, fever, URI prodrome, and steeple sign. Parainfluenza is the classic cause; influenza and RSV can also cause it.",
+    "optionExplanations": {
+      "A": "Hib is classically associated with epiglottitis.",
+      "B": "Parvovirus B19 causes erythema infectiosum.",
+      "C": "Correct. Croup classically causes barky/brassy cough, inspiratory stridor, fever, URI prodrome, and steeple sign. Parainfluenza is the classic cause; influenza and RSV can also cause it.",
+      "D": "This is an older cystic fibrosis pathogen."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A child with mild croup has barky cough without distress at rest. Which treatment is most appropriate",
+    "topic": "Mild croup treatment",
+    "options": {
+      "A": "Immediate intubation in all cases",
+      "B": "Pneumatic enema",
+      "C": "Oseltamivir only",
+      "D": "Humidified or cool air with dexamethasone"
+    },
+    "correct": "D",
+    "explanation": "Mild croup is managed with humidified/cool air and dexamethasone. Moderate/severe cases may require nebulized epinephrine.",
+    "optionExplanations": {
+      "A": "Airway support is for severe disease or failure; not all mild croup.",
+      "B": "This treats intussusception.",
+      "C": "Oseltamivir treats influenza; croup management is based on severity.",
+      "D": "Correct. Mild croup is managed with humidified/cool air and dexamethasone. Moderate/severe cases may require nebulized epinephrine."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A child with croup receives nebulized epinephrine and dexamethasone. Symptoms improve. What is the appropriate observation/discharge principle",
+    "topic": "Croup disposition",
+    "options": {
+      "A": "Discharge may be possible if improved after 2–3 hours of observation",
+      "B": "Discharge immediately with no observation",
+      "C": "Hospitalize all croup patients for 7 days",
+      "D": "Avoid steroids because they worsen croup"
+    },
+    "correct": "A",
+    "explanation": "After nebulized epinephrine and dexamethasone, discharge is possible if the child improves after 2–3 hours of observation. Hospitalize if cyanosis, no improvement, decreased alertness, poor follow-up, or family anxiety/concern.",
+    "optionExplanations": {
+      "A": "Correct. After nebulized epinephrine and dexamethasone, discharge is possible if the child improves after 2–3 hours of observation. Hospitalize if cyanosis, no improvement, decreased alertness, poor follow-up, or family anxiety/concern.",
+      "B": "Observation is needed after epinephrine due to recurrence risk.",
+      "C": "Not all cases require admission.",
+      "D": "Dexamethasone is part of treatment."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "An 8-week-old has URI symptoms followed by tachypnea, nasal flaring, retractions, wheezing, and crackles. Which diagnosis is most likely",
+    "topic": "Bronchiolitis",
+    "options": {
+      "A": "Epiglottitis",
+      "B": "Pyloric stenosis",
+      "C": "Bronchiolitis",
+      "D": "Amblyopia"
+    },
+    "correct": "C",
+    "explanation": "Bronchiolitis is a clinical syndrome in children under 2 years with URI symptoms followed by lower airway inflammation causing wheeze and/or crackles.",
+    "optionExplanations": {
+      "A": "Epiglottitis causes high fever, severe sore throat, tripod, drooling, dysphagia, and distress.",
+      "B": "Pyloric stenosis causes nonbilious projectile vomiting.",
+      "C": "Correct. Bronchiolitis is a clinical syndrome in children under 2 years with URI symptoms followed by lower airway inflammation causing wheeze and/or crackles.",
+      "D": "Amblyopia is decreased vision from abnormal visual development."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "Which pathogen causes more than half of bronchiolitis cases according to the section",
+    "topic": "Bronchiolitis etiology",
+    "options": {
+      "A": "Hib",
+      "B": "RSV",
+      "C": "GAS",
+      "D": "Moraxella catarrhalis"
+    },
+    "correct": "B",
+    "explanation": "RSV causes more than 50% of bronchiolitis cases.",
+    "optionExplanations": {
+      "A": "Hib is classically associated with epiglottitis.",
+      "B": "Correct. RSV causes more than 50% of bronchiolitis cases.",
+      "C": "GAS is a cause of pharyngitis and retropharyngeal abscess.",
+      "D": "This is a sinusitis pathogen."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "Which child with bronchiolitis has a severe disease risk factor",
+    "topic": "Bronchiolitis severity risk",
+    "options": {
+      "A": "Healthy 10-year-old with isolated sore throat",
+      "B": "Teen with myalgias and headache",
+      "C": "Child with isolated anterior shin bruise",
+      "D": "Premature infant younger than 12 weeks with passive smoke exposure"
+    },
+    "correct": "D",
+    "explanation": "Severe bronchiolitis risk factors include prematurity, low birth weight, age <12 weeks, anatomic airway defects, passive smoke exposure, immunodeficiency, and daycare/crowded household.",
+    "optionExplanations": {
+      "A": "This is more pharyngitis context, not severe bronchiolitis risk.",
+      "B": "This suggests influenza systemic symptoms.",
+      "C": "This is unrelated to bronchiolitis severity.",
+      "D": "Correct. Severe bronchiolitis risk factors include prematurity, low birth weight, age <12 weeks, anatomic airway defects, passive smoke exposure, immunodeficiency, and daycare/crowded household."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A child with bronchiolitis is otherwise stable. Which diagnostic/treatment principle is correct",
+    "topic": "Bronchiolitis diagnosis/treatment",
+    "options": {
+      "A": "Diagnosis is clinical; treatment is supportive with hydration, suctioning, and oxygen to keep SpO2 above about 90–92",
+      "B": "Routine CXR and antibiotics for all cases",
+      "C": "Routine systemic steroids and hypertonic saline for all cases",
+      "D": "Immediate surgery for all cases"
+    },
+    "correct": "A",
+    "explanation": "Bronchiolitis is diagnosed clinically. CXR is not routine unless severe or alternate diagnosis is suspected. Treatment is supportive: hydration, nasal suctioning, supplemental oxygen to keep SpO2 >90–92, HFNC/CPAP if severe, and possible albuterol trial.",
+    "optionExplanations": {
+      "A": "Correct. Bronchiolitis is diagnosed clinically. CXR is not routine unless severe or alternate diagnosis is suspected. Treatment is supportive: hydration, nasal suctioning, supplemental oxygen to keep SpO2 >90–92, HFNC/CPAP if severe, and possible albuterol trial.",
+      "B": "CXR and antibiotics are not routine in uncomplicated bronchiolitis.",
+      "C": "AAP: no routine hypertonic saline/steroids.",
+      "D": "Bronchiolitis is not a surgical disease."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "When is respiratory compromise risk highest in bronchiolitis after cough/dyspnea onset",
+    "topic": "Bronchiolitis course",
+    "options": {
+      "A": "Immediately at week 4 only",
+      "B": "After 3 months",
+      "C": "First 48–72 hours",
+      "D": "Only after fever resolves"
+    },
+    "correct": "C",
+    "explanation": "The section states that the highest risk of respiratory compromise in bronchiolitis is the first 48–72 hours after cough/dyspnea onset.",
+    "optionExplanations": {
+      "A": "This timing is not the bronchiolitis risk window.",
+      "B": "This is too late for the listed highest-risk window.",
+      "C": "Correct. The section states that the highest risk of respiratory compromise in bronchiolitis is the first 48–72 hours after cough/dyspnea onset.",
+      "D": "The notes tie risk to the first 48–72 hours after cough/dyspnea onset."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A child has a viral URI, then after about 4 days develops a dry hacking cough that later becomes productive and lasts 2–3 weeks. Which diagnosis and treatment best fit",
+    "topic": "Acute bronchitis",
+    "options": {
+      "A": "Protracted bacterial bronchitis; no antibiotics ever",
+      "B": "Acute bronchitis; supportive care without antibiotics",
+      "C": "Pneumonia; mandatory levofloxacin for all ages",
+      "D": "Epiglottitis; secure airway first"
+    },
+    "correct": "B",
+    "explanation": "Acute bronchitis is usually viral and follows URI with dry hacking cough after about 4 days, sputum after 3–4 days, and total episode 2–3 weeks. Treatment is supportive; no antibiotics. Cough suppressants only if >4 years; bronchodilator only if significant wheeze.",
+    "optionExplanations": {
+      "A": "PBB has wet cough >4 weeks and gets a 2-week broad-spectrum antibiotic course.",
+      "B": "Correct. Acute bronchitis is usually viral and follows URI with dry hacking cough after about 4 days, sputum after 3–4 days, and total episode 2–3 weeks. Treatment is supportive; no antibiotics. Cough suppressants only if >4 years; bronchodilator only if significant wheeze.",
+      "C": "Levofloxacin is for atypical pneumonia in adolescents, not all cough.",
+      "D": "Epiglottitis has acute high fever, severe sore throat, tripod, and 4 D’s."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A child has a chronic wet cough for more than 4 weeks and wheezing that mimics asthma. Which treatment is recommended",
+    "topic": "Protracted bacterial bronchitis",
+    "options": {
+      "A": "Supportive care only because it is always viral",
+      "B": "Dexamethasone and nebulized epinephrine",
+      "C": "Pyloromyotomy",
+      "D": "Two-week broad-spectrum antibiotic course and assess for CF or foreign body"
+    },
+    "correct": "D",
+    "explanation": "Protracted bacterial bronchitis causes wet cough >4 weeks and may wheeze/mimic asthma. Treatment is a 2-week broad-spectrum antibiotic course and assessment for CF/foreign body.",
+    "optionExplanations": {
+      "A": "Wet cough >4 weeks suggests PBB and antibiotics are listed.",
+      "B": "This is for croup.",
+      "C": "This treats pyloric stenosis.",
+      "D": "Correct. Protracted bacterial bronchitis causes wet cough >4 weeks and may wheeze/mimic asthma. Treatment is a 2-week broad-spectrum antibiotic course and assessment for CF/foreign body."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A child has quick-onset fever, productive cough, dyspnea, tachypnea, chest/abdominal pain, vomiting, decreased appetite, and diarrhea. Which pneumonia pattern is most likely",
+    "topic": "Bacterial pneumonia",
+    "options": {
+      "A": "Bacterial pneumonia",
+      "B": "Viral pneumonia",
+      "C": "Acute rhinitis only",
+      "D": "Night terrors"
+    },
+    "correct": "A",
+    "explanation": "Bacterial pneumonia tends to have quick onset, productive cough, chest/abdominal pain, vomiting, decreased appetite, diarrhea, fever, fussiness, dyspnea, and tachypnea.",
+    "optionExplanations": {
+      "A": "Correct. Bacterial pneumonia tends to have quick onset, productive cough, chest/abdominal pain, vomiting, decreased appetite, diarrhea, fever, fussiness, dyspnea, and tachypnea.",
+      "B": "Viral pneumonia has slower respiratory progression and wheezing may occur.",
+      "C": "Rhinitis is upper respiratory with rhinorrhea/sneezing/congestion/itching.",
+      "D": "Night terrors are a sleep disorder, not pneumonia."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "Which CXR/lab pattern supports bacterial pneumonia over viral pneumonia",
+    "topic": "Pneumonia diagnosis",
+    "options": {
+      "A": "Hyperinflation, peribronchial cuffing, and normal WBC",
+      "B": "Lobar consolidation, large pleural effusion, and WBC 15,000–40,000",
+      "C": "Steeple sign and normal WBC",
+      "D": "Thumbprint sign and drooling"
+    },
+    "correct": "B",
+    "explanation": "Bacterial pneumonia is associated with lobar consolidation, large pleural effusion, and WBC 15,000–40,000. Viral pneumonia more often shows hyperinflation/peribronchial cuffing and normal or ≤20,000 WBC.",
+    "optionExplanations": {
+      "A": "This supports viral pneumonia.",
+      "B": "Correct. Bacterial pneumonia is associated with lobar consolidation, large pleural effusion, and WBC 15,000–40,000. Viral pneumonia more often shows hyperinflation/peribronchial cuffing and normal or ≤20,000 WBC.",
+      "C": "Steeple sign suggests croup.",
+      "D": "This suggests epiglottitis."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A child has presumptive bacterial community-acquired pneumonia. Which treatment is listed",
+    "topic": "Bacterial pneumonia treatment",
+    "options": {
+      "A": "Azithromycin only for all cases",
+      "B": "No antibiotics for all suspected bacterial pneumonia",
+      "C": "Ceftriaxone single dose only for all cases",
+      "D": "Amoxicillin 90 mg/kg BID for 10 days"
+    },
+    "correct": "D",
+    "explanation": "Presumptive bacterial pneumonia is treated with amoxicillin 90 mg/kg BID for 10 days.",
+    "optionExplanations": {
+      "A": "Azithromycin is used for community-acquired atypical pneumonia.",
+      "B": "Presumptive bacterial pneumonia gets antibiotics.",
+      "C": "This is not the listed outpatient presumptive bacterial pneumonia regimen.",
+      "D": "Correct. Presumptive bacterial pneumonia is treated with amoxicillin 90 mg/kg BID for 10 days."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "An adolescent has atypical pneumonia. Which antibiotic is specifically listed as an option for adolescents",
+    "topic": "Atypical pneumonia",
+    "options": {
+      "A": "Penicillin V only",
+      "B": "Amoxicillin 90 mg/kg BID only for all atypical cases",
+      "C": "Levofloxacin",
+      "D": "Indomethacin"
+    },
+    "correct": "C",
+    "explanation": "Community-acquired atypical pneumonia can be treated with azithromycin, and atypical pneumonia in adolescents may be treated with a fluoroquinolone such as levofloxacin.",
+    "optionExplanations": {
+      "A": "Penicillin is for GAS pharyngitis, not atypical pneumonia.",
+      "B": "Amoxicillin is listed for presumptive bacterial pneumonia, not atypical coverage.",
+      "C": "Correct. Community-acquired atypical pneumonia can be treated with azithromycin, and atypical pneumonia in adolescents may be treated with a fluoroquinolone such as levofloxacin.",
+      "D": "Indomethacin closes PDA, not pneumonia treatment."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A child has musical continuous breath sounds caused by oscillation in narrowed airways. Which term best describes this finding",
+    "topic": "Wheezing",
+    "options": {
+      "A": "Wheeze",
+      "B": "Stridor",
+      "C": "Crackles",
+      "D": "Murmur"
+    },
+    "correct": "A",
+    "explanation": "Wheeze is a musical continuous sound from oscillation in narrowed airways.",
+    "optionExplanations": {
+      "A": "Correct. Wheeze is a musical continuous sound from oscillation in narrowed airways.",
+      "B": "Stridor is an upper airway sound, often inspiratory.",
+      "C": "Crackles are discontinuous sounds suggesting fluid/opening of small airways.",
+      "D": "Murmurs are cardiac sounds."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "Which history question is important in the wheezing differential",
+    "topic": "Wheezing differential",
+    "options": {
+      "A": "Only ask if the child likes school",
+      "B": "Only ask about adult smoking history and ignore food exposure",
+      "C": "Avoid asking about foreign body because children never aspirate",
+      "D": "Onset at birth vs later, feeding difficulty, failure to thrive, eczema/atopy, new food exposure, and foreign body possibility"
+    },
+    "correct": "D",
+    "explanation": "Pertinent wheeze history includes onset at birth vs later, noisy breathing, cough apart from wheeze, eczema/atopic triad, prior hospitalizations/intubations, FTT, feeding difficulties, new food exposure, change in caregivers, and foreign body possibility.",
+    "optionExplanations": {
+      "A": "This misses key medical differentials.",
+      "B": "Food exposure/anaphylaxis and feeding issues matter.",
+      "C": "Foreign body possibility is specifically listed.",
+      "D": "Correct. Pertinent wheeze history includes onset at birth vs later, noisy breathing, cough apart from wheeze, eczema/atopic triad, prior hospitalizations/intubations, FTT, feeding difficulties, new food exposure, change in caregivers, and foreign body possibility."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A child has abrupt fever, myalgia, chills, headache, malaise, anorexia, dry cough, coryza, pharyngitis, abdominal pain, vomiting, and diarrhea. Which diagnosis is most likely",
+    "topic": "Influenza",
+    "options": {
+      "A": "Cystic fibrosis",
+      "B": "Influenza",
+      "C": "Pyloric stenosis",
+      "D": "Hirschsprung disease"
+    },
+    "correct": "B",
+    "explanation": "Influenza causes abrupt systemic symptoms including fever, myalgia, chills, headache, malaise, anorexia, and respiratory/GI symptoms such as dry cough, coryza, pharyngitis, abdominal pain, vomiting, and diarrhea.",
+    "optionExplanations": {
+      "A": "CF is chronic with thick mucus, recurrent infections, pancreatic insufficiency, and elevated sweat chloride.",
+      "B": "Correct. Influenza causes abrupt systemic symptoms including fever, myalgia, chills, headache, malaise, anorexia, and respiratory/GI symptoms such as dry cough, coryza, pharyngitis, abdominal pain, vomiting, and diarrhea.",
+      "C": "Pyloric stenosis causes nonbilious projectile vomiting at 3–6 weeks.",
+      "D": "Hirschsprung causes delayed meconium, distention, and bilious vomiting."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "Which influenza antiviral age pairing is correct from the section",
+    "topic": "Influenza treatment",
+    "options": {
+      "A": "Oseltamivir only after age 18; zanamivir only at birth",
+      "B": "Zanamivir for all newborns; oseltamivir contraindicated in children",
+      "C": "Oseltamivir for age 2 weeks or older; zanamivir for age 7 years or older",
+      "D": "Acyclovir for all influenza cases"
+    },
+    "correct": "C",
+    "explanation": "Influenza treatment listed: oseltamivir for age ≥2 weeks and zanamivir for age ≥7 years.",
+    "optionExplanations": {
+      "A": "This reverses/incorrectly changes the ages.",
+      "B": "Zanamivir is listed for ≥7 years, oseltamivir for ≥2 weeks.",
+      "C": "Correct. Influenza treatment listed: oseltamivir for age ≥2 weeks and zanamivir for age ≥7 years.",
+      "D": "Acyclovir treats herpesvirus infections, not influenza."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A 2-week-old has inspiratory low-pitched stridor that worsens with exertion, supine position, and viral infection. Which diagnosis is most likely",
+    "topic": "Laryngomalacia",
+    "options": {
+      "A": "Congenital subglottic stenosis",
+      "B": "Epiglottitis",
+      "C": "Retropharyngeal abscess",
+      "D": "Laryngomalacia"
+    },
+    "correct": "D",
+    "explanation": "Laryngomalacia starts in the first 2 weeks and causes inspiratory low-pitched stridor worsened by exertion, supine position, and viral infection. Diagnosis is by laryngoscopy; treatment is usually observation unless severe.",
+    "optionExplanations": {
+      "A": "This is the second most common cause of infant stridor and causes biphasic stridor/recurrent croup.",
+      "B": "Epiglottitis is acute high fever, severe sore throat, tripod, and 4 D’s.",
+      "C": "RPA causes fever, poor PO, drooling, dysphagia, and posterior neck pain.",
+      "D": "Correct. Laryngomalacia starts in the first 2 weeks and causes inspiratory low-pitched stridor worsened by exertion, supine position, and viral infection. Diagnosis is by laryngoscopy; treatment is usually observation unless severe."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "An infant has biphasic stridor and recurrent croup. Imaging is suggestive and laryngoscopy confirms the diagnosis. Which congenital airway abnormality is most likely",
+    "topic": "Congenital subglottic stenosis",
+    "options": {
+      "A": "Congenital subglottic stenosis",
+      "B": "Laryngomalacia",
+      "C": "Acute rhinitis",
+      "D": "Bronchiolitis"
+    },
+    "correct": "A",
+    "explanation": "Congenital subglottic stenosis is the second most common cause of infant stridor and presents with biphasic stridor and recurrent croup. Diagnosis may use radiograph and confirmatory laryngoscopy; treatment can involve reconstruction with cartilage graft.",
+    "optionExplanations": {
+      "A": "Correct. Congenital subglottic stenosis is the second most common cause of infant stridor and presents with biphasic stridor and recurrent croup. Diagnosis may use radiograph and confirmatory laryngoscopy; treatment can involve reconstruction with cartilage graft.",
+      "B": "Laryngomalacia causes inspiratory low-pitched stridor starting in the first 2 weeks, worse supine/exertion/viral illness.",
+      "C": "Rhinitis causes congestion/rhinorrhea/sneezing/itching.",
+      "D": "Bronchiolitis causes wheezing/crackles after URI in children under 2."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "Which condition can influenza progress to according to the notes",
+    "topic": "Influenza complications/progression",
+    "options": {
+      "A": "Pyloric stenosis only",
+      "B": "Croup, bronchiolitis, or pneumonia",
+      "C": "Meckel diverticulum only",
+      "D": "Amblyopia only"
+    },
+    "correct": "B",
+    "explanation": "Influenza can progress to croup, bronchiolitis, or pneumonia in children.",
+    "optionExplanations": {
+      "A": "This is a GI obstruction, not influenza progression.",
+      "B": "Correct. Influenza can progress to croup, bronchiolitis, or pneumonia in children.",
+      "C": "This causes painless bloody stool, not an influenza complication.",
+      "D": "Amblyopia is abnormal visual development, not influenza progression."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
