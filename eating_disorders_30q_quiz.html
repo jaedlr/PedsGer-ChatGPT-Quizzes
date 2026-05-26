@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eating Disorders Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 15-year-old has severe restriction of intake, significantly low body weight, intense fear of weight gain, and denial of the seriousness of her weight loss. Which diagnosis best fits",
+    "topic": "Anorexia nervosa diagnosis",
+    "options": {
+      "A": "Bulimia nervosa",
+      "B": "Anorexia nervosa",
+      "C": "Binge eating disorder",
+      "D": "ARFID"
+    },
+    "correct": "B",
+    "explanation": "Anorexia nervosa requires restriction of energy intake leading to significantly low body weight, intense fear of gaining weight or becoming fat, and body image disturbance or denial of seriousness.",
+    "optionExplanations": {
+      "A": "Bulimia involves recurrent binge eating plus compensatory behavior and usually normal or near-normal weight.",
+      "B": "Correct. Anorexia nervosa requires restriction of energy intake leading to significantly low body weight, intense fear of gaining weight or becoming fat, and body image disturbance or denial of seriousness.",
+      "C": "Binge eating disorder has binge eating without compensatory behavior and does not require low body weight.",
+      "D": "ARFID involves restrictive intake without weight/shape concern."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A patient meets all psychological criteria for anorexia nervosa after major weight loss, but current BMI is still in the normal range. Why is this clinically important",
+    "topic": "Atypical anorexia",
+    "options": {
+      "A": "Normal BMI excludes clinically significant malnutrition",
+      "B": "Atypical anorexia requires binge eating and compensatory behavior",
+      "C": "Atypical anorexia has no body image disturbance",
+      "D": "Atypical anorexia can still be medically dangerous despite normal or high weight"
+    },
+    "correct": "D",
+    "explanation": "Atypical anorexia has anorexia nervosa criteria but weight remains normal or high after major weight loss; it can still be medically dangerous.",
+    "optionExplanations": {
+      "A": "Normal BMI does not rule out dangerous restriction or rapid weight loss.",
+      "B": "That describes bulimia when low weight is absent, not atypical anorexia.",
+      "C": "Atypical anorexia still has body image disturbance or fear of weight gain.",
+      "D": "Correct. Atypical anorexia has anorexia nervosa criteria but weight remains normal or high after major weight loss; it can still be medically dangerous."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A 20-year-old has recurrent episodes of eating unusually large amounts of food with loss of control, followed by self-induced vomiting and laxative use. This occurs twice weekly for 4 months. Weight is normal. Which diagnosis is most likely",
+    "topic": "Bulimia nervosa diagnosis",
+    "options": {
+      "A": "Bulimia nervosa",
+      "B": "Anorexia nervosa, restricting type",
+      "C": "Binge eating disorder",
+      "D": "Pica"
+    },
+    "correct": "A",
+    "explanation": "Bulimia nervosa requires recurrent binge eating with loss of control plus recurrent compensatory behavior such as vomiting, laxatives, diuretics, fasting, or excessive exercise, occurring at least once weekly for 3 months. Weight is often normal or near-normal.",
+    "optionExplanations": {
+      "A": "Correct. Bulimia nervosa requires recurrent binge eating with loss of control plus recurrent compensatory behavior such as vomiting, laxatives, diuretics, fasting, or excessive exercise, occurring at least once weekly for 3 months. Weight is often normal or near-normal.",
+      "B": "Restricting-type anorexia has significantly low body weight and no regular binge/purge behavior in the last 3 months.",
+      "C": "Binge eating disorder lacks compensatory behavior.",
+      "D": "Pica involves eating nonfood substances for at least 1 month."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A patient has recurrent binge eating with loss of control, eats rapidly until uncomfortably full, eats alone from embarrassment, and feels guilty afterward. There is no vomiting, laxative use, fasting, or excessive exercise. Which diagnosis is most likely",
+    "topic": "Binge eating disorder",
+    "options": {
+      "A": "Bulimia nervosa",
+      "B": "Anorexia nervosa binge-eating/purging type",
+      "C": "Binge eating disorder",
+      "D": "Rumination disorder"
+    },
+    "correct": "C",
+    "explanation": "Binge eating disorder involves binge eating with loss of control, associated symptoms such as rapid eating or guilt, at least once weekly for 3 months, and no compensatory behavior.",
+    "optionExplanations": {
+      "A": "Bulimia requires compensatory behavior.",
+      "B": "This requires significantly low body weight plus anorexia nervosa criteria.",
+      "C": "Correct. Binge eating disorder involves binge eating with loss of control, associated symptoms such as rapid eating or guilt, at least once weekly for 3 months, and no compensatory behavior.",
+      "D": "Rumination is repeated regurgitation for at least 1 month, not binge episodes."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A child restricts intake because of fear of vomiting and sensory aversion to food textures. There is weight loss and supplement dependence, but no fear of becoming fat and no body image disturbance. Which diagnosis is most likely",
+    "topic": "ARFID",
+    "options": {
+      "A": "Anorexia nervosa",
+      "B": "Bulimia nervosa",
+      "C": "Binge eating disorder",
+      "D": "ARFID"
+    },
+    "correct": "D",
+    "explanation": "Avoidant/restrictive food intake disorder involves restrictive intake due to low interest, sensory issues, or fear of vomiting/pain, causing weight loss, nutritional deficiency, supplement dependence, or psychosocial impairment, without body image disturbance.",
+    "optionExplanations": {
+      "A": "Anorexia requires fear of weight gain/body image disturbance.",
+      "B": "Bulimia requires binge eating plus compensatory behavior.",
+      "C": "Binge eating disorder involves binge eating rather than restrictive intake.",
+      "D": "Correct. Avoidant/restrictive food intake disorder involves restrictive intake due to low interest, sensory issues, or fear of vomiting/pain, causing weight loss, nutritional deficiency, supplement dependence, or psychosocial impairment, without body image disturbance."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A 3-year-old persistently eats paint chips and dirt for more than 1 month. Which diagnosis best fits",
+    "topic": "Pica",
+    "options": {
+      "A": "Rumination disorder",
+      "B": "Pica",
+      "C": "ARFID",
+      "D": "Bulimia nervosa"
+    },
+    "correct": "B",
+    "explanation": "Pica is eating nonfood substances for at least 1 month in a developmentally inappropriate way. It is associated with intellectual disability, ASD, OCD, and schizophrenia.",
+    "optionExplanations": {
+      "A": "Rumination involves repeated regurgitation, not eating nonfood substances.",
+      "B": "Correct. Pica is eating nonfood substances for at least 1 month in a developmentally inappropriate way. It is associated with intellectual disability, ASD, OCD, and schizophrenia.",
+      "C": "ARFID is restrictive intake from fear, sensory aversion, or low interest without body image disturbance.",
+      "D": "Bulimia involves binge eating and compensatory behaviors."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A child repeatedly regurgitates food for 6 weeks. Evaluation does not suggest a GI disorder and the behavior is not explained by anorexia or bulimia. Which diagnosis best fits",
+    "topic": "Rumination disorder",
+    "options": {
+      "A": "Rumination disorder",
+      "B": "Pica",
+      "C": "Binge eating disorder",
+      "D": "ARFID"
+    },
+    "correct": "A",
+    "explanation": "Rumination disorder is repeated regurgitation for at least 1 month, not due to GI disease and not occurring exclusively during anorexia or bulimia. It can cause malnutrition, dehydration, esophageal ulceration, and tooth decay.",
+    "optionExplanations": {
+      "A": "Correct. Rumination disorder is repeated regurgitation for at least 1 month, not due to GI disease and not occurring exclusively during anorexia or bulimia. It can cause malnutrition, dehydration, esophageal ulceration, and tooth decay.",
+      "B": "Pica is eating nonfood substances.",
+      "C": "Binge eating disorder involves binge episodes with loss of control.",
+      "D": "ARFID is restrictive intake from fear/sensory issues/low appetite without regurgitation as the core feature."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A severely underweight teen has cold intolerance, bradycardia, orthostatic hypotension, amenorrhea, proximal muscle wasting, brittle hair, and fine unpigmented hair on the trunk. What is the fine hair called",
+    "topic": "Restriction/malnutrition signs",
+    "options": {
+      "A": "Russell sign",
+      "B": "Acanthosis nigricans",
+      "C": "Koilonychia",
+      "D": "Lanugo"
+    },
+    "correct": "D",
+    "explanation": "Lanugo is very fine, unpigmented hair that develops for insulation in malnutrition/restriction.",
+    "optionExplanations": {
+      "A": "Russell sign is scars on the dorsum of the hand from self-induced vomiting.",
+      "B": "Acanthosis nigricans is hyperpigmented velvety plaques associated with insulin resistance.",
+      "C": "Koilonychia is spooning of nails, classically associated with iron deficiency.",
+      "D": "Correct. Lanugo is very fine, unpigmented hair that develops for insulation in malnutrition/restriction."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A dentist notices dental enamel erosion and decay in a patient who also has enlarged salivary glands and palatal scratches. Which behavior best explains these findings",
+    "topic": "Purging signs",
+    "options": {
+      "A": "Pure food restriction without purging",
+      "B": "Nonfood substance ingestion",
+      "C": "Self-induced vomiting/purging",
+      "D": "Delayed fetal lung fluid clearance"
+    },
+    "correct": "C",
+    "explanation": "Purging by vomiting causes dental enamel erosion/decay, enlarged salivary glands, pharyngeal pain, palatal scratches, GERD, erosions, blood-streaked emesis, and Russell sign.",
+    "optionExplanations": {
+      "A": "Restriction can cause malnutrition signs but does not classically cause enamel erosion and palatal scratches.",
+      "B": "Pica is nonfood substance ingestion and does not best explain vomiting-related oral findings.",
+      "C": "Correct. Purging by vomiting causes dental enamel erosion/decay, enlarged salivary glands, pharyngeal pain, palatal scratches, GERD, erosions, blood-streaked emesis, and Russell sign.",
+      "D": "This describes transient tachypnea of the newborn, unrelated here."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A patient with bulimia has scars on the dorsum of the hand from inducing vomiting. What is this finding called",
+    "topic": "Russell sign",
+    "options": {
+      "A": "Russell sign",
+      "B": "Lanugo",
+      "C": "Koebner phenomenon",
+      "D": "Murphy sign"
+    },
+    "correct": "A",
+    "explanation": "Russell sign refers to scars or calluses on the dorsum of the hand from self-induced vomiting.",
+    "optionExplanations": {
+      "A": "Correct. Russell sign refers to scars or calluses on the dorsum of the hand from self-induced vomiting.",
+      "B": "Lanugo is fine unpigmented hair from malnutrition.",
+      "C": "Koebner phenomenon is lesion development along skin trauma, classically in psoriasis.",
+      "D": "Murphy sign suggests cholecystitis."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A patient with recurrent vomiting from purging has weakness and paresthesias. Labs show hypokalemia, hypochloremia, elevated serum amylase, and acid-base disturbance. Which acid-base pattern is expected",
+    "topic": "Purging labs",
+    "options": {
+      "A": "Metabolic acidosis",
+      "B": "Respiratory acidosis",
+      "C": "Respiratory alkalosis",
+      "D": "Metabolic alkalosis"
+    },
+    "correct": "D",
+    "explanation": "Vomiting/purging is associated with metabolic alkalosis, elevated serum amylase, decreased potassium, and decreased chloride.",
+    "optionExplanations": {
+      "A": "Laxative abuse is associated with metabolic acidosis.",
+      "B": "Respiratory acidosis is not the expected purging pattern.",
+      "C": "Respiratory alkalosis is not the expected vomiting/purging pattern.",
+      "D": "Correct. Vomiting/purging is associated with metabolic alkalosis, elevated serum amylase, decreased potassium, and decreased chloride."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A patient with chronic laxative abuse has electrolyte abnormalities and an acid-base disturbance. Which pattern is most expected from the lecture material",
+    "topic": "Laxative abuse labs",
+    "options": {
+      "A": "Metabolic alkalosis",
+      "B": "Metabolic acidosis",
+      "C": "Respiratory acidosis",
+      "D": "Primary respiratory alkalosis"
+    },
+    "correct": "B",
+    "explanation": "Laxative abuse is associated with metabolic acidosis, while vomiting/purging is associated with metabolic alkalosis with low potassium and chloride.",
+    "optionExplanations": {
+      "A": "This is more typical of vomiting/purging.",
+      "B": "Correct. Laxative abuse is associated with metabolic acidosis, while vomiting/purging is associated with metabolic alkalosis with low potassium and chloride.",
+      "C": "This is not the expected laxative-abuse pattern.",
+      "D": "This is not the expected laxative-abuse pattern."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A severely malnourished patient is restarted on calories and develops hypophosphatemia, edema, seizures, rhabdomyolysis, and heart failure. Which complication is most likely",
+    "topic": "Refeeding syndrome",
+    "options": {
+      "A": "Serotonin syndrome",
+      "B": "Malignant hyperthermia",
+      "C": "Refeeding syndrome",
+      "D": "Acute dystonic reaction"
+    },
+    "correct": "C",
+    "explanation": "Refeeding syndrome is characterized by hypophosphatemia and can cause rhabdomyolysis, seizures, edema, and heart failure.",
+    "optionExplanations": {
+      "A": "Serotonin syndrome causes agitation, autonomic instability, diaphoresis, and diarrhea from serotonergic excess.",
+      "B": "Malignant hyperthermia follows anesthetic triggers and causes fever, rigidity, and hypermetabolism.",
+      "C": "Correct. Refeeding syndrome is characterized by hypophosphatemia and can cause rhabdomyolysis, seizures, edema, and heart failure.",
+      "D": "Acute dystonia causes involuntary muscle contractions, not hypophosphatemia and heart failure."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A patient with suspected anorexia nervosa has jaundice, leukopenia, elevated BUN, elevated AST/ALT, hyponatremia, and hypokalemia. Which statement about labs in eating disorders is most accurate",
+    "topic": "Eating disorder workup",
+    "options": {
+      "A": "Labs support medical assessment but are not diagnostic for eating disorders",
+      "B": "The lab pattern alone confirms anorexia nervosa",
+      "C": "A normal CMP excludes an eating disorder",
+      "D": "CBC and CMP should never be ordered"
+    },
+    "correct": "A",
+    "explanation": "CBC and CMP are part of initial evaluation, but labs are not diagnostic for eating disorders. They help assess complications and medical risk.",
+    "optionExplanations": {
+      "A": "Correct. CBC and CMP are part of initial evaluation, but labs are not diagnostic for eating disorders. They help assess complications and medical risk.",
+      "B": "Diagnosis is clinical; labs assess complications.",
+      "C": "Normal labs do not exclude an eating disorder.",
+      "D": "CBC and CMP are listed as initial workup."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A patient with restrictive eating has sinus bradycardia and possible prolonged QT. When is EKG recommended in eating disorder evaluation",
+    "topic": "EKG indications",
+    "options": {
+      "A": "Only when BMI is normal",
+      "B": "Only in binge eating disorder without purging",
+      "C": "Never, because EKG is diagnostic",
+      "D": "Restrictive eating disorder, severe purging, or QT-prolonging medications"
+    },
+    "correct": "D",
+    "explanation": "EKG is recommended with restrictive eating disorder, severe purging, or QT-prolonging medications. It is used to assess medical risk, not to diagnose the eating disorder.",
+    "optionExplanations": {
+      "A": "Normal BMI is not the indication.",
+      "B": "Binge eating without purging is not the key indication.",
+      "C": "EKG may be indicated but is not diagnostic.",
+      "D": "Correct. EKG is recommended with restrictive eating disorder, severe purging, or QT-prolonging medications. It is used to assess medical risk, not to diagnose the eating disorder."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A patient with anorexia has no regular binge eating or purging behavior in the last 3 months. Which subtype is this",
+    "topic": "Anorexia subtypes",
+    "options": {
+      "A": "Binge-eating/purging type",
+      "B": "ARFID",
+      "C": "Restricting type",
+      "D": "Binge eating disorder"
+    },
+    "correct": "C",
+    "explanation": "Anorexia nervosa restricting type means no regular binge-eating or purging behavior in the last 3 months.",
+    "optionExplanations": {
+      "A": "This requires regular binge eating or purging in the last 3 months.",
+      "B": "ARFID lacks body image disturbance.",
+      "C": "Correct. Anorexia nervosa restricting type means no regular binge-eating or purging behavior in the last 3 months.",
+      "D": "Binge eating disorder lacks compensatory behavior and low-weight AN criteria."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A patient with anorexia nervosa has regular binge eating and purging behavior within the last 3 months. Which subtype is this",
+    "topic": "Anorexia subtypes",
+    "options": {
+      "A": "Restricting type",
+      "B": "Binge-eating/purging type",
+      "C": "Binge eating disorder",
+      "D": "Pica"
+    },
+    "correct": "B",
+    "explanation": "Anorexia nervosa binge-eating/purging type means regular binge eating or purging has occurred in the last 3 months, while the patient still meets anorexia nervosa criteria.",
+    "optionExplanations": {
+      "A": "Restricting type has no regular binge/purge behavior in the last 3 months.",
+      "B": "Correct. Anorexia nervosa binge-eating/purging type means regular binge eating or purging has occurred in the last 3 months, while the patient still meets anorexia nervosa criteria.",
+      "C": "Binge eating disorder lacks compensatory behavior and does not require low body weight.",
+      "D": "Pica is eating nonfood substances for at least 1 month."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A patient with anorexia nervosa has BMI 14.8. What severity category is this according to the provided table",
+    "topic": "Anorexia severity",
+    "options": {
+      "A": "Mild",
+      "B": "Moderate",
+      "C": "Severe",
+      "D": "Extreme"
+    },
+    "correct": "D",
+    "explanation": "Anorexia severity by BMI: mild ≥17, moderate 16–16.99, severe 15–15.99, extreme <15.",
+    "optionExplanations": {
+      "A": "Mild is BMI ≥17.",
+      "B": "Moderate is BMI 16–16.99.",
+      "C": "Severe is BMI 15–15.99.",
+      "D": "Correct. Anorexia severity by BMI: mild ≥17, moderate 16–16.99, severe 15–15.99, extreme <15."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "An adolescent with anorexia nervosa has BMI 14.5, potassium 2.8, bradycardia 46, and QTc 470. What level of care is indicated",
+    "topic": "Anorexia hospitalization",
+    "options": {
+      "A": "Hospitalization",
+      "B": "Routine outpatient follow-up only",
+      "C": "No treatment because psychiatric medications do not treat core AN well",
+      "D": "Dental referral only"
+    },
+    "correct": "A",
+    "explanation": "Hospitalization is indicated for severe medical instability, including BMI ≤15 especially <13, bradycardia <50, arrhythmia/QTc >450, low blood pressure, severe orthostasis, low potassium/magnesium/phosphate, glucose <60, severe hematemesis, cytopenias, low temperature, or acute medical complications.",
+    "optionExplanations": {
+      "A": "Correct. Hospitalization is indicated for severe medical instability, including BMI ≤15 especially <13, bradycardia <50, arrhythmia/QTc >450, low blood pressure, severe orthostasis, low potassium/magnesium/phosphate, glucose <60, severe hematemesis, cytopenias, low temperature, or acute medical complications.",
+      "B": "The patient has multiple hospitalization criteria.",
+      "C": "Medication limitations do not eliminate need for medical stabilization.",
+      "D": "Dental care is relevant for vomiting but does not address this patient’s instability."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "Which treatment principle is most appropriate for anorexia nervosa in an adolescent",
+    "topic": "Anorexia treatment",
+    "options": {
+      "A": "Fluoxetine 60 mg daily as sole core treatment",
+      "B": "Tube feeding preferred over meals in all patients",
+      "C": "Weight restoration, nutritional counseling, meal-based nutrition, and family-based treatment",
+      "D": "Avoid calcium and vitamin D despite bone loss"
+    },
+    "correct": "C",
+    "explanation": "Anorexia treatment emphasizes weight restoration, nutritional counseling, meal-based nutrition preferred over tube feeding, calcium/vitamin D for bone loss, and psychotherapy; family-based treatment is emphasized in adolescents. Medications usually do not treat core AN well and are mainly for comorbid depression/anxiety/OCD.",
+    "optionExplanations": {
+      "A": "Fluoxetine 60 mg is emphasized for adult bulimia, not as sole core AN treatment.",
+      "B": "Meal-based nutrition is preferred over tube feeding when possible.",
+      "C": "Correct. Anorexia treatment emphasizes weight restoration, nutritional counseling, meal-based nutrition preferred over tube feeding, calcium/vitamin D for bone loss, and psychotherapy; family-based treatment is emphasized in adolescents. Medications usually do not treat core AN well and are mainly for comorbid depression/anxiety/OCD.",
+      "D": "Calcium and vitamin D are used to manage bone loss."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A patient with bulimia asks about first-line adult treatment. Which option is best supported by the lecture",
+    "topic": "Bulimia treatment",
+    "options": {
+      "A": "Weight restoration alone with no psychotherapy",
+      "B": "Eating-disorder-focused CBT plus fluoxetine 60 mg daily",
+      "C": "Lisdexamfetamine as first-line for all ages",
+      "D": "Calcium and vitamin D as the core bulimia treatment"
+    },
+    "correct": "B",
+    "explanation": "Bulimia nervosa is usually outpatient. Treatment includes nutritional counseling even if BMI is normal, a structured meal plan, eating-disorder-focused CBT, and fluoxetine 60 mg daily in adults.",
+    "optionExplanations": {
+      "A": "Bulimia treatment includes CBT and structured meal planning, not weight restoration alone.",
+      "B": "Correct. Bulimia nervosa is usually outpatient. Treatment includes nutritional counseling even if BMI is normal, a structured meal plan, eating-disorder-focused CBT, and fluoxetine 60 mg daily in adults.",
+      "C": "Lisdexamfetamine is listed as an adult option for binge eating disorder.",
+      "D": "Calcium/vitamin D is for bone loss management in AN."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A patient with bulimia vomits frequently and asks how to protect teeth after vomiting. Which recommendation is correct",
+    "topic": "Dental care in vomiting",
+    "options": {
+      "A": "Brush vigorously immediately after vomiting",
+      "B": "Drink carbonated citrus beverages after vomiting",
+      "C": "Avoid dental referral",
+      "D": "Rinse with water after vomiting and avoid brushing immediately"
+    },
+    "correct": "D",
+    "explanation": "Dental care for vomiting includes dental referral, rinsing mouth with water after vomiting, not brushing immediately after vomiting, and avoiding carbonated/citrus drinks after vomiting.",
+    "optionExplanations": {
+      "A": "Immediate brushing can worsen enamel damage after acid exposure.",
+      "B": "Carbonated/citrus drinks should be avoided after vomiting.",
+      "C": "Dental referral is recommended.",
+      "D": "Correct. Dental care for vomiting includes dental referral, rinsing mouth with water after vomiting, not brushing immediately after vomiting, and avoiding carbonated/citrus drinks after vomiting."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A patient has binge eating disorder. Which treatment statement is most accurate",
+    "topic": "Binge eating disorder treatment",
+    "options": {
+      "A": "Compensatory vomiting is required for diagnosis",
+      "B": "Bariatric surgery should be first before behavioral treatment",
+      "C": "CBT has high remission rates and is generally better than SSRI alone",
+      "D": "Nutritional deficiency from sensory aversion is required"
+    },
+    "correct": "C",
+    "explanation": "Binge eating disorder treatment includes CBT, interpersonal therapy, SSRIs, and lisdexamfetamine as an adult option. CBT can produce remission around 50–70%, is generally better than SSRI alone, and combination may be best. Behavioral/psychotherapy should precede bariatric surgery because surgery may remove a coping mechanism.",
+    "optionExplanations": {
+      "A": "Compensatory behavior is absent in binge eating disorder.",
+      "B": "Behavioral/psychotherapy comes first in the bariatric surgery context.",
+      "C": "Correct. Binge eating disorder treatment includes CBT, interpersonal therapy, SSRIs, and lisdexamfetamine as an adult option. CBT can produce remission around 50–70%, is generally better than SSRI alone, and combination may be best. Behavioral/psychotherapy should precede bariatric surgery because surgery may remove a coping mechanism.",
+      "D": "That points more toward ARFID."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "Which eating disorder is described as the most common eating disorder in the provided material and is often associated with obesity, diabetes, and hypertension risk",
+    "topic": "Binge eating disorder clinical features",
+    "options": {
+      "A": "Binge eating disorder",
+      "B": "Anorexia nervosa",
+      "C": "Pica",
+      "D": "Rumination disorder"
+    },
+    "correct": "A",
+    "explanation": "Binge eating disorder is listed as the most common eating disorder. It is often associated with obesity and increased diabetes and hypertension risk.",
+    "optionExplanations": {
+      "A": "Correct. Binge eating disorder is listed as the most common eating disorder. It is often associated with obesity and increased diabetes and hypertension risk.",
+      "B": "Anorexia is characterized by restriction and significantly low body weight.",
+      "C": "Pica is eating nonfood substances.",
+      "D": "Rumination is repeated regurgitation."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A young child has ARFID with malnutrition. Which family-based approach is supported by the lecture",
+    "topic": "ARFID treatment",
+    "options": {
+      "A": "Focus on weight/shape distortion as the primary driver",
+      "B": "Reduce blame, emphasize dangers of malnutrition, and empower caregivers to restore nutrition",
+      "C": "Use fluoxetine 60 mg as first-line for all pediatric ARFID",
+      "D": "Avoid involving caregivers"
+    },
+    "correct": "B",
+    "explanation": "ARFID treatment evidence is limited. A family-based approach should reduce blame, emphasize dangers of malnutrition, and empower parents/caregivers to restore nutrition. CBT is likely useful in adults.",
+    "optionExplanations": {
+      "A": "ARFID has no body image disturbance.",
+      "B": "Correct. ARFID treatment evidence is limited. A family-based approach should reduce blame, emphasize dangers of malnutrition, and empower parents/caregivers to restore nutrition. CBT is likely useful in adults.",
+      "C": "Fluoxetine 60 mg is adult first-line medication for bulimia, not ARFID.",
+      "D": "Family-based involvement is emphasized."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A hospitalized patient intentionally swallows foreign objects repeatedly. Which association/management pairing best matches the lecture",
+    "topic": "Deliberate foreign body ingestion",
+    "options": {
+      "A": "Associated only with anorexia; manage by ignoring all objects",
+      "B": "Associated only with fetal alcohol syndrome; manage with vitamin D",
+      "C": "Associated only with low BMI; manage with fluoxetine 60 mg",
+      "D": "Associated with malingering, psychosis, pica, personality disorders, incarceration, substance use; manage object risk and team countertransference"
+    },
+    "correct": "D",
+    "explanation": "Deliberate foreign body ingestion is associated with male gender, incarceration, substance use, malingering, psychosis, pica, and personality disorders. Management includes safe environment, treating surgical/medical risk from the object, reducing future episodes, managing team countertransference, and addressing return environment.",
+    "optionExplanations": {
+      "A": "Object risk must be medically/surgically managed.",
+      "B": "This is not the described association or management.",
+      "C": "Low BMI is not the sole association, and fluoxetine is not the main management.",
+      "D": "Correct. Deliberate foreign body ingestion is associated with male gender, incarceration, substance use, malingering, psychosis, pica, and personality disorders. Management includes safe environment, treating surgical/medical risk from the object, reducing future episodes, managing team countertransference, and addressing return environment."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "Which poor prognostic factor for eating disorders was listed in the material",
+    "topic": "Eating disorder prognosis",
+    "options": {
+      "A": "Younger age at onset only",
+      "B": "No prior psychiatric history",
+      "C": "Longer illness duration",
+      "D": "Excellent premorbid adjustment"
+    },
+    "correct": "C",
+    "explanation": "Poor prognostic factors include longer illness duration, older age at onset, prior psychiatric hospitalization, poor premorbid adjustment, personality disorder comorbidity, suicide attempt/self-harm history, and alcohol or diuretic abuse.",
+    "optionExplanations": {
+      "A": "Older age at onset is listed as poor prognosis.",
+      "B": "Prior psychiatric hospitalization is a poor prognostic factor.",
+      "C": "Correct. Poor prognostic factors include longer illness duration, older age at onset, prior psychiatric hospitalization, poor premorbid adjustment, personality disorder comorbidity, suicide attempt/self-harm history, and alcohol or diuretic abuse.",
+      "D": "Poor premorbid adjustment is the poor prognostic factor."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A pregnant patient has a history of anorexia nervosa. Which pregnancy complication association is listed",
+    "topic": "Maternal eating disorders",
+    "options": {
+      "A": "Hyperemesis, antepartum hemorrhage, preterm birth, and microcephaly",
+      "B": "Post-term birth only",
+      "C": "Macrosomia only",
+      "D": "Congenital diaphragmatic hernia only"
+    },
+    "correct": "A",
+    "explanation": "Maternal anorexia nervosa is associated with hyperemesis, antepartum hemorrhage, preterm birth, and microcephaly. Maternal bulimia is also associated with hyperemesis, preterm birth, and microcephaly.",
+    "optionExplanations": {
+      "A": "Correct. Maternal anorexia nervosa is associated with hyperemesis, antepartum hemorrhage, preterm birth, and microcephaly. Maternal bulimia is also associated with hyperemesis, preterm birth, and microcephaly.",
+      "B": "Preterm birth is listed, not post-term birth.",
+      "C": "Microcephaly is listed, not macrosomia.",
+      "D": "This is not the pregnancy association listed for AN/BN."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A medical student asks which group is less likely to seek help for eating disorders according to the lecture notes. Which answer is most accurate",
+    "topic": "Help-seeking disparities",
+    "options": {
+      "A": "Only ballet dancers",
+      "B": "Men and racial minorities",
+      "C": "Only patients with binge eating disorder",
+      "D": "Only patients with bulimia"
+    },
+    "correct": "B",
+    "explanation": "The lecture notes that men and racial minorities are less likely to seek help for eating disorders.",
+    "optionExplanations": {
+      "A": "Ballet dancers are listed as a higher-risk group for AN, not specifically lower help-seeking.",
+      "B": "Correct. The lecture notes that men and racial minorities are less likely to seek help for eating disorders.",
+      "C": "Help-seeking rates vary, but the disparity highlighted is men and racial minorities.",
+      "D": "The disparity highlighted is broader than bulimia alone."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A patient with anorexia has endocrine testing. Which pattern matches the lecture’s anorexia nervosa endocrine findings",
+    "topic": "Anorexia endocrine labs",
+    "options": {
+      "A": "↑ estradiol, ↑ LH/FSH, ↓ cortisol, ↓ GH, ↑ T3",
+      "B": "Normal endocrine studies exclude anorexia",
+      "C": "Isolated ↑ TSH with no other endocrine changes",
+      "D": "↓ estradiol, ↓ LH/FSH, ↑ cortisol, ↑ GH, ↓ T3, ↑ reverse T3"
+    },
+    "correct": "D",
+    "explanation": "Anorexia endocrine findings include decreased estradiol, decreased LH/FSH, increased cortisol, increased growth hormone, decreased T3, and increased reverse T3.",
+    "optionExplanations": {
+      "A": "This reverses the listed anorexia pattern.",
+      "B": "Labs are not diagnostic and normal studies do not exclude eating disorders.",
+      "C": "This is not the pattern listed for anorexia.",
+      "D": "Correct. Anorexia endocrine findings include decreased estradiol, decreased LH/FSH, increased cortisol, increased growth hormone, decreased T3, and increased reverse T3."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

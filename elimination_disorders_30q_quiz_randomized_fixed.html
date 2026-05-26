@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elimination Disorders Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 6-year-old repeatedly wets the bed 3 nights per week for 4 months. He is otherwise healthy, and urinalysis is normal. Which diagnosis is best supported",
+    "topic": "Enuresis diagnosis",
+    "options": {
+      "A": "Enuresis",
+      "B": "Encopresis",
+      "C": "Developmental coordination disorder",
+      "D": "Oppositional defiant disorder"
+    },
+    "correct": "A",
+    "explanation": "Enuresis is repeated voiding of urine into bed or clothes, involuntary or intentional, at age ≥5 years or equivalent developmental level. It must occur ≥2 times/week for ≥3 months or cause significant distress/impairment, and not be due to a substance or medical condition.",
+    "optionExplanations": {
+      "A": "Correct. Bedwetting at age ≥5 occurring ≥2 times/week for ≥3 months fits enuresis.",
+      "B": "Encopresis is inappropriate stool passage, not urination.",
+      "C": "Developmental coordination disorder involves motor coordination deficits.",
+      "D": "ODD involves angry/irritable mood, argumentative behavior, or vindictiveness, not isolated bedwetting."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A 4-year-old repeatedly passes stool into his underwear at least once per month for 3 months. No substance use or primary medical disease explains the behavior except possible constipation. Which diagnosis is best supported",
+    "topic": "Encopresis diagnosis",
+    "options": {
+      "A": "Enuresis",
+      "B": "Encopresis",
+      "C": "Tourette disorder",
+      "D": "Pica"
+    },
+    "correct": "B",
+    "explanation": "Encopresis is repeated passage of feces into inappropriate places, involuntary or intentional, at age ≥4 years. It requires ≥1 event/month for ≥3 months and is not due to a substance or medical condition except through constipation.",
+    "optionExplanations": {
+      "A": "Enuresis involves urine and requires age ≥5 years.",
+      "B": "Correct. Stool passage into inappropriate places at age ≥4 with the required frequency fits encopresis.",
+      "C": "Tourette disorder involves motor and vocal tics for >1 year.",
+      "D": "Pica is eating nonnutritive, nonfood substances."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A child has never achieved nighttime urinary continence. Which term best describes this pattern",
+    "topic": "Primary vs secondary enuresis",
+    "options": {
+      "A": "Secondary enuresis",
+      "B": "Retentive encopresis",
+      "C": "Primary enuresis",
+      "D": "Nonretentive encopresis"
+    },
+    "correct": "C",
+    "explanation": "Primary enuresis means urinary continence was never established. Secondary enuresis develops after a period of continence and is more likely to be related to psychosocial stressors or medical causes.",
+    "optionExplanations": {
+      "A": "Secondary enuresis occurs after prior continence was established.",
+      "B": "Retentive encopresis involves stool incontinence with constipation/overflow.",
+      "C": "Correct. Continence never established = primary enuresis.",
+      "D": "Nonretentive encopresis involves stool passage without constipation."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A 7-year-old who had been dry at night for years begins wetting the bed after parental separation. Which interpretation is most appropriate",
+    "topic": "Secondary enuresis",
+    "options": {
+      "A": "This must be normal because nocturnal enuresis can occur in any sleep phase",
+      "B": "This is diagnostic of diabetes insipidus",
+      "C": "This is primary enuresis because the child is younger than 10",
+      "D": "This pattern is secondary enuresis and should prompt assessment for stressors and medical causes"
+    },
+    "correct": "D",
+    "explanation": "Secondary enuresis develops after continence has been achieved and is more likely psychosocial or stress-related, though medical causes should also be ruled out.",
+    "optionExplanations": {
+      "A": "Nocturnal enuresis can occur in any sleep phase, but new-onset symptoms after continence are secondary and need evaluation.",
+      "B": "Diabetes insipidus is a medical rule-out, not diagnosed from this history alone.",
+      "C": "Primary enuresis means continence was never established.",
+      "D": "Correct. Loss of prior continence suggests secondary enuresis."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A 6-year-old only wets the bed at night and has no daytime accidents. Which enuresis subtype is this",
+    "topic": "Enuresis subtypes",
+    "options": {
+      "A": "Nocturnal only",
+      "B": "Diurnal only",
+      "C": "Nocturnal plus diurnal",
+      "D": "Retentive"
+    },
+    "correct": "A",
+    "explanation": "Nocturnal-only enuresis means bedwetting only. Diurnal-only means daytime wetting only. Nocturnal plus diurnal means both.",
+    "optionExplanations": {
+      "A": "Correct. Bedwetting only = nocturnal-only enuresis.",
+      "B": "Diurnal-only enuresis is daytime wetting only.",
+      "C": "Nocturnal plus diurnal requires both nighttime and daytime wetting.",
+      "D": "Retentive describes constipation-associated encopresis, not enuresis subtype."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A 7-year-old frequently wets his pants in early afternoon at school because he avoids using the school bathroom. Which pattern is most consistent",
+    "topic": "Diurnal enuresis",
+    "options": {
+      "A": "Nocturnal enuresis due only to failure to wake up",
+      "B": "Diurnal enuresis from deferred urination",
+      "C": "Retentive encopresis",
+      "D": "Nonretentive encopresis"
+    },
+    "correct": "B",
+    "explanation": "Diurnal enuresis often occurs when the child defers urination until incontinence occurs. It may occur early afternoon on school days and can be related to social anxiety about the bathroom, preoccupation with activities, or disruptive behavior.",
+    "optionExplanations": {
+      "A": "Nocturnal enuresis occurs during sleep and is not usually simply failure to wake.",
+      "B": "Correct. Daytime wetting after deferring urination fits diurnal enuresis.",
+      "C": "Retentive encopresis is stool incontinence from constipation/overflow.",
+      "D": "Nonretentive encopresis is stool passage without constipation."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A parent says the child’s bedwetting occurs only because he fails to wake up. Which correction is most accurate",
+    "topic": "Nocturnal enuresis",
+    "options": {
+      "A": "Nocturnal enuresis cannot occur during REM sleep",
+      "B": "Nocturnal enuresis only occurs in deep non-REM sleep",
+      "C": "Nocturnal enuresis is not usually simply failure to wake and can occur during any sleep phase",
+      "D": "Nocturnal enuresis always indicates seizure disorder"
+    },
+    "correct": "C",
+    "explanation": "Nocturnal enuresis can occur during REM sleep or any sleep phase. It is not usually simply a failure to wake up, and a child may recall a dream involving urination.",
+    "optionExplanations": {
+      "A": "The material notes it can occur during REM sleep.",
+      "B": "It can occur during any sleep phase.",
+      "C": "Correct. This is the key teaching point.",
+      "D": "Seizure disorder is a medical rule-out, not the default explanation."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A 6-year-old has bedwetting and loud snoring. Which associated condition should be considered",
+    "topic": "Enuresis associations",
+    "options": {
+      "A": "Osteogenesis imperfecta",
+      "B": "Familial adenomatous polyposis",
+      "C": "Dandy-Walker malformation",
+      "D": "Obstructive sleep apnea"
+    },
+    "correct": "D",
+    "explanation": "Enuresis is more common with snoring and obstructive sleep apnea. ADHD is also the most common psychiatric comorbidity.",
+    "optionExplanations": {
+      "A": "OI causes fractures, blue sclerae, hearing loss, and poor dentition.",
+      "B": "FAP causes numerous adenomatous colon polyps.",
+      "C": "Dandy-Walker causes posterior fossa abnormalities and hydrocephalus risk.",
+      "D": "Correct. Snoring with enuresis should raise concern for obstructive sleep apnea."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "Which psychiatric comorbidity is most commonly associated with enuresis in the provided material",
+    "topic": "Enuresis comorbidity",
+    "options": {
+      "A": "ADHD",
+      "B": "Schizophrenia",
+      "C": "Bipolar I disorder",
+      "D": "Anorexia nervosa"
+    },
+    "correct": "A",
+    "explanation": "The most common psychiatric comorbidity with enuresis is ADHD.",
+    "optionExplanations": {
+      "A": "Correct. ADHD is the most common psychiatric comorbidity listed for enuresis.",
+      "B": "Schizophrenia is not the common comorbidity emphasized.",
+      "C": "Bipolar disorder is not the common comorbidity emphasized.",
+      "D": "Anorexia nervosa is unrelated to the enuresis association here."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A child with new urinary incontinence is evaluated. Which medical cause should be ruled out before labeling the problem psychiatric",
+    "topic": "Urinary incontinence differential",
+    "options": {
+      "A": "Osteoblastoma",
+      "B": "UTI",
+      "C": "Osteochondroma",
+      "D": "Molluscum contagiosum"
+    },
+    "correct": "B",
+    "explanation": "Medical causes of urinary incontinence to rule out include UTI, urethritis, bubble bath irritation, sexual abuse, diabetes mellitus, diabetes insipidus, sickle cell trait, seizure disorder, sleep apnea, neurogenic bladder, myelodysplasia, neurologic trauma, GU malformations, ectopic ureter, obstruction, stones, and pelvic mass.",
+    "optionExplanations": {
+      "A": "Osteoblastoma is a benign bone tumor and is not a urinary incontinence rule-out.",
+      "B": "Correct. UTI is a key medical cause to rule out.",
+      "C": "Osteochondroma is a benign cartilage-capped bone lesion.",
+      "D": "Molluscum contagiosum causes umbilicated papules, not urinary incontinence."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A 5-year-old with bedwetting has weight loss, polydipsia, and polyuria. Which medical rule-out is especially important",
+    "topic": "Urinary incontinence differential",
+    "options": {
+      "A": "Dermatomyositis",
+      "B": "Juvenile idiopathic arthritis",
+      "C": "Diabetes mellitus",
+      "D": "Achondroplasia"
+    },
+    "correct": "C",
+    "explanation": "Diabetes mellitus is listed as a medical cause to rule out in urinary incontinence. Polyuria, polydipsia, and weight loss are important clues.",
+    "optionExplanations": {
+      "A": "Dermatomyositis causes proximal weakness and heliotrope rash.",
+      "B": "JIA causes chronic arthritis before age 16.",
+      "C": "Correct. DM is a key rule-out in new urinary symptoms with polyuria/polydipsia/weight loss.",
+      "D": "Achondroplasia is a skeletal dysplasia."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A 7-year-old with enuresis has sickle cell trait. Why is this relevant",
+    "topic": "Urinary incontinence differential",
+    "options": {
+      "A": "Sickle cell trait means encopresis is more likely than enuresis",
+      "B": "Sickle cell trait confirms psychiatric enuresis",
+      "C": "Sickle cell trait excludes all renal concentrating problems",
+      "D": "Sickle cell trait is listed as a medical cause/rule-out for urinary incontinence"
+    },
+    "correct": "D",
+    "explanation": "Sickle cell trait is included among medical causes to rule out or consider in urinary incontinence.",
+    "optionExplanations": {
+      "A": "Sickle cell trait is not an encopresis clue.",
+      "B": "It does not confirm psychiatric enuresis.",
+      "C": "Sickle cell trait can affect renal concentrating ability; it does not exclude urinary causes.",
+      "D": "Correct. The section lists sickle cell trait among urinary incontinence rule-outs."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A young child with enuresis is embarrassed, avoids sleepovers, and is punished by caregivers. Which management principle is most appropriate",
+    "topic": "Enuresis treatment",
+    "options": {
+      "A": "Use positive reinforcement and avoid ridicule/punishment",
+      "B": "Start repeated enemas",
+      "C": "Use punishment to increase motivation",
+      "D": "Treat all cases with imipramine first-line"
+    },
+    "correct": "A",
+    "explanation": "Young children with enuresis are usually managed by the pediatrician. Mainstay treatment includes positive reinforcement, rewarding successful nights, avoiding punishment/ridicule, and teaching the child to change sheets to reduce caregiver frustration.",
+    "optionExplanations": {
+      "A": "Correct. Positive reinforcement and avoiding shame are central.",
+      "B": "Repeated enemas are discouraged in encopresis, not an enuresis treatment.",
+      "C": "Punitive measures are discouraged.",
+      "D": "Medications may be used in older children but are not first-line for all cases."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A parent asks what behavioral strategy can reduce caregiver frustration while managing bedwetting. Which recommendation is listed",
+    "topic": "Enuresis treatment",
+    "options": {
+      "A": "Have the child sleep in a different room indefinitely",
+      "B": "Teach the child to change sheets",
+      "C": "Remove all rewards until symptoms stop",
+      "D": "Avoid discussing the problem with the child"
+    },
+    "correct": "B",
+    "explanation": "Teaching the child to change sheets can reduce caregiver frustration. Treatment should also avoid punishment and use positive reinforcement.",
+    "optionExplanations": {
+      "A": "Isolation is not listed as an appropriate treatment.",
+      "B": "Correct. The material specifically notes teaching the child to change sheets.",
+      "C": "Reward systems are encouraged.",
+      "D": "Education and supportive discussion are appropriate."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "An older child with enuresis is treated with a bell-and-pad alarm. Which outcome profile was emphasized",
+    "topic": "Enuresis alarm",
+    "options": {
+      "A": "Nearly no benefit and no relapse",
+      "B": "Only useful for daytime wetting",
+      "C": "About 80% success with about 40% relapse",
+      "D": "Immediate cure after one night"
+    },
+    "correct": "C",
+    "explanation": "The bell-and-pad alarm is listed as having about 80% success with about 40% relapse.",
+    "optionExplanations": {
+      "A": "The alarm has high success but relapse is common.",
+      "B": "It is a treatment option for enuresis generally, especially nocturnal patterns.",
+      "C": "Correct. High success but substantial relapse is the key point.",
+      "D": "It is not an immediate one-night cure."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "An older child with enuresis practices briefly postponing urination and start-stop flow exercises. Which treatment is this",
+    "topic": "Enuresis treatment",
+    "options": {
+      "A": "Bell-and-pad alarm",
+      "B": "Desmopressin",
+      "C": "Psychotherapy",
+      "D": "Bladder training"
+    },
+    "correct": "D",
+    "explanation": "Bladder training includes briefly postponing urination and start-stop flow exercises.",
+    "optionExplanations": {
+      "A": "A bell-and-pad alarm is a device-based conditioning approach.",
+      "B": "Desmopressin is medication therapy.",
+      "C": "Psychotherapy is considered for oppositional disorder or psychosocial issues.",
+      "D": "Correct. Briefly postponing urination and start-stop flow exercises are bladder training."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A child with nocturnal enuresis is started on desmopressin. Which serious adverse effect must be discussed",
+    "topic": "Desmopressin risk",
+    "options": {
+      "A": "Hyponatremia with seizures or death",
+      "B": "Aplastic crisis",
+      "C": "Aortic root dilation",
+      "D": "Malignant hyperthermia"
+    },
+    "correct": "A",
+    "explanation": "Desmopressin can cause hyponatremia, seizures, and death. This warning was emphasized in the material.",
+    "optionExplanations": {
+      "A": "Correct. Desmopressin can cause dangerous water retention and hyponatremia.",
+      "B": "Aplastic crisis is classically associated with parvovirus B19 in susceptible patients.",
+      "C": "Aortic root dilation is associated with Marfan syndrome.",
+      "D": "Malignant hyperthermia is associated with RYR1 and anesthetic triggers."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A child with recurrent bedwetting develops symptoms after a bullying incident and family stress. Which treatment addition is especially relevant",
+    "topic": "Secondary enuresis treatment",
+    "options": {
+      "A": "No evaluation because enuresis is never stress-related",
+      "B": "Psychosocial support",
+      "C": "Repeated enemas",
+      "D": "Immediate colectomy"
+    },
+    "correct": "B",
+    "explanation": "Psychosocial support is especially important for secondary enuresis or stressors. Psychotherapy may be considered when oppositional disorder or psychosocial issues are present.",
+    "optionExplanations": {
+      "A": "Secondary enuresis is more likely psychosocial/stress-related but also needs medical rule-outs.",
+      "B": "Correct. Psychosocial support is emphasized for secondary enuresis/stressors.",
+      "C": "Repeated enemas are discouraged in encopresis.",
+      "D": "Colectomy is unrelated."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A child passes poorly formed stool in underwear frequently and mostly during the day. Symptoms improve after constipation treatment. Which encopresis subtype is most likely",
+    "topic": "Encopresis subtypes",
+    "options": {
+      "A": "Nonretentive encopresis",
+      "B": "Nocturnal enuresis",
+      "C": "Retentive encopresis with constipation and overflow",
+      "D": "Diurnal enuresis"
+    },
+    "correct": "C",
+    "explanation": "Encopresis with constipation/overflow is retentive. Stool is often poorly formed, frequent or continuous, mostly daytime and rarely nighttime, and improves after constipation treatment.",
+    "optionExplanations": {
+      "A": "Nonretentive encopresis has normal stool form/consistency and is often intermittent.",
+      "B": "Nocturnal enuresis is bedwetting.",
+      "C": "Correct. Poorly formed frequent stool that improves with constipation treatment is retentive encopresis.",
+      "D": "Diurnal enuresis is daytime urinary incontinence."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A child intermittently passes normal-formed stool in prominent places. There is no constipation. The behavior is associated with conduct symptoms. Which subtype best fits",
+    "topic": "Nonretentive encopresis",
+    "options": {
+      "A": "Primary nocturnal enuresis",
+      "B": "Retentive encopresis",
+      "C": "Diurnal enuresis",
+      "D": "Nonretentive encopresis"
+    },
+    "correct": "D",
+    "explanation": "Nonretentive encopresis occurs without constipation and has normal stool form/consistency. It is intermittent, may be placed prominently, and is often associated with oppositional or conduct disorder.",
+    "optionExplanations": {
+      "A": "Primary nocturnal enuresis is bedwetting with continence never established.",
+      "B": "Retentive encopresis involves constipation/overflow and often poorly formed frequent stool.",
+      "C": "Diurnal enuresis involves daytime urinary incontinence.",
+      "D": "Correct. Normal stool without constipation plus prominent placement/conduct symptoms fits nonretentive encopresis."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A 5-year-old has encopresis. Which comorbidity is noted to occur in up to 25% of affected children",
+    "topic": "Encopresis epidemiology",
+    "options": {
+      "A": "Enuresis",
+      "B": "Marfan syndrome",
+      "C": "Osteosarcoma",
+      "D": "Fragile X syndrome"
+    },
+    "correct": "A",
+    "explanation": "Up to 25% of children with encopresis also have enuresis.",
+    "optionExplanations": {
+      "A": "Correct. Enuresis can co-occur with encopresis.",
+      "B": "Marfan syndrome is a connective tissue disorder, not the emphasized comorbidity.",
+      "C": "Osteosarcoma is a bone tumor, not an encopresis comorbidity.",
+      "D": "Fragile X is a neurodevelopmental syndrome, not the listed common comorbidity here."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A child has fecal incontinence. Which medical condition should be considered before labeling it behavioral",
+    "topic": "Fecal incontinence differential",
+    "options": {
+      "A": "Meconium aspiration",
+      "B": "Hirschsprung disease",
+      "C": "Croup",
+      "D": "Laryngomalacia"
+    },
+    "correct": "B",
+    "explanation": "Medical causes of fecal incontinence to rule out include fecal impaction/constipation, structural abnormalities, UTI, thyroid disease, hypercalcemia, lactase deficiency, rectal stenosis, anal fissure, Hirschsprung disease, anorectal trauma, cerebral palsy with hypotonia, and hemorrhoids.",
+    "optionExplanations": {
+      "A": "Meconium aspiration causes neonatal respiratory distress.",
+      "B": "Correct. Hirschsprung disease is a key rule-out for fecal incontinence/encopresis.",
+      "C": "Croup causes upper airway symptoms.",
+      "D": "Laryngomalacia causes inspiratory stridor."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child with encopresis has constipation and stool withholding after painful defecation. Which initial treatment is most appropriate",
+    "topic": "Retentive encopresis treatment",
+    "options": {
+      "A": "Fluid restriction before sleep only",
+      "B": "Bell-and-pad alarm only",
+      "C": "Initial bowel cleanout followed by bowel retraining, roughage diet, mineral oil, and toileting routine",
+      "D": "Desmopressin as first-line therapy"
+    },
+    "correct": "C",
+    "explanation": "Encopresis with constipation is treated with initial bowel cleanout followed by bowel retraining, roughage diet, mineral oil, and toileting routine.",
+    "optionExplanations": {
+      "A": "Fluid restriction may help enuresis but does not address constipation/overflow stool.",
+      "B": "Bell-and-pad alarm is an enuresis treatment.",
+      "C": "Correct. Constipation-associated encopresis requires cleanout then retraining and bowel regimen.",
+      "D": "Desmopressin treats enuresis, not encopresis."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A child has encopresis without constipation. Which initial behavioral strategy is listed",
+    "topic": "Nonretentive encopresis treatment",
+    "options": {
+      "A": "Mineral oil only",
+      "B": "Repeated enemas",
+      "C": "Imipramine",
+      "D": "Behavioral reward system for sitting on the toilet, later rewarding bowel movements"
+    },
+    "correct": "D",
+    "explanation": "Encopresis without constipation is treated with a behavioral reward system: first rewarding sitting on the toilet, then later rewarding bowel movements.",
+    "optionExplanations": {
+      "A": "Mineral oil is part of constipation-associated encopresis treatment.",
+      "B": "Repeated enemas should be avoided.",
+      "C": "Imipramine may be used for enuresis, not encopresis.",
+      "D": "Correct. Behavioral rewards are emphasized for nonretentive encopresis."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A child with encopresis has severe shame and repeated treatment failures. Which counseling approach is emphasized",
+    "topic": "Encopresis counseling",
+    "options": {
+      "A": "Reframe success to reduce shame and failure cycle",
+      "B": "Use ridicule to strengthen motivation",
+      "C": "Tell parents it is always intentional misconduct",
+      "D": "Avoid parent education about bowel function"
+    },
+    "correct": "A",
+    "explanation": "Encopresis treatment includes educating the child and parents about bowel function, diet, and exercise, promoting the child’s interest in change, and reframing success to reduce the shame/failure cycle.",
+    "optionExplanations": {
+      "A": "Correct. Reducing shame and reframing success are specifically emphasized.",
+      "B": "Punishment and ridicule are discouraged.",
+      "C": "Encopresis may be involuntary or intentional and often involves constipation.",
+      "D": "Parent and child education is part of treatment."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A clinician plans repeated enemas for chronic encopresis with constipation. Which statement is most accurate based on the provided material",
+    "topic": "Encopresis treatment cautions",
+    "options": {
+      "A": "Repeated enemas are the preferred long-term treatment",
+      "B": "Repeated enemas should be avoided",
+      "C": "Enemas are the only treatment for nonretentive encopresis",
+      "D": "Enemas replace bowel retraining"
+    },
+    "correct": "B",
+    "explanation": "For encopresis with constipation, treatment includes cleanout followed by bowel retraining and bowel regimen. Repeated enemas should be avoided.",
+    "optionExplanations": {
+      "A": "Repeated enemas are specifically discouraged.",
+      "B": "Correct. Avoid repeated enemas.",
+      "C": "Nonretentive encopresis is treated with behavioral reward systems.",
+      "D": "Bowel retraining remains important."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "Which comparison between enuresis and encopresis is accurate",
+    "topic": "Enuresis vs encopresis",
+    "options": {
+      "A": "Enuresis requires age ≥4; encopresis requires age ≥5",
+      "B": "Both require ≥2 events/week for ≥3 months",
+      "C": "Enuresis involves urine at age ≥5; encopresis involves feces at age ≥4",
+      "D": "Enuresis involves feces; encopresis involves urine"
+    },
+    "correct": "C",
+    "explanation": "Enuresis involves urine and requires age ≥5 with ≥2 events/week for ≥3 months or distress/impairment. Encopresis involves feces and requires age ≥4 with ≥1 event/month for ≥3 months.",
+    "optionExplanations": {
+      "A": "The ages are reversed.",
+      "B": "The frequency requirements differ.",
+      "C": "Correct. This is the key high-yield comparison.",
+      "D": "The elimination types are reversed."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A child has fecal soiling with constipation. According to the high-yield table, which major medical rule-out category is most relevant",
+    "topic": "Encopresis rule-outs",
+    "options": {
+      "A": "Neurogenic bladder and pelvic mass",
+      "B": "Sickle cell trait, sleep apnea, and ectopic ureter",
+      "C": "Diabetes insipidus and urinary obstruction",
+      "D": "Constipation or impaction, Hirschsprung disease, fissure, and thyroid disease"
+    },
+    "correct": "D",
+    "explanation": "Major encopresis medical rule-outs include constipation/impaction, Hirschsprung disease, fissure, and thyroid disease.",
+    "optionExplanations": {
+      "A": "These are urinary incontinence rule-outs.",
+      "B": "These are urinary incontinence/enuresis rule-outs.",
+      "C": "These are urinary causes, not fecal incontinence causes.",
+      "D": "Correct. These are key fecal incontinence/encopresis rule-outs."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A child with urinary accidents has daytime and nighttime symptoms. Which subtype applies",
+    "topic": "Enuresis subtypes",
+    "options": {
+      "A": "Nocturnal plus diurnal",
+      "B": "Diurnal only",
+      "C": "Retentive",
+      "D": "Nocturnal only"
+    },
+    "correct": "A",
+    "explanation": "Nocturnal plus diurnal enuresis means both nighttime and daytime wetting.",
+    "optionExplanations": {
+      "A": "Correct. Both daytime and nighttime wetting = nocturnal plus diurnal.",
+      "B": "Diurnal-only enuresis is daytime wetting only.",
+      "C": "Retentive describes constipation-associated encopresis.",
+      "D": "Nocturnal-only enuresis is bedwetting only."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "Which general diagnostic principle applies to both enuresis and encopresis",
+    "topic": "Elimination disorder principles",
+    "options": {
+      "A": "Diagnosis can be made after one isolated accident",
+      "B": "Diagnosis requires developmentally inappropriate elimination with a repeated pattern not better explained by substances or medical disease",
+      "C": "Medical causes should be ignored if the child is embarrassed",
+      "D": "Punishment is the main treatment"
+    },
+    "correct": "B",
+    "explanation": "Both elimination disorders require developmentally inappropriate elimination, a repeated pattern, and exclusion of substances or medical disease. Punishment should be avoided, and positive reinforcement is emphasized.",
+    "optionExplanations": {
+      "A": "A repeated pattern is required.",
+      "B": "Correct. This is the general diagnostic principle for elimination disorders.",
+      "C": "Medical causes should be ruled out before psychiatric labeling.",
+      "D": "Punitive measures are discouraged."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Congenital Heart Disease Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A newborn transitions from fetal to neonatal circulation. Which change helps functionally close the foramen ovale",
+    "topic": "Birth transition",
+    "options": {
+      "A": "Increased pulmonary vascular resistance → increased right atrial pressure",
+      "B": "Decreased pulmonary vascular resistance → increased pulmonary venous return → increased left atrial pressure",
+      "C": "Decreased systemic vascular resistance from placental removal",
+      "D": "Increased ductus venosus flow after birth"
+    },
+    "correct": "B",
+    "explanation": "At birth, lung expansion decreases pulmonary vascular resistance, increasing pulmonary blood flow and pulmonary venous return to the left atrium. Left atrial pressure rises and functionally closes the foramen ovale.",
+    "optionExplanations": {
+      "A": "Pulmonary vascular resistance decreases after birth.",
+      "B": "Correct. At birth, lung expansion decreases pulmonary vascular resistance, increasing pulmonary blood flow and pulmonary venous return to the left atrium. Left atrial pressure rises and functionally closes the foramen ovale.",
+      "C": "Placental removal increases systemic vascular resistance.",
+      "D": "The ductus venosus closes after birth."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "The ductus arteriosus normally closes within the first 1–2 days of life. Which physiologic change promotes this closure",
+    "topic": "Ductus arteriosus closure",
+    "options": {
+      "A": "Increased prostaglandin E1",
+      "B": "Decreased oxygen tension",
+      "C": "Persistent fetal pulmonary vascular resistance",
+      "D": "Decreased prostaglandin E2 and increased oxygen tension"
+    },
+    "correct": "D",
+    "explanation": "After birth, increased oxygen tension and decreased prostaglandins promote ductus arteriosus closure.",
+    "optionExplanations": {
+      "A": "PGE1 keeps the ductus open and is used for ductal-dependent lesions.",
+      "B": "Hypoxia tends to keep the ductus open.",
+      "C": "Normal transition involves falling pulmonary vascular resistance.",
+      "D": "Correct. After birth, increased oxygen tension and decreased prostaglandins promote ductus arteriosus closure."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A neonate with a ductal-dependent congenital heart lesion becomes cyanotic as the ductus arteriosus closes. Which medication should be used to maintain ductal patency",
+    "topic": "Ductal-dependent lesions",
+    "options": {
+      "A": "Prostaglandin E1",
+      "B": "Indomethacin",
+      "C": "Aspirin",
+      "D": "Vitamin A"
+    },
+    "correct": "A",
+    "explanation": "PGE1 maintains ductus arteriosus patency and is used in ductal-dependent congenital heart disease.",
+    "optionExplanations": {
+      "A": "Correct. PGE1 maintains ductus arteriosus patency and is used in ductal-dependent congenital heart disease.",
+      "B": "Indomethacin closes the ductus and would worsen a ductal-dependent lesion.",
+      "C": "Aspirin is part of Kawasaki treatment, not ductal patency management.",
+      "D": "Vitamin A is used in measles management."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "Which group represents initially acyanotic left-to-right shunts",
+    "topic": "CHD classification",
+    "options": {
+      "A": "TOF, TGA, and truncus arteriosus",
+      "B": "Coarctation and pulmonic stenosis",
+      "C": "VSD, ASD, and PDA",
+      "D": "Ebstein anomaly and tricuspid atresia"
+    },
+    "correct": "C",
+    "explanation": "VSD, ASD, and PDA are classic left-to-right shunts and are initially acyanotic.",
+    "optionExplanations": {
+      "A": "These are cyanotic lesions.",
+      "B": "These are obstructive lesions.",
+      "C": "Correct. VSD, ASD, and PDA are classic left-to-right shunts and are initially acyanotic.",
+      "D": "These are cyanotic/right-sided lesions."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A child has a long-standing VSD with pulmonary overcirculation. Later, pulmonary hypertension causes shunt reversal and cyanosis. What is this complication called",
+    "topic": "Eisenmenger syndrome",
+    "options": {
+      "A": "Tet spell",
+      "B": "Jatene switch",
+      "C": "Nagayama phenomenon",
+      "D": "Eisenmenger syndrome"
+    },
+    "correct": "D",
+    "explanation": "Eisenmenger syndrome is pulmonary hypertension from chronic left-to-right shunting that eventually reverses the shunt and causes cyanosis.",
+    "optionExplanations": {
+      "A": "Tet spells are hypercyanotic episodes in tetralogy of Fallot.",
+      "B": "The Jatene procedure is arterial switch surgery for TGA.",
+      "C": "Nagayama spots are associated with roseola.",
+      "D": "Correct. Eisenmenger syndrome is pulmonary hypertension from chronic left-to-right shunting that eventually reverses the shunt and causes cyanosis."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "An infant has a harsh holosystolic murmur at the lower left sternal border. Symptoms worsen as pulmonary vascular resistance falls after birth. Which lesion is most likely",
+    "topic": "VSD",
+    "options": {
+      "A": "Atrial septal defect",
+      "B": "Ventricular septal defect",
+      "C": "Patent ductus arteriosus",
+      "D": "Pulmonic stenosis"
+    },
+    "correct": "B",
+    "explanation": "VSD causes a harsh holosystolic murmur at the lower left sternal border. Symptoms can worsen as pulmonary vascular resistance falls and left-to-right shunting increases.",
+    "optionExplanations": {
+      "A": "ASD classically causes wide fixed splitting of S2.",
+      "B": "Correct. VSD causes a harsh holosystolic murmur at the lower left sternal border. Symptoms can worsen as pulmonary vascular resistance falls and left-to-right shunting increases.",
+      "C": "PDA classically causes a continuous machinery murmur.",
+      "D": "Pulmonic stenosis causes a systolic ejection murmur at the left upper sternal border."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A young adult with an undiagnosed congenital lesion has a wide fixed split S2 and mild exertional dyspnea. Which lesion is most likely",
+    "topic": "ASD",
+    "options": {
+      "A": "Atrial septal defect",
+      "B": "Ventricular septal defect",
+      "C": "Patent ductus arteriosus",
+      "D": "Tetralogy of Fallot"
+    },
+    "correct": "A",
+    "explanation": "ASD is often mild and can present later. The classic physical finding is wide fixed splitting of S2.",
+    "optionExplanations": {
+      "A": "Correct. ASD is often mild and can present later. The classic physical finding is wide fixed splitting of S2.",
+      "B": "VSD classically causes a harsh holosystolic murmur.",
+      "C": "PDA causes a continuous machinery murmur.",
+      "D": "TOF is a cyanotic lesion with tet spells and boot-shaped heart."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "Which atrial septal defect subtype is most common and located near the foramen ovale",
+    "topic": "ASD subtype",
+    "options": {
+      "A": "Primum ASD",
+      "B": "Sinus venosus ASD",
+      "C": "Complete AV canal",
+      "D": "Secundum ASD"
+    },
+    "correct": "D",
+    "explanation": "Secundum ASD is the most common ASD subtype and is located near the foramen ovale.",
+    "optionExplanations": {
+      "A": "Primum ASD is adjacent to the AV valves and is less common.",
+      "B": "Sinus venosus ASD is near the vena cava entry.",
+      "C": "Complete AV canal is an endocardial cushion defect, classically associated with Down syndrome.",
+      "D": "Correct. Secundum ASD is the most common ASD subtype and is located near the foramen ovale."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A premature infant has a continuous machinery murmur and bounding pulses. Which congenital heart lesion is most likely",
+    "topic": "PDA",
+    "options": {
+      "A": "Atrial septal defect",
+      "B": "Ventricular septal defect",
+      "C": "Patent ductus arteriosus",
+      "D": "Aortic stenosis"
+    },
+    "correct": "C",
+    "explanation": "PDA causes persistence of the connection between the pulmonary artery and aorta. It classically causes a continuous machinery murmur and can be associated with prematurity.",
+    "optionExplanations": {
+      "A": "ASD causes wide fixed split S2.",
+      "B": "VSD causes a harsh holosystolic murmur.",
+      "C": "Correct. PDA causes persistence of the connection between the pulmonary artery and aorta. It classically causes a continuous machinery murmur and can be associated with prematurity.",
+      "D": "Aortic stenosis causes a systolic ejection murmur at the RUSB."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A PDA needs to be closed pharmacologically in a premature infant. Which medication is used",
+    "topic": "PDA closure",
+    "options": {
+      "A": "Indomethacin or ibuprofen",
+      "B": "Prostaglandin E1",
+      "C": "Alprostadil to close it",
+      "D": "Tocilizumab"
+    },
+    "correct": "A",
+    "explanation": "NSAIDs such as indomethacin or ibuprofen inhibit prostaglandin synthesis and promote PDA closure.",
+    "optionExplanations": {
+      "A": "Correct. NSAIDs such as indomethacin or ibuprofen inhibit prostaglandin synthesis and promote PDA closure.",
+      "B": "PGE1 keeps the ductus open.",
+      "C": "Alprostadil is PGE1 and maintains ductal patency.",
+      "D": "Tocilizumab is an IL-6 inhibitor used in severe systemic-onset JIA."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "An infant with tetralogy of Fallot has cyanotic spells during crying. Which maneuver helps acutely by increasing systemic vascular resistance",
+    "topic": "Tet spells",
+    "options": {
+      "A": "Lying flat with legs extended",
+      "B": "Indomethacin to close the ductus",
+      "C": "Hyperventilation to reduce systemic resistance",
+      "D": "Knee-chest positioning or squatting"
+    },
+    "correct": "D",
+    "explanation": "Knee-chest positioning or squatting increases systemic vascular resistance, reducing right-to-left shunting and improving pulmonary blood flow during tet spells.",
+    "optionExplanations": {
+      "A": "This does not provide the same SVR increase.",
+      "B": "Indomethacin is not acute tet spell management.",
+      "C": "Reducing systemic resistance can worsen right-to-left shunting.",
+      "D": "Correct. Knee-chest positioning or squatting increases systemic vascular resistance, reducing right-to-left shunting and improving pulmonary blood flow during tet spells."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A cyanotic infant has boot-shaped heart on CXR. Which four defects define the condition",
+    "topic": "Tetralogy of Fallot anatomy",
+    "options": {
+      "A": "ASD, VSD, PDA, and bicuspid aortic valve",
+      "B": "VSD, overriding aorta, pulmonary stenosis/RV outflow obstruction, and RV hypertrophy",
+      "C": "Tricuspid atresia, TAPVR, PDA, and ASD",
+      "D": "Coarctation, aortic stenosis, mitral stenosis, and pulmonary vein stenosis"
+    },
+    "correct": "B",
+    "explanation": "Tetralogy of Fallot consists of VSD, overriding aorta, RV outflow obstruction/pulmonary stenosis, and RV hypertrophy.",
+    "optionExplanations": {
+      "A": "This is not the TOF tetrad.",
+      "B": "Correct. Tetralogy of Fallot consists of VSD, overriding aorta, RV outflow obstruction/pulmonary stenosis, and RV hypertrophy.",
+      "C": "These are separate congenital lesions.",
+      "D": "This is not the TOF tetrad."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A cyanotic newborn has the aorta arising from the right ventricle and pulmonary artery arising from the left ventricle. Which lesion is present",
+    "topic": "TGA anatomy",
+    "options": {
+      "A": "Tetralogy of Fallot",
+      "B": "Truncus arteriosus",
+      "C": "Transposition of the great arteries",
+      "D": "Total anomalous pulmonary venous return"
+    },
+    "correct": "C",
+    "explanation": "TGA has ventriculoarterial discordance: aorta from RV and pulmonary artery from LV, creating parallel circuits.",
+    "optionExplanations": {
+      "A": "TOF has VSD, overriding aorta, RVOT obstruction, and RVH.",
+      "B": "Truncus arteriosus has a single common arterial trunk.",
+      "C": "Correct. TGA has ventriculoarterial discordance: aorta from RV and pulmonary artery from LV, creating parallel circuits.",
+      "D": "TAPVR involves pulmonary veins not draining normally into the left atrium."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A neonate with TGA survives because blood can mix between the pulmonary and systemic circuits. Which structure can allow this mixing",
+    "topic": "TGA mixing",
+    "options": {
+      "A": "Closed foramen ovale only",
+      "B": "Closed ductus arteriosus only",
+      "C": "A normal intact septum only",
+      "D": "ASD, VSD, or PDA"
+    },
+    "correct": "D",
+    "explanation": "TGA requires mixing through an ASD, VSD, or PDA to be compatible with life.",
+    "optionExplanations": {
+      "A": "Closure prevents atrial-level mixing.",
+      "B": "Ductus closure reduces mixing and worsens cyanosis.",
+      "C": "An intact septum prevents mixing between circuits.",
+      "D": "Correct. TGA requires mixing through an ASD, VSD, or PDA to be compatible with life."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A neonate with TGA is cyanotic and worsening as the ductus closes. Which treatment sequence is most appropriate",
+    "topic": "TGA treatment",
+    "options": {
+      "A": "PGE1 → balloon atrial septostomy if needed → arterial switch/Jatene procedure",
+      "B": "Indomethacin → ductal closure → observation",
+      "C": "Vitamin A → isolation → MMR",
+      "D": "NSAIDs only"
+    },
+    "correct": "A",
+    "explanation": "TGA treatment includes maintaining ductal patency with PGE1, improving mixing with atrial septostomy if needed, and definitive arterial switch/Jatene procedure.",
+    "optionExplanations": {
+      "A": "Correct. TGA treatment includes maintaining ductal patency with PGE1, improving mixing with atrial septostomy if needed, and definitive arterial switch/Jatene procedure.",
+      "B": "Ductal closure worsens TGA.",
+      "C": "This is measles-related management/prevention.",
+      "D": "NSAIDs do not correct TGA physiology."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A newborn has a single common arterial trunk supplying systemic, pulmonary, and coronary circulation. Which diagnosis is most likely",
+    "topic": "Truncus arteriosus",
+    "options": {
+      "A": "TGA",
+      "B": "Truncus arteriosus",
+      "C": "ASD",
+      "D": "Coarctation of the aorta"
+    },
+    "correct": "B",
+    "explanation": "Truncus arteriosus is characterized by one common arterial trunk.",
+    "optionExplanations": {
+      "A": "TGA has two great arteries switched, not one common trunk.",
+      "B": "Correct. Truncus arteriosus is characterized by one common arterial trunk.",
+      "C": "ASD is an atrial septal opening.",
+      "D": "Coarctation is narrowing of the aorta."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A neonate has truncus arteriosus, low-set ears, hypoplastic chin, and immune/calcium abnormalities. Which syndrome is most likely",
+    "topic": "DiGeorge association",
+    "options": {
+      "A": "Turner syndrome",
+      "B": "Klinefelter syndrome",
+      "C": "Fragile X syndrome",
+      "D": "22q11.2 deletion / DiGeorge syndrome"
+    },
+    "correct": "D",
+    "explanation": "Conotruncal abnormalities such as truncus arteriosus are associated with 22q11.2 deletion/DiGeorge syndrome.",
+    "optionExplanations": {
+      "A": "Turner syndrome is associated with coarctation, bicuspid aortic valve, and aortic stenosis.",
+      "B": "Klinefelter syndrome is associated with PDA, ASD, and mitral valve prolapse in the lecture table.",
+      "C": "Fragile X is not the classic conotruncal defect association.",
+      "D": "Correct. Conotruncal abnormalities such as truncus arteriosus are associated with 22q11.2 deletion/DiGeorge syndrome."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A newborn has absent tricuspid valve development with cyanosis from birth. Circulation depends on an ASD or VSD. Which lesion is most likely",
+    "topic": "Tricuspid atresia",
+    "options": {
+      "A": "Ebstein anomaly",
+      "B": "PDA",
+      "C": "Tricuspid atresia",
+      "D": "Pulmonic stenosis"
+    },
+    "correct": "C",
+    "explanation": "Tricuspid atresia is failure of tricuspid valve development. Survival requires an interatrial or interventricular communication.",
+    "optionExplanations": {
+      "A": "Ebstein anomaly is downward displacement of the tricuspid valve, not absent development.",
+      "B": "PDA is persistent ductus arteriosus.",
+      "C": "Correct. Tricuspid atresia is failure of tricuspid valve development. Survival requires an interatrial or interventricular communication.",
+      "D": "Pulmonic stenosis is RV outflow obstruction."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A neonate has pulmonary veins that do not drain into the left atrium. Oxygenated blood reaches the left atrium through a PFO or ASD. Which lesion is most likely",
+    "topic": "TAPVR",
+    "options": {
+      "A": "Total anomalous pulmonary venous return",
+      "B": "Tricuspid atresia",
+      "C": "Truncus arteriosus",
+      "D": "VSD"
+    },
+    "correct": "A",
+    "explanation": "In TAPVR, pulmonary veins fail to drain normally into the left atrium. Blood must reach the LA through an ASD or PFO.",
+    "optionExplanations": {
+      "A": "Correct. In TAPVR, pulmonary veins fail to drain normally into the left atrium. Blood must reach the LA through an ASD or PFO.",
+      "B": "Tricuspid atresia is absent tricuspid valve development.",
+      "C": "Truncus arteriosus is one common arterial trunk.",
+      "D": "VSD is an interventricular septal defect."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A neonate has cyanosis, cardiomegaly, and a holosystolic murmur from tricuspid regurgitation due to downward displacement of the tricuspid valve. Which diagnosis is most likely",
+    "topic": "Ebstein anomaly",
+    "options": {
+      "A": "Tricuspid atresia",
+      "B": "TGA",
+      "C": "Coarctation",
+      "D": "Ebstein anomaly"
+    },
+    "correct": "D",
+    "explanation": "Ebstein anomaly is downward displacement of the tricuspid valve, causing tricuspid regurgitation, cyanosis, and cardiomegaly.",
+    "optionExplanations": {
+      "A": "Tricuspid atresia is absent tricuspid valve development.",
+      "B": "TGA has switched great arteries and an egg-shaped heart.",
+      "C": "Coarctation is narrowing of the aorta with pulse/BP discrepancies.",
+      "D": "Correct. Ebstein anomaly is downward displacement of the tricuspid valve, causing tricuspid regurgitation, cyanosis, and cardiomegaly."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "An infant has weak femoral pulses and lower-extremity oxygen saturation lower than upper-extremity saturation. Which lesion is most likely",
+    "topic": "Coarctation",
+    "options": {
+      "A": "ASD",
+      "B": "Coarctation of the aorta",
+      "C": "PDA",
+      "D": "Pulmonic stenosis"
+    },
+    "correct": "B",
+    "explanation": "Coarctation causes narrowing of the aorta and can present with upper/lower extremity pulse, BP, or oxygen saturation discrepancies.",
+    "optionExplanations": {
+      "A": "ASD causes wide fixed split S2.",
+      "B": "Correct. Coarctation causes narrowing of the aorta and can present with upper/lower extremity pulse, BP, or oxygen saturation discrepancies.",
+      "C": "PDA causes a continuous machinery murmur and bounding pulses.",
+      "D": "Pulmonic stenosis causes a LUSB systolic ejection murmur."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A neonate with severe coarctation is dependent on ductal flow to perfuse the lower body. Which medication should be started before repair",
+    "topic": "Coarctation management",
+    "options": {
+      "A": "Indomethacin",
+      "B": "Atropine",
+      "C": "PGE1",
+      "D": "Acyclovir"
+    },
+    "correct": "C",
+    "explanation": "Severe neonatal coarctation may be ductal-dependent for systemic perfusion. PGE1 maintains ductal patency before definitive management.",
+    "optionExplanations": {
+      "A": "Indomethacin closes the ductus and can worsen ductal-dependent systemic blood flow.",
+      "B": "Atropine is used for amblyopia penalization, not coarctation.",
+      "C": "Correct. Severe neonatal coarctation may be ductal-dependent for systemic perfusion. PGE1 maintains ductal patency before definitive management.",
+      "D": "Acyclovir is used for high-risk varicella."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child has a systolic ejection murmur at the right upper sternal border with an early systolic ejection click. Which lesion is most likely",
+    "topic": "Aortic stenosis",
+    "options": {
+      "A": "Aortic stenosis",
+      "B": "Pulmonic stenosis",
+      "C": "VSD",
+      "D": "PDA"
+    },
+    "correct": "A",
+    "explanation": "Aortic stenosis causes a systolic ejection murmur at the right upper sternal border and may have an ejection click.",
+    "optionExplanations": {
+      "A": "Correct. Aortic stenosis causes a systolic ejection murmur at the right upper sternal border and may have an ejection click.",
+      "B": "Pulmonic stenosis causes a left upper sternal border murmur radiating to the lungs.",
+      "C": "VSD causes a holosystolic murmur at the lower left sternal border.",
+      "D": "PDA causes a continuous machinery murmur."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A child has a systolic ejection murmur at the left upper sternal border radiating to the lungs with a sharp pulmonic ejection click. Which lesion is most likely",
+    "topic": "Pulmonic stenosis",
+    "options": {
+      "A": "Aortic stenosis",
+      "B": "ASD",
+      "C": "Coarctation",
+      "D": "Pulmonic stenosis"
+    },
+    "correct": "D",
+    "explanation": "Pulmonic stenosis classically causes a systolic ejection murmur at the LUSB radiating to the lungs with a sharp pulmonic ejection click.",
+    "optionExplanations": {
+      "A": "Aortic stenosis is heard at the RUSB.",
+      "B": "ASD causes wide fixed split S2.",
+      "C": "Coarctation causes pulse/BP discrepancies.",
+      "D": "Correct. Pulmonic stenosis classically causes a systolic ejection murmur at the LUSB radiating to the lungs with a sharp pulmonic ejection click."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A patient with Turner syndrome is screened for congenital heart disease. Which defect is especially associated",
+    "topic": "Turner association",
+    "options": {
+      "A": "AV canal defect only",
+      "B": "Truncus arteriosus only",
+      "C": "Coarctation of the aorta or bicuspid aortic valve",
+      "D": "TAPVR only"
+    },
+    "correct": "C",
+    "explanation": "Turner syndrome is associated with left-sided obstructive lesions, especially coarctation and bicuspid aortic valve.",
+    "optionExplanations": {
+      "A": "AV canal defect is classically associated with Down syndrome.",
+      "B": "Truncus arteriosus is associated with 22q11.2 deletion.",
+      "C": "Correct. Turner syndrome is associated with left-sided obstructive lesions, especially coarctation and bicuspid aortic valve.",
+      "D": "TAPVR is not the classic Turner association."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A newborn with Down syndrome is diagnosed with a complete atrioventricular canal defect. Which embryologic problem best explains this association",
+    "topic": "AV canal / Down syndrome",
+    "options": {
+      "A": "Neural crest migration failure causing conotruncal defect only",
+      "B": "Endocardial cushion defect",
+      "C": "Failure of ductus arteriosus closure",
+      "D": "Aortic isthmus narrowing only"
+    },
+    "correct": "B",
+    "explanation": "Complete AV canal/AV septal defects are endocardial cushion defects and are classically associated with Down syndrome.",
+    "optionExplanations": {
+      "A": "Conotruncal defects are associated with 22q11.2 deletion.",
+      "B": "Correct. Complete AV canal/AV septal defects are endocardial cushion defects and are classically associated with Down syndrome.",
+      "C": "This causes PDA.",
+      "D": "This describes coarctation anatomy."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "Which lesion classically has an egg-shaped heart with narrow mediastinum on chest X-ray",
+    "topic": "Classic CXR",
+    "options": {
+      "A": "Tetralogy of Fallot",
+      "B": "PDA",
+      "C": "ASD",
+      "D": "Transposition of the great arteries"
+    },
+    "correct": "D",
+    "explanation": "TGA is classically associated with an egg-shaped heart and narrow mediastinum.",
+    "optionExplanations": {
+      "A": "TOF classically has a boot-shaped heart.",
+      "B": "PDA is classically associated with continuous machinery murmur rather than egg-shaped heart.",
+      "C": "ASD is classically associated with wide fixed split S2.",
+      "D": "Correct. TGA is classically associated with an egg-shaped heart and narrow mediastinum."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "Which lesion classically has a boot-shaped heart on chest X-ray due to right ventricular hypertrophy",
+    "topic": "Classic CXR",
+    "options": {
+      "A": "Tetralogy of Fallot",
+      "B": "Transposition of the great arteries",
+      "C": "ASD",
+      "D": "PDA"
+    },
+    "correct": "A",
+    "explanation": "Tetralogy of Fallot causes right ventricular hypertrophy and a boot-shaped heart.",
+    "optionExplanations": {
+      "A": "Correct. Tetralogy of Fallot causes right ventricular hypertrophy and a boot-shaped heart.",
+      "B": "TGA classically has an egg-shaped heart.",
+      "C": "ASD causes wide fixed splitting of S2.",
+      "D": "PDA causes a continuous machinery murmur."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "Which lesion is most likely to present with a continuous machinery murmur",
+    "topic": "Murmur clues",
+    "options": {
+      "A": "Atrial septal defect",
+      "B": "Ventricular septal defect",
+      "C": "Patent ductus arteriosus",
+      "D": "Pulmonic stenosis"
+    },
+    "correct": "C",
+    "explanation": "PDA classically causes a continuous machinery murmur.",
+    "optionExplanations": {
+      "A": "ASD causes wide fixed split S2.",
+      "B": "VSD causes a holosystolic murmur at the LLSB.",
+      "C": "Correct. PDA classically causes a continuous machinery murmur.",
+      "D": "Pulmonic stenosis causes a systolic ejection murmur at the LUSB."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "Which pairing is most accurate",
+    "topic": "High-yield CHD pairings",
+    "options": {
+      "A": "NOTCH1 → rickets; NOTCH2 → amblyopia",
+      "B": "NOTCH1 → bicuspid aortic valve; NOTCH2 → tetralogy of Fallot",
+      "C": "FBN1 → TGA; SMN1 → PDA",
+      "D": "HLA-B27 → VSD; HLA-DR3 → ASD"
+    },
+    "correct": "B",
+    "explanation": "The congenital heart disease notes associate NOTCH1 with bicuspid aortic valve and NOTCH2 with tetralogy of Fallot.",
+    "optionExplanations": {
+      "A": "These are not the listed Notch associations.",
+      "B": "Correct. The congenital heart disease notes associate NOTCH1 with bicuspid aortic valve and NOTCH2 with tetralogy of Fallot.",
+      "C": "FBN1 is Marfan syndrome and SMN1 is spinal muscular atrophy.",
+      "D": "HLA-B27 is associated with spondyloarthropathy and HLA-DR3 with T1DM risk."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

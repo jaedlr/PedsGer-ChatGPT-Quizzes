@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neurodevelopmental Disorders Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 9-year-old with developmental delay is evaluated. Testing shows impaired reasoning and problem-solving, difficulty with social participation, and limited independent living skills. Symptoms began during childhood. Which diagnosis is best supported",
+    "topic": "Intellectual disability diagnosis",
+    "options": {
+      "A": "Specific learning disorder",
+      "B": "Intellectual disability",
+      "C": "Social pragmatic communication disorder",
+      "D": "Developmental coordination disorder"
+    },
+    "correct": "B",
+    "explanation": "Intellectual disability requires deficits in intellectual functioning and adaptive functioning, with onset during the developmental period. Adaptive domains include communication, social participation, and independent living.",
+    "optionExplanations": {
+      "A": "Specific learning disorder involves academic skills below expected level despite possible normal or high IQ.",
+      "B": "Correct. Intellectual and adaptive deficits beginning in development fit intellectual disability.",
+      "C": "Social pragmatic communication disorder affects social use of language, not global intellectual and adaptive function.",
+      "D": "Developmental coordination disorder primarily affects motor coordination."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A nonverbal adolescent with intellectual disability becomes acutely agitated. Which initial approach is most appropriate",
+    "topic": "Agitation in intellectual disability",
+    "options": {
+      "A": "Assume primary psychosis and start antipsychotics immediately",
+      "B": "Rule out pain, infection, constipation, seizures, thyroid disease, glucose abnormalities, and environmental triggers",
+      "C": "Ignore the change because atypical behavior is expected in intellectual disability",
+      "D": "Diagnose autism spectrum disorder based only on the agitation"
+    },
+    "correct": "B",
+    "explanation": "Agitation in intellectual disability should prompt evaluation for medical, psychiatric, and environmental causes. Medical causes include pain, fracture, UTI, otitis, dental pain, constipation, pneumonia, seizure, thyroid disease, B12 deficiency, and glucose abnormality.",
+    "optionExplanations": {
+      "A": "Psychiatric causes are possible, but medical and environmental causes must be ruled out first.",
+      "B": "Correct. Acute agitation in ID should be medically evaluated before psychiatric labeling.",
+      "C": "A new behavioral change should not be dismissed.",
+      "D": "ASD cannot be diagnosed from acute agitation alone."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A child with trisomy 21 has intellectual disability and motor coordination issues. Which additional complication is emphasized in the provided material",
+    "topic": "Down syndrome",
+    "options": {
+      "A": "Congenital heart disease and leukemia risk",
+      "B": "Macroorchidism after puberty",
+      "C": "Self-injury with hyperuricemia",
+      "D": "Overly friendly personality with vascular narrowing"
+    },
+    "correct": "A",
+    "explanation": "Down syndrome is associated with intellectual disability, motor coordination issues, ASD risk, early dementia, congenital heart disease, pulmonary hypertension, airway obstruction, leukemia risk, thyroid disease, diabetes, and seizures.",
+    "optionExplanations": {
+      "A": "Correct. Congenital heart disease and leukemia risk are key Down syndrome complications.",
+      "B": "Macroorchidism is associated with Fragile X syndrome.",
+      "C": "Self-injury with hyperuricemia is associated with Lesch-Nyhan syndrome.",
+      "D": "Overly friendly personality with vascular narrowing suggests Williams syndrome."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A boy has language delay, echolalia, poor eye contact, sensory hypersensitivity, long face, large ears, flexible joints, flat feet, and postpubertal macroorchidism. Which syndrome best fits",
+    "topic": "Fragile X syndrome",
+    "options": {
+      "A": "Down syndrome",
+      "B": "Williams syndrome",
+      "C": "Fragile X syndrome",
+      "D": "Sanfilippo syndrome"
+    },
+    "correct": "C",
+    "explanation": "Fragile X syndrome is associated with FMRP mutation and features language delay, echolalia, poor eye contact, sensory hypersensitivity, long face, large ears, flexible joints, flat feet, and postpubertal macroorchidism.",
+    "optionExplanations": {
+      "A": "Down syndrome is trisomy 21 with CHD, leukemia risk, thyroid disease, and early dementia.",
+      "B": "Williams syndrome has chromosome 7 deletion, overly friendly/social behavior, mild-moderate ID, and vascular narrowing/heart disease.",
+      "C": "Correct. The facial, behavioral, sensory, and macroorchidism findings fit Fragile X.",
+      "D": "Sanfilippo syndrome causes childhood cognitive/motor regression due to GAG accumulation."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A boy has gout, renal stones, cognitive impairment, lip and finger biting, and head-banging. Which diagnosis is most likely",
+    "topic": "Lesch-Nyhan syndrome",
+    "options": {
+      "A": "Lesch-Nyhan syndrome",
+      "B": "Williams syndrome",
+      "C": "Down syndrome",
+      "D": "Fragile X syndrome"
+    },
+    "correct": "A",
+    "explanation": "Lesch-Nyhan syndrome is X-linked due to HPRT1 mutation, causing increased uric acid with gout/stones, cognitive impairment, and self-injurious behavior such as lip/finger biting and head-banging.",
+    "optionExplanations": {
+      "A": "Correct. Hyperuricemia plus self-mutilation strongly suggests Lesch-Nyhan syndrome.",
+      "B": "Williams syndrome is linked to chromosome 7 deletion with overly friendly behavior and vascular narrowing.",
+      "C": "Down syndrome is trisomy 21 and does not classically cause hyperuricemia with self-injury.",
+      "D": "Fragile X causes language delay, long face, large ears, sensory hypersensitivity, and macroorchidism."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A child is normal at birth but later develops cognitive and motor regression, slow language, seizures, and a movement disorder due to glycosaminoglycan accumulation in lysosomes. Which condition best matches",
+    "topic": "Sanfilippo syndrome",
+    "options": {
+      "A": "Tourette disorder",
+      "B": "Sanfilippo syndrome",
+      "C": "Childhood-onset fluency disorder",
+      "D": "Developmental coordination disorder"
+    },
+    "correct": "B",
+    "explanation": "Sanfilippo syndrome, or MPS III, is an autosomal recessive lysosomal storage disease with glycosaminoglycan accumulation. Children may appear normal at birth then develop cognitive/motor regression, slow language, seizures, and movement disorder.",
+    "optionExplanations": {
+      "A": "Tourette disorder involves motor and vocal tics for more than 1 year.",
+      "B": "Correct. Regression with GAG accumulation fits Sanfilippo syndrome.",
+      "C": "Childhood-onset fluency disorder involves stuttering.",
+      "D": "Developmental coordination disorder causes motor coordination deficits, not lysosomal regression."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A child with mild-to-moderate intellectual disability is very outgoing and social. He also has vascular narrowing and heart problems. Which genetic syndrome is most likely",
+    "topic": "Williams syndrome",
+    "options": {
+      "A": "Fragile X syndrome",
+      "B": "Lesch-Nyhan syndrome",
+      "C": "Down syndrome",
+      "D": "Williams syndrome"
+    },
+    "correct": "D",
+    "explanation": "Williams syndrome is associated with chromosome 7 deletion and features an overly friendly/social personality, mild-to-moderate intellectual disability, and vascular narrowing/heart problems.",
+    "optionExplanations": {
+      "A": "Fragile X has long face, large ears, sensory hypersensitivity, and macroorchidism.",
+      "B": "Lesch-Nyhan has HPRT1 mutation, increased uric acid, gout/stones, and self-injury.",
+      "C": "Down syndrome is trisomy 21 with CHD, leukemia risk, thyroid disease, and early dementia.",
+      "D": "Correct. Overly friendly behavior plus vascular narrowing fits Williams syndrome."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A child has persistent difficulty acquiring and using language, with reduced vocabulary and limited sentence structure. Hearing and sensory impairment are not present. Which communication disorder best fits",
+    "topic": "Language disorder",
+    "options": {
+      "A": "Language disorder",
+      "B": "Speech sound disorder",
+      "C": "Tourette disorder",
+      "D": "Stereotypic movement disorder"
+    },
+    "correct": "A",
+    "explanation": "Language disorder involves persistent difficulty acquiring or using language, with reduced vocabulary, limited sentence structure, and impaired language use, not due to hearing or sensory impairment.",
+    "optionExplanations": {
+      "A": "Correct. Reduced vocabulary and limited sentence structure define language disorder.",
+      "B": "Speech sound disorder involves difficulty producing speech sounds.",
+      "C": "Tourette disorder involves motor and vocal tics.",
+      "D": "Stereotypic movement disorder involves repetitive, purposeless motor behavior."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A child has persistent difficulty producing speech sounds, causing impaired communication. Language comprehension and vocabulary are otherwise appropriate. Which diagnosis is most likely",
+    "topic": "Speech sound disorder",
+    "options": {
+      "A": "Language disorder",
+      "B": "Specific learning disorder",
+      "C": "Speech sound disorder",
+      "D": "Social pragmatic communication disorder"
+    },
+    "correct": "C",
+    "explanation": "Speech sound disorder is persistent difficulty producing speech sounds that interferes with communication.",
+    "optionExplanations": {
+      "A": "Language disorder involves vocabulary and sentence structure deficits.",
+      "B": "Specific learning disorder involves academic achievement below expected level.",
+      "C": "Correct. Isolated production of speech sounds points to speech sound disorder.",
+      "D": "Social pragmatic communication disorder affects social use of communication."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A 7-year-old has repetitions, prolongations, broken words, blocks, circumlocutions, visible tension, and anxiety about speaking. Which mechanism and treatment association was emphasized in the lecture",
+    "topic": "Childhood-onset fluency disorder",
+    "options": {
+      "A": "Low dopamine activity; dopamine agonists improve symptoms",
+      "B": "High dopamine activity; dopamine antagonists may improve symptoms",
+      "C": "Low serotonin activity; SSRIs cure core fluency symptoms",
+      "D": "Defective cilia; airway clearance improves speech"
+    },
+    "correct": "B",
+    "explanation": "Childhood-onset fluency disorder, or stuttering, involves repetitions, prolongations, blocks, circumlocutions, and tension. The lecture notes a dopamine theory: elevated dopamine activity can worsen stuttering, dopamine agonists worsen it, and dopamine antagonists may improve symptoms.",
+    "optionExplanations": {
+      "A": "The lecture emphasizes elevated, not low, dopamine activity.",
+      "B": "Correct. Dopamine antagonists may improve stuttering.",
+      "C": "SSRIs are not presented as core treatment for stuttering.",
+      "D": "Defective cilia is unrelated to fluency disorder."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A child has difficulty using language socially, adjusting speech to context, following conversation rules, and understanding implied meaning. Which disorder is most likely",
+    "topic": "Social pragmatic communication disorder",
+    "options": {
+      "A": "Developmental coordination disorder",
+      "B": "Language disorder",
+      "C": "Social pragmatic communication disorder",
+      "D": "Motor dysgraphia"
+    },
+    "correct": "C",
+    "explanation": "Social pragmatic communication disorder involves difficulty using communication socially, changing speech to context, following conversation rules, and understanding implied meaning.",
+    "optionExplanations": {
+      "A": "Developmental coordination disorder is a motor coordination disorder.",
+      "B": "Language disorder involves reduced vocabulary and sentence structure.",
+      "C": "Correct. Social-language context and implied meaning difficulties fit social pragmatic communication disorder.",
+      "D": "Motor dysgraphia affects handwriting, including copied work."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A child’s reading accuracy, speed, and comprehension are far below expected, despite normal intelligence. Which specific learning disorder subtype is most common",
+    "topic": "Specific learning disorder",
+    "options": {
+      "A": "Mathematics impairment",
+      "B": "Written expression impairment",
+      "C": "Motor dysgraphia",
+      "D": "Reading impairment or dyslexia"
+    },
+    "correct": "D",
+    "explanation": "Reading impairment, or dyslexia, is the most common specific learning disorder and presents with poor reading accuracy, speed, or comprehension despite possible normal or high IQ.",
+    "optionExplanations": {
+      "A": "Mathematics impairment causes difficulty with math language, symbols, spatial organization, and sequencing.",
+      "B": "Written expression impairment affects writing skills.",
+      "C": "Motor dysgraphia causes poor handwriting including copied work, with normal spelling.",
+      "D": "Correct. Dyslexia is the most common specific learning disorder."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A student has poor spelling and poor spontaneous writing, but copied work is normal. Which dysgraphia pattern best fits",
+    "topic": "Dysgraphia patterns",
+    "options": {
+      "A": "Spatial dysgraphia",
+      "B": "Dyslexic dysgraphia",
+      "C": "Motor dysgraphia",
+      "D": "Mathematics impairment"
+    },
+    "correct": "B",
+    "explanation": "Dyslexic dysgraphia causes poor spelling and poor spontaneous writing, while copied work remains normal. Phonologic instruction is listed as treatment.",
+    "optionExplanations": {
+      "A": "Spatial dysgraphia causes poor alignment on page or lines.",
+      "B": "Correct. Poor spontaneous writing with normal copying is dyslexic dysgraphia.",
+      "C": "Motor dysgraphia causes poor handwriting including copied work, with normal spelling.",
+      "D": "Mathematics impairment affects math language, symbols, sequencing, or spatial organization."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A student has normal spelling but poor handwriting, including when copying text. Which dysgraphia subtype is most likely",
+    "topic": "Dysgraphia patterns",
+    "options": {
+      "A": "Motor dysgraphia",
+      "B": "Dyslexic dysgraphia",
+      "C": "Social pragmatic communication disorder",
+      "D": "Reading impairment"
+    },
+    "correct": "A",
+    "explanation": "Motor dysgraphia causes poor handwriting, including copied work, with normal spelling. Occupational therapy is listed as treatment.",
+    "optionExplanations": {
+      "A": "Correct. Poor handwriting even when copying with normal spelling fits motor dysgraphia.",
+      "B": "Dyslexic dysgraphia has poor spelling/spontaneous writing with normal copied work.",
+      "C": "Social pragmatic communication disorder affects social language use.",
+      "D": "Reading impairment/dyslexia affects reading accuracy, speed, and comprehension."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A student’s writing is poorly aligned on the lines and page. Which dysgraphia subtype is most likely",
+    "topic": "Dysgraphia patterns",
+    "options": {
+      "A": "Dyslexic dysgraphia",
+      "B": "Motor dysgraphia",
+      "C": "Spatial dysgraphia",
+      "D": "Childhood-onset fluency disorder"
+    },
+    "correct": "C",
+    "explanation": "Spatial dysgraphia causes poor alignment on page or lines and may be treated with occupational therapy.",
+    "optionExplanations": {
+      "A": "Dyslexic dysgraphia causes poor spelling and spontaneous writing but normal copied work.",
+      "B": "Motor dysgraphia causes poor handwriting including copied work with normal spelling.",
+      "C": "Correct. Poor spatial alignment is spatial dysgraphia.",
+      "D": "Childhood-onset fluency disorder is stuttering."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A child has marked difficulty with math language, symbols, spatial organization, and sequencing. Which intervention pairing is listed in the material",
+    "topic": "Mathematics impairment",
+    "options": {
+      "A": "Extra time and tutoring",
+      "B": "Chelation therapy",
+      "C": "Immediate antipsychotic treatment",
+      "D": "Airway clearance therapy"
+    },
+    "correct": "A",
+    "explanation": "Mathematics impairment involves difficulty with math language, symbols, spatial organization, and sequencing. Extra time and tutoring are listed as treatment/support.",
+    "optionExplanations": {
+      "A": "Correct. Extra time and tutoring are listed for mathematics impairment.",
+      "B": "Chelation is specifically listed as not helpful/avoid for ASD core treatment.",
+      "C": "Antipsychotics are not standard for math impairment.",
+      "D": "Airway clearance is unrelated to learning disorders."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A child has motor coordination deficits and delayed motor milestones that impair daily functioning. Which disorder and treatment are most appropriate",
+    "topic": "Developmental coordination disorder",
+    "options": {
+      "A": "Tourette disorder; dopamine antagonist",
+      "B": "Specific learning disorder; phonologic instruction",
+      "C": "Developmental coordination disorder; occupational therapy",
+      "D": "Language disorder; speech sound production therapy only"
+    },
+    "correct": "C",
+    "explanation": "Developmental coordination disorder is characterized by motor coordination deficits and delayed milestones. Occupational therapy is the listed treatment.",
+    "optionExplanations": {
+      "A": "Tourette disorder requires motor and vocal tics, not generalized motor coordination deficits.",
+      "B": "Specific learning disorder affects academic skills, not motor coordination.",
+      "C": "Correct. Motor coordination deficiency is treated with OT.",
+      "D": "Language disorder is not the primary motor problem here."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A child has repetitive, driven, purposeless motor behaviors that interfere with activities and sometimes cause self-injury. Which diagnosis best fits",
+    "topic": "Stereotypic movement disorder",
+    "options": {
+      "A": "Stereotypic movement disorder",
+      "B": "Persistent motor or vocal tic disorder",
+      "C": "Provisional tic disorder",
+      "D": "Dyslexia"
+    },
+    "correct": "A",
+    "explanation": "Stereotypic movement disorder is defined by repetitive, driven, purposeless motor behavior that interferes with activities or causes self-injury.",
+    "optionExplanations": {
+      "A": "Correct. Repetitive purposeless motor behavior with interference or self-injury fits stereotypic movement disorder.",
+      "B": "Persistent motor or vocal tic disorder involves motor or vocal tics, not both, for more than 1 year.",
+      "C": "Provisional tic disorder involves tics for less than 1 year.",
+      "D": "Dyslexia is a reading disorder."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A 12-year-old has eye blinking, shoulder shrugging, throat clearing, and grunting for 18 months. Which diagnosis is most likely",
+    "topic": "Tourette disorder",
+    "options": {
+      "A": "Provisional tic disorder",
+      "B": "Persistent motor tic disorder",
+      "C": "Tourette disorder",
+      "D": "Developmental coordination disorder"
+    },
+    "correct": "C",
+    "explanation": "Tourette disorder requires at least 2 motor tics and at least 1 vocal tic for more than 1 year, with onset before age 18.",
+    "optionExplanations": {
+      "A": "Provisional tic disorder lasts less than 1 year.",
+      "B": "Persistent motor or vocal tic disorder has motor or vocal tics, not both.",
+      "C": "Correct. Multiple motor tics plus vocal tics for more than 1 year fits Tourette disorder.",
+      "D": "Developmental coordination disorder involves coordination deficits, not tics."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A 10-year-old has only motor tics for 2 years and no vocal tics. Which diagnosis best fits",
+    "topic": "Persistent motor or vocal tic disorder",
+    "options": {
+      "A": "Tourette disorder",
+      "B": "Persistent motor or vocal tic disorder",
+      "C": "Provisional tic disorder",
+      "D": "Stereotypic movement disorder"
+    },
+    "correct": "B",
+    "explanation": "Persistent motor or vocal tic disorder involves motor tics or vocal tics, but not both, for more than 1 year with onset before age 18.",
+    "optionExplanations": {
+      "A": "Tourette disorder requires both motor and vocal tics.",
+      "B": "Correct. Motor tics alone for more than 1 year fit persistent motor tic disorder.",
+      "C": "Provisional tic disorder lasts less than 1 year.",
+      "D": "Stereotypic movement disorder is repetitive purposeless motor behavior, not classic tics."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A 9-year-old develops one motor tic and one vocal tic that have been present for 4 months. Which diagnosis best fits",
+    "topic": "Provisional tic disorder",
+    "options": {
+      "A": "Provisional tic disorder",
+      "B": "Tourette disorder",
+      "C": "Persistent motor or vocal tic disorder",
+      "D": "Specific learning disorder"
+    },
+    "correct": "A",
+    "explanation": "Provisional tic disorder involves at least one motor and/or vocal tic for less than 1 year, with onset before age 18.",
+    "optionExplanations": {
+      "A": "Correct. Tics for less than 1 year fit provisional tic disorder.",
+      "B": "Tourette disorder requires motor and vocal tics for more than 1 year.",
+      "C": "Persistent motor or vocal tic disorder requires more than 1 year and either motor or vocal tics, not both.",
+      "D": "Specific learning disorder involves academic impairment."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A toddler has poor eye contact, limited response to name, decreased social smiling, reduced gestures, limited imitation, and spins the wheels of a toy car instead of pretending to drive it. Which diagnosis should be considered",
+    "topic": "Autism spectrum disorder red flags",
+    "options": {
+      "A": "Mathematics impairment",
+      "B": "Autism spectrum disorder",
+      "C": "Childhood-onset fluency disorder",
+      "D": "Motor dysgraphia"
+    },
+    "correct": "B",
+    "explanation": "Early ASD markers include poor eye contact, limited response to name, lack of socially directed looking, reduced social smiling, reduced imitation/gestures, limited social interest, and nonfunctional toy play such as spinning car wheels.",
+    "optionExplanations": {
+      "A": "Mathematics impairment presents with math-related academic difficulty.",
+      "B": "Correct. Social deficits plus restricted/repetitive/nonfunctional play suggest ASD.",
+      "C": "Childhood-onset fluency disorder is stuttering.",
+      "D": "Motor dysgraphia affects handwriting."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child has deficits in social communication and interaction across contexts plus restricted, repetitive behaviors and interests beginning early in development. Which diagnosis is most likely",
+    "topic": "Autism spectrum disorder diagnostic criteria",
+    "options": {
+      "A": "Autism spectrum disorder",
+      "B": "Language disorder only",
+      "C": "Dyslexia",
+      "D": "Persistent vocal tic disorder"
+    },
+    "correct": "A",
+    "explanation": "ASD diagnostic criteria include deficits in social communication/interaction across contexts, restricted and repetitive behaviors/interests/activities, and onset early in development.",
+    "optionExplanations": {
+      "A": "Correct. The combination of social communication deficits and restricted/repetitive behaviors defines ASD.",
+      "B": "Language disorder alone does not include restricted/repetitive behaviors.",
+      "C": "Dyslexia is a reading disorder.",
+      "D": "Persistent vocal tic disorder involves vocal tics only for more than 1 year."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A child with suspected ASD undergoes evaluation. Which tool is a structured caregiver interview",
+    "topic": "ASD evaluation tools",
+    "options": {
+      "A": "ADOS",
+      "B": "SCQ",
+      "C": "ADI-R",
+      "D": "Continuous Performance Test"
+    },
+    "correct": "C",
+    "explanation": "ASD evaluation tools include ADI-R, a structured caregiver interview; SCQ, a screening questionnaire; and ADOS, a direct clinical assessment.",
+    "optionExplanations": {
+      "A": "ADOS is a direct clinical assessment.",
+      "B": "SCQ is a screening questionnaire.",
+      "C": "Correct. ADI-R is the caregiver interview.",
+      "D": "Continuous Performance Test is used in ADHD/neuropsych testing, not the ASD tool listed here."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A clinician administers a 40-question screening questionnaire for ASD; a high number of positive responses is suggestive. Which tool is this",
+    "topic": "ASD evaluation tools",
+    "options": {
+      "A": "SCQ",
+      "B": "ADI-R",
+      "C": "ADOS",
+      "D": "Stroop test"
+    },
+    "correct": "A",
+    "explanation": "The Social Communication Questionnaire is a 40-question screening questionnaire for ASD; the provided material notes that 15 or more positive responses is suggestive.",
+    "optionExplanations": {
+      "A": "Correct. SCQ is the 40-question ASD screening questionnaire.",
+      "B": "ADI-R is a caregiver interview.",
+      "C": "ADOS is a direct clinical assessment.",
+      "D": "The Stroop test is a neuropsychological test, not an ASD screening questionnaire in this material."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A child with ASD has irritability and aggression severe enough to impair care. Which medications may provide selected benefit according to the material",
+    "topic": "ASD medication",
+    "options": {
+      "A": "Omega-3 and secretin",
+      "B": "Risperidone or aripiprazole",
+      "C": "Chelation and hyperbaric oxygen",
+      "D": "Vitamin B6 and magnesium"
+    },
+    "correct": "B",
+    "explanation": "Risperidone and aripiprazole may help irritability/aggression in ASD, although adverse effects must be considered. Several other treatments are listed as not helpful or to avoid.",
+    "optionExplanations": {
+      "A": "Omega-3 and secretin are listed as not clearly helpful/avoid for ASD core treatment.",
+      "B": "Correct. Risperidone and aripiprazole may help irritability/aggression.",
+      "C": "Chelation and hyperbaric oxygen are listed as not helpful/avoid.",
+      "D": "Vitamin B6/magnesium is listed as not helpful/avoid."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "Parents of a child with ASD ask about alternative therapies. Which option is listed as not helpful or to avoid for core ASD treatment",
+    "topic": "Unsupported ASD treatments",
+    "options": {
+      "A": "Early behavioral therapy",
+      "B": "Occupational therapy",
+      "C": "Parent-mediated strategies",
+      "D": "Chelation therapy"
+    },
+    "correct": "D",
+    "explanation": "Treatments listed as not helpful or to avoid for ASD include chelation, hyperbaric oxygen, secretin, omega-3 as ASD treatment, vitamin B6/magnesium, sound therapy, and SSRIs for children with ASD core symptoms.",
+    "optionExplanations": {
+      "A": "Early behavioral therapy is a recommended ASD intervention.",
+      "B": "Occupational therapy is recommended to address sensory/context triggers and adaptive behavior.",
+      "C": "Parent-mediated strategies are part of best-supported practical care.",
+      "D": "Correct. Chelation is listed as not helpful/avoid."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A clinician is caring for a nonverbal child with ASD. Which communication principle is most appropriate",
+    "topic": "Caring for ASD patients",
+    "options": {
+      "A": "Assume the child does not understand because they are nonverbal",
+      "B": "Use vague open-ended questions to avoid influencing responses",
+      "C": "Use precise language, visual aids, symptom choices, and allow extra processing time",
+      "D": "Perform the exam quickly without warning to minimize anticipatory distress"
+    },
+    "correct": "C",
+    "explanation": "Care for ASD patients should include asking preferred communication style, recognizing that nonverbal does not mean the patient does not understand, using visual aids, precise language, symptom choices, extra processing time, and explaining exam steps beforehand.",
+    "optionExplanations": {
+      "A": "Nonverbal does not mean the patient does not understand.",
+      "B": "Precise language and symptom choices are preferred over vague questions.",
+      "C": "Correct. These are recommended ASD communication strategies.",
+      "D": "Exam steps should be explained before doing them."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A child with ASD becomes distressed during clinic visits because of bright lights, loud background noise, and unexpected touch. Which adjustment is recommended",
+    "topic": "ASD sensory accommodations",
+    "options": {
+      "A": "Increase background noise to mask clinic sounds",
+      "B": "Use dim lights, minimize background noise, and avoid unnecessary touch",
+      "C": "Avoid visual aids because they worsen communication",
+      "D": "Use only abstract explanations"
+    },
+    "correct": "B",
+    "explanation": "ASD care includes reducing sensory load by dimming lights, minimizing background noise, and avoiding unnecessary touch.",
+    "optionExplanations": {
+      "A": "Background noise should be minimized, not increased.",
+      "B": "Correct. Reducing sensory load is recommended.",
+      "C": "Visual aids are recommended.",
+      "D": "Precise, concrete language is preferred over abstract explanations."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A pregnant patient asks about exposures associated with ASD risk in the lecture. Which exposure was listed",
+    "topic": "ASD risk factors",
+    "options": {
+      "A": "Valproic acid exposure",
+      "B": "Folic acid supplementation",
+      "C": "Reading impairment in the father",
+      "D": "Childhood stuttering in a sibling"
+    },
+    "correct": "A",
+    "explanation": "ASD risk factors and associations listed include genetic vulnerability, maternal infection/inflammation, valproic acid, thalidomide, environmental toxins, and maternal anemia before 30 weeks.",
+    "optionExplanations": {
+      "A": "Correct. Valproic acid exposure is listed as an ASD-associated pregnancy risk.",
+      "B": "Folic acid supplementation is not listed as an ASD risk factor here.",
+      "C": "Reading impairment in the father is not listed as an ASD exposure.",
+      "D": "Sibling stuttering is not listed as an ASD pregnancy exposure."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

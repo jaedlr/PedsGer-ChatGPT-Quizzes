@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Human Development Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 10-month-old infant searches briefly for a toy after it is hidden under a blanket. Which Piaget stage best fits this child’s developing ability",
+    "topic": "Piaget stages",
+    "options": {
+      "A": "Sensorimotor",
+      "B": "Preoperational",
+      "C": "Concrete operational",
+      "D": "Formal operational"
+    },
+    "correct": "A",
+    "explanation": "The sensorimotor stage spans birth to 2 years and is characterized by development from reflexes to intentional actions and object permanence.",
+    "optionExplanations": {
+      "A": "Correct. Object permanence is the key sensorimotor concept.",
+      "B": "Preoperational thinking occurs from 2 to 7 years and includes egocentrism and symbolic play.",
+      "C": "Concrete operational thinking occurs from 7 to 11 years and includes reversibility and decentration.",
+      "D": "Formal operational thinking begins around 11 years and involves abstract reasoning."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A 4-year-old says the moon is following her home and cannot understand that water remains the same amount when poured into a differently shaped glass. Which Piaget stage best explains this",
+    "topic": "Piaget stages",
+    "options": {
+      "A": "Sensorimotor",
+      "B": "Preoperational",
+      "C": "Concrete operational",
+      "D": "Formal operational"
+    },
+    "correct": "B",
+    "explanation": "The preoperational stage occurs from 2 to 7 years and is associated with egocentrism, symbolic play, animism, irreversibility, and poor conservation.",
+    "optionExplanations": {
+      "A": "Sensorimotor is birth to 2 years and centers on object permanence.",
+      "B": "Correct. Animism, egocentrism, and poor conservation are preoperational features.",
+      "C": "Concrete operational children gain conservation, logic, and reversibility.",
+      "D": "Formal operational adolescents can use abstract thought and deductive reasoning."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A 9-year-old can understand that the amount of clay remains the same after it is reshaped and can reverse a sequence of steps in her head. Which Piaget stage is this",
+    "topic": "Piaget stages",
+    "options": {
+      "A": "Formal operational",
+      "B": "Sensorimotor",
+      "C": "Concrete operational",
+      "D": "Preoperational"
+    },
+    "correct": "C",
+    "explanation": "Concrete operational development occurs from about 7 to 11 years and includes simple logic, reversibility, decentration, and decreased egocentrism.",
+    "optionExplanations": {
+      "A": "Formal operational reasoning begins around 11 years and involves abstract/deductive thinking.",
+      "B": "Sensorimotor is birth to 2 years and involves object permanence.",
+      "C": "Correct. Reversibility and conservation are concrete operational abilities.",
+      "D": "Preoperational children have poor conservation and irreversibility."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A 13-year-old can reason hypothetically about future career paths and solve abstract logic problems. Which developmental stage is most consistent",
+    "topic": "Piaget stages",
+    "options": {
+      "A": "Preoperational",
+      "B": "Concrete operational",
+      "C": "Sensorimotor",
+      "D": "Formal operational"
+    },
+    "correct": "D",
+    "explanation": "Formal operational thinking begins around age 11 and includes abstract thought, deductive reasoning, and problem-solving.",
+    "optionExplanations": {
+      "A": "Preoperational thinking is typical from ages 2 to 7 and is not abstract.",
+      "B": "Concrete operational thinking uses logic but is more concrete and less abstract.",
+      "C": "Sensorimotor thinking is infancy through age 2.",
+      "D": "Correct. Abstract and hypothetical reasoning indicate formal operations."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A toddler cannot search for a lost object in several places by 24 months. Which milestone category is most directly delayed",
+    "topic": "Cognitive milestones",
+    "options": {
+      "A": "Cognitive development",
+      "B": "Gross motor development",
+      "C": "Language pragmatics",
+      "D": "School-age individuation"
+    },
+    "correct": "A",
+    "explanation": "Searching for a lost object in several places is a cognitive milestone expected around 18 months; absence by 24 months is concerning.",
+    "optionExplanations": {
+      "A": "Correct. Object search is a cognitive/object permanence-related milestone.",
+      "B": "Gross motor milestones include jumping, stairs, balance, and hopping.",
+      "C": "Pragmatics refers to social use of language.",
+      "D": "Individuation is more relevant to adolescence/high school development."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A 30-month-old does not reenact familiar activities and does not use one object to represent another during play. Which interpretation is most accurate",
+    "topic": "Cognitive milestones",
+    "options": {
+      "A": "This is expected until age 5 years",
+      "B": "This is concerning because these should appear by about 18 months and be present by 30 months",
+      "C": "This only reflects gross motor delay",
+      "D": "This is diagnostic of school phobia"
+    },
+    "correct": "B",
+    "explanation": "Reenacting familiar activities, deferred imitation, and using an object to represent another are expected around 18 months; absence by 30 months is concerning.",
+    "optionExplanations": {
+      "A": "These symbolic/imitative skills should appear much earlier than age 5.",
+      "B": "Correct. Absence at 30 months is concerning for delayed cognitive/symbolic development.",
+      "C": "These are cognitive and play milestones, not primarily gross motor skills.",
+      "D": "School phobia involves school avoidance with real physical symptoms."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A 4-year-old cannot use imaginary objects in play, role-play familiar people, or draw a crude face/person. Based on the provided milestones, this is most concerning because these skills should usually be present by what age",
+    "topic": "Cognitive milestones",
+    "options": {
+      "A": "18 months",
+      "B": "24 months",
+      "C": "36 months",
+      "D": "7 years"
+    },
+    "correct": "C",
+    "explanation": "Imaginary object play, role-playing familiar people, and drawing a crude face/person are typical at about 36 months; absence by 48 months is concerning.",
+    "optionExplanations": {
+      "A": "At 18 months, early object permanence, imitation, and simple symbolic play begin.",
+      "B": "At 24 months, symbolism and parallel play are emphasized.",
+      "C": "Correct. These are expected around 36 months and concerning if absent by 48 months.",
+      "D": "By 7 years, children are expected to copy a diamond and use concrete operations."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A 5-year-old does not plan a story or assign roles during pretend play. Which milestone is delayed",
+    "topic": "Cognitive milestones",
+    "options": {
+      "A": "Functional toy play expected by 18 months",
+      "B": "Shared attention expected by 18 months",
+      "C": "Copying a triangle expected by 6 years",
+      "D": "Planning a story and assigning roles expected by 48 months"
+    },
+    "correct": "D",
+    "explanation": "Planning a story and assigning roles is expected around 48 months and is concerning if absent by 60 months.",
+    "optionExplanations": {
+      "A": "Functional play is earlier and does not specifically describe story planning.",
+      "B": "Shared attention is a social-emotional milestone expected around 18 months.",
+      "C": "Copying a triangle is a fine motor milestone around 6 years.",
+      "D": "Correct. This is the 48-month cognitive/pretend play milestone."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A 13-month-old uses a blanket for comfort during separation from a caregiver. Which concept does this object most directly support",
+    "topic": "Transitional object",
+    "options": {
+      "A": "Concrete operational reversibility",
+      "B": "Formal deductive reasoning",
+      "C": "Transitional object reinforcing object permanence during separation",
+      "D": "School phobia avoidance behavior"
+    },
+    "correct": "C",
+    "explanation": "A transitional object usually begins around 1 year. It comforts the child during separation and helps reinforce object permanence.",
+    "optionExplanations": {
+      "A": "Concrete operational reversibility appears later, around 7 to 11 years.",
+      "B": "Formal deductive reasoning begins around adolescence.",
+      "C": "Correct. Transitional objects support separation and object permanence.",
+      "D": "School phobia refers to school avoidance, not comfort objects in infancy."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A 20-month-old does not show shared attention. At what age is absence of shared attention concerning in the provided material",
+    "topic": "Social-emotional milestones",
+    "options": {
+      "A": "24 months",
+      "B": "30 months",
+      "C": "48 months",
+      "D": "60 months"
+    },
+    "correct": "B",
+    "explanation": "Shared attention is typical by about 18 months; absence by 30 months is concerning.",
+    "optionExplanations": {
+      "A": "24 months is the concern threshold for combined two ideas, not shared attention.",
+      "B": "Correct. Shared attention absent by 30 months is concerning.",
+      "C": "48 months is the concern threshold for separation without crying and feeling labels.",
+      "D": "60 months is the concern threshold for group games with simple rules and some cognitive play skills."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A 2-year-old plays next to another child with similar toys but does not truly cooperate in a shared game. Which social milestone does this represent",
+    "topic": "Social-emotional milestones",
+    "options": {
+      "A": "Parallel play with one peer",
+      "B": "Group games with simple rules",
+      "C": "Formal operational reasoning",
+      "D": "Detachment after loss"
+    },
+    "correct": "A",
+    "explanation": "Parallel play with one peer is expected around 24 months and is concerning if absent by 36 months.",
+    "optionExplanations": {
+      "A": "Correct. Playing alongside rather than cooperatively is parallel play.",
+      "B": "Group games with simple rules are expected later, around 48 months.",
+      "C": "Formal operations are cognitive, not social play, and begin around 11 years.",
+      "D": "Detachment is part of the response sequence to separation/loss in young children."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A 3-year-old says “I’m sad,” separates from a parent without crying, and takes turns during play. These are expected milestones around what age",
+    "topic": "Social-emotional milestones",
+    "options": {
+      "A": "12 months",
+      "B": "24 months",
+      "C": "48 months",
+      "D": "36 months"
+    },
+    "correct": "D",
+    "explanation": "At about 36 months, children should label their own feelings, separate from a parent without crying, and take turns/share; absence by 48 months is concerning.",
+    "optionExplanations": {
+      "A": "At 12 months, transitional object and simple requests/words are more relevant.",
+      "B": "At 24 months, symbolism and parallel play are expected.",
+      "C": "48 months is when absence of these 36-month skills becomes concerning.",
+      "D": "Correct. These are 36-month social-emotional milestones."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A parent reports a 4-year-old participates in group games with simple rules. Which developmental domain is most directly represented",
+    "topic": "Social-emotional milestones",
+    "options": {
+      "A": "Social-emotional development",
+      "B": "Primitive reflex integration",
+      "C": "Gross motor infancy",
+      "D": "Language phonology only"
+    },
+    "correct": "A",
+    "explanation": "Group games with simple rules are a social-emotional milestone expected around 48 months and concerning if absent by 60 months.",
+    "optionExplanations": {
+      "A": "Correct. Group games reflect social-emotional development and peer interaction.",
+      "B": "Primitive reflexes are newborn findings such as Moro and palmar grasp.",
+      "C": "Gross motor infancy includes sitting, crawling, cruising, and walking.",
+      "D": "Phonology refers to speech sounds, not group play."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A child is refusing school and reports abdominal pain and headaches on school mornings. The physical symptoms appear real. What is the best management principle from the lecture",
+    "topic": "School phobia",
+    "options": {
+      "A": "Assume malingering and ignore the symptoms",
+      "B": "Allow prolonged home avoidance until all symptoms disappear",
+      "C": "Treat with immediate hospitalization for psychosis",
+      "D": "Get the child back to school before avoidance becomes persistent"
+    },
+    "correct": "D",
+    "explanation": "School phobia often involves real physical symptoms, not malingering. The key management principle is to get the child back to school early before avoidance becomes a persistent pattern.",
+    "optionExplanations": {
+      "A": "The symptoms may be real; the lecture explicitly says this is not malingering.",
+      "B": "Prolonged avoidance can reinforce the pattern.",
+      "C": "Psychosis is not implied by school phobia alone.",
+      "D": "Correct. Early return to school prevents persistent avoidance."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A student asks what “pragmatics” means in language development. Which answer is most accurate",
+    "topic": "Language domains",
+    "options": {
+      "A": "Sounds used in language",
+      "B": "Grammar and sentence structure",
+      "C": "Social use of language",
+      "D": "Word meaning"
+    },
+    "correct": "C",
+    "explanation": "Pragmatics is the social use of language. Phonology refers to sounds, semantics to word meaning, and syntax to grammar/structure.",
+    "optionExplanations": {
+      "A": "Sounds used in language is phonology.",
+      "B": "Grammar/structure is syntax.",
+      "C": "Correct. Pragmatics is social language use.",
+      "D": "Word meaning is semantics."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A toddler cannot combine two ideas at 24 months. Which statement best applies",
+    "topic": "Language milestones",
+    "options": {
+      "A": "This is expected until 36 months",
+      "B": "This is concerning because combining two ideas should occur by about 18 months",
+      "C": "This is expected until formal operations",
+      "D": "This is only a gross motor delay"
+    },
+    "correct": "B",
+    "explanation": "Combining two ideas is expected around 18 months; absence by 24 months is concerning.",
+    "optionExplanations": {
+      "A": "By 36 months, 3 to 4 word sentences and stranger understandability are expected.",
+      "B": "Correct. Combining two ideas absent by 24 months is concerning.",
+      "C": "Formal operations begin around adolescence and are unrelated to this language milestone.",
+      "D": "Combining ideas is a language milestone, not gross motor."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A 2-year-old says 3 to 4 word sentences, uses pronouns appropriately, and names the use of common objects. Which age range best matches this cluster",
+    "topic": "Language milestones",
+    "options": {
+      "A": "Birth",
+      "B": "12 months",
+      "C": "24 to 30 months",
+      "D": "6 to 12 years"
+    },
+    "correct": "C",
+    "explanation": "At 24 to 30 months, expected language includes 3 to 4 word sentences, appropriate pronoun use, and naming the use of common objects.",
+    "optionExplanations": {
+      "A": "At birth, infants discriminate language from non-language but do not use sentences.",
+      "B": "At 12 months, children understand simple requests and may form 2 to 4 words.",
+      "C": "Correct. This language cluster is expected around 24 to 30 months.",
+      "D": "School-age children have much more advanced language and academic development."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A 3-year-old identifies two colors and is understandable to strangers. These are expected language milestones at approximately what age",
+    "topic": "Language milestones",
+    "options": {
+      "A": "18 months",
+      "B": "24 months",
+      "C": "30 months",
+      "D": "36 months"
+    },
+    "correct": "D",
+    "explanation": "At about 36 months, children identify two colors and are understandable to strangers. Absence of understandability to strangers by 48 months is concerning.",
+    "optionExplanations": {
+      "A": "At 18 months, children combine two ideas and follow 2-step commands.",
+      "B": "At 24 months, 3 to 4 word sentence development begins in the 24 to 30 month range.",
+      "C": "At 30 months, naming use of common objects is expected.",
+      "D": "Correct. Identifying two colors and being understandable to strangers are 36-month milestones."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A 5-year-old defines familiar words, argues, tells stories, comments on future events, and can lie. Which statement is most accurate",
+    "topic": "Language development",
+    "options": {
+      "A": "These abilities are expected by about 5 years",
+      "B": "These abilities should be present by 12 months",
+      "C": "These abilities indicate delayed language",
+      "D": "These abilities are only expected after age 11"
+    },
+    "correct": "A",
+    "explanation": "By about 5 years, children can define familiar words, argue, tell stories, comment on future events, and lie.",
+    "optionExplanations": {
+      "A": "Correct. This is the expected 5-year language pattern.",
+      "B": "At 12 months, expressive language is limited to about 2 to 4 words.",
+      "C": "This pattern is developmentally appropriate for age 5.",
+      "D": "Formal operations begin after age 11, but these language skills appear earlier."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A newborn has rooting, sucking, Moro, palmar grasp, and Babinski reflexes. Which age best matches this motor profile",
+    "topic": "Motor milestones",
+    "options": {
+      "A": "6 months",
+      "B": "12 months",
+      "C": "Birth",
+      "D": "3 years"
+    },
+    "correct": "C",
+    "explanation": "Rooting/sucking, Moro, palmar grasp, and Babinski are newborn primitive reflexes present at birth.",
+    "optionExplanations": {
+      "A": "At 6 months, transferring a toy between hands is expected.",
+      "B": "At 12 months, pincer grasp and cruising are expected.",
+      "C": "Correct. These are birth reflexes.",
+      "D": "At 3 years, tricycle riding, toilet training, scissors, and copying a circle are expected."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A 4-week-old infant follows an object only to midline. Which interpretation is most appropriate",
+    "topic": "Motor milestones",
+    "options": {
+      "A": "This is expected at about 4 weeks",
+      "B": "This is delayed until 6 months",
+      "C": "This is expected only after walking alone",
+      "D": "This indicates formal operational development"
+    },
+    "correct": "A",
+    "explanation": "Following an object to midline is an expected milestone around 4 weeks.",
+    "optionExplanations": {
+      "A": "Correct. This is appropriate for a 4-week-old.",
+      "B": "At 6 months, transferring objects hand-to-hand is expected.",
+      "C": "Walking alone occurs around 13 months and is unrelated.",
+      "D": "Formal operations are adolescent cognitive reasoning skills."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A 6-month-old transfers a toy from one hand to the other. Which milestone is being demonstrated",
+    "topic": "Motor milestones",
+    "options": {
+      "A": "Copies a circle",
+      "B": "Transfers toy between hands",
+      "C": "Mature pencil grasp",
+      "D": "Copies a diamond"
+    },
+    "correct": "B",
+    "explanation": "Transferring a toy between hands is expected at about 6 months.",
+    "optionExplanations": {
+      "A": "Copying a circle is expected around 36 months.",
+      "B": "Correct. Hand-to-hand transfer is the 6-month milestone.",
+      "C": "Mature pencil grasp is expected around 36 months.",
+      "D": "Copying a diamond is expected around 7 years."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A 12-month-old uses a pincer grasp and understands simple requests. Which additional motor milestone is also expected around this period in the lecture table",
+    "topic": "Motor milestones",
+    "options": {
+      "A": "Copies triangle",
+      "B": "Rides tricycle",
+      "C": "Cruises",
+      "D": "Copies cross"
+    },
+    "correct": "C",
+    "explanation": "At around 12 months, children cruise, use a pincer grasp, understand simple requests, and form about 2 to 4 words.",
+    "optionExplanations": {
+      "A": "Copying a triangle is expected around 6 years.",
+      "B": "Riding a tricycle is expected around 3 years.",
+      "C": "Correct. Cruising is part of the 12-month cluster.",
+      "D": "Copying a cross is expected around 4 years."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A child walks alone without support. According to the lecture table, this milestone is expected at approximately what age",
+    "topic": "Motor milestones",
+    "options": {
+      "A": "6 months",
+      "B": "9 months",
+      "C": "12 months",
+      "D": "13 months"
+    },
+    "correct": "D",
+    "explanation": "Walking alone is expected at approximately 13 months in the provided material.",
+    "optionExplanations": {
+      "A": "At 6 months, hand-to-hand transfer is expected.",
+      "B": "At 9 months, crawling and fear of falling are expected.",
+      "C": "At 12 months, pincer grasp and cruising are expected.",
+      "D": "Correct. Walking alone is listed around 13 months."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A 2-year-old can turn a doorknob, unscrew a lid, scribble, throw a ball, and jump. Which age best matches this motor profile",
+    "topic": "Motor milestones",
+    "options": {
+      "A": "2 years",
+      "B": "4 months",
+      "C": "5 years",
+      "D": "7 years"
+    },
+    "correct": "A",
+    "explanation": "At around 2 years, children can turn a doorknob, unscrew a lid, scribble, throw a ball, and jump.",
+    "optionExplanations": {
+      "A": "Correct. These are 2-year/toddler motor milestones.",
+      "B": "At 4 months, sitting with support is expected.",
+      "C": "At 5 years, dressing/undressing, drawing a recognizable person, and copying a square are expected.",
+      "D": "At 7 years, copying a diamond is expected."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A 3-year-old rides a tricycle, is toilet trained, cuts with scissors, copies a circle, broad jumps, alternates feet downstairs, and balances briefly on one foot. Which age best matches this",
+    "topic": "Motor milestones",
+    "options": {
+      "A": "18 months",
+      "B": "3 years",
+      "C": "5 years",
+      "D": "6 years"
+    },
+    "correct": "B",
+    "explanation": "At about 3 years, children ride a tricycle, toilet train, cut with scissors, copy a circle, broad jump, alternate feet downstairs, balance on one foot briefly, and use a mature pencil grasp.",
+    "optionExplanations": {
+      "A": "At 18 months, hand preference emerges and early language/social milestones are expected.",
+      "B": "Correct. This cluster matches 36 months.",
+      "C": "At 5 years, children dress/undress, draw a recognizable person, and copy a square.",
+      "D": "At 6 years, copying a triangle is expected."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A 5-year-old dresses and undresses independently, draws a recognizable person with head/body/limbs, and copies a square. Which milestone pairing is correct",
+    "topic": "Fine motor milestones",
+    "options": {
+      "A": "Copies circle at 5 years",
+      "B": "Copies cross at 5 years",
+      "C": "Copies triangle at 5 years",
+      "D": "Copies square at 5 years"
+    },
+    "correct": "D",
+    "explanation": "The high-yield drawing milestones are: circle at 3 years, cross at 4 years, square at 5 years, triangle at 6 years, and diamond at 7 years.",
+    "optionExplanations": {
+      "A": "Copying a circle is expected around 3 years.",
+      "B": "Copying a cross is expected around 4 years.",
+      "C": "Copying a triangle is expected around 6 years.",
+      "D": "Correct. Copying a square is expected around 5 years."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A 7-year-old copies a diamond. Which statement is most accurate based on the lecture’s high-yield drawing milestones",
+    "topic": "Fine motor milestones",
+    "options": {
+      "A": "Diamond copying is expected around 7 years",
+      "B": "Diamond copying is expected around 3 years",
+      "C": "Diamond copying should precede circle copying",
+      "D": "Diamond copying is a language milestone"
+    },
+    "correct": "A",
+    "explanation": "The lecture lists copying a diamond at about 7 years. Circle is around 3 years, cross 4 years, square 5 years, and triangle 6 years.",
+    "optionExplanations": {
+      "A": "Correct. Diamond copying is expected around 7 years.",
+      "B": "At 3 years, copying a circle is expected.",
+      "C": "Diamond copying is later and more advanced than circle copying.",
+      "D": "Copying shapes is a fine motor/visual-motor milestone."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A 4-year-old child is about to undergo a painful procedure. Which statement by the clinician should be avoided",
+    "topic": "Explaining illness to children",
+    "options": {
+      "A": "You did not cause this illness",
+      "B": "Can you show me what you understand by drawing it",
+      "C": "This may hurt, but I will explain each step",
+      "D": "This won’t hurt"
+    },
+    "correct": "D",
+    "explanation": "When explaining illness or procedures to children, clinicians should use clear, honest, age-appropriate language and should not say “this won’t hurt” if it might hurt.",
+    "optionExplanations": {
+      "A": "Reassuring the child they did not cause the illness is recommended.",
+      "B": "Letting a child express understanding through drawing, clay, or play is recommended.",
+      "C": "Honest preparation with age-appropriate explanation is recommended.",
+      "D": "Correct. Do not falsely reassure that something will not hurt if it might."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A clinician explains a child’s death to a sibling by saying the child “went to sleep forever.” Why is this discouraged",
+    "topic": "Discussing illness and death",
+    "options": {
+      "A": "It is too medically detailed",
+      "B": "It is a euphemism that can confuse or frighten children about sleep",
+      "C": "Children should never receive explanations about illness",
+      "D": "Bad news should always be given only by written note"
+    },
+    "correct": "B",
+    "explanation": "The lecture emphasizes avoiding euphemisms such as “going to sleep” when discussing illness or death with children. Clear, honest, age-appropriate language is preferred.",
+    "optionExplanations": {
+      "A": "The problem is not excessive detail; it is confusing euphemistic language.",
+      "B": "Correct. Euphemisms like “going to sleep” can confuse children and create fear around sleep.",
+      "C": "Children should receive clear, honest, age-appropriate explanations.",
+      "D": "Bad news should be given in person in a private setting, with time for questions."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

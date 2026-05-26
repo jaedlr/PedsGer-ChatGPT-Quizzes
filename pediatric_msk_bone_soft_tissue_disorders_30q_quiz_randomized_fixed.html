@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pediatric MSK, Bone, & Soft Tissue Disorders Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 6-year-old has recurrent fractures, blue sclerae, hearing loss, and poor dentition. Which molecular defect best explains the disorder",
+    "topic": "Osteogenesis imperfecta",
+    "options": {
+      "A": "Type I collagen synthesis defect",
+      "B": "FGFR3 gain-of-function causing growth plate arrest",
+      "C": "Fibrillin-1 missense mutation",
+      "D": "COL5A1/COL5A2 defect causing classic Ehlers-Danlos"
+    },
+    "correct": "A",
+    "explanation": "Osteogenesis imperfecta is most often autosomal dominant and results from defective type I collagen synthesis, especially involving the alpha-1 chain. Type 1 was emphasized in the lecture with fractures, blue sclerae, hearing loss, poor dentition, and brittle bones.",
+    "optionExplanations": {
+      "A": "Correct. Type I collagen defects cause osteogenesis imperfecta.",
+      "B": "FGFR3 gain-of-function causes achondroplasia.",
+      "C": "FBN1 mutation causes Marfan syndrome.",
+      "D": "COL5A1/COL5A2 defects cause classic Ehlers-Danlos, not OI."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A child has short limbs, enlarged head, frontal bossing, and depressed nasal bridge. Growth plate cartilage development is inhibited by a paternal new mutation. Which gene is most likely involved",
+    "topic": "Achondroplasia",
+    "options": {
+      "A": "FBN1",
+      "B": "FGFR3",
+      "C": "COL1A1",
+      "D": "SMN1"
+    },
+    "correct": "B",
+    "explanation": "Achondroplasia is the most common skeletal dysplasia/dwarfism cause. It is autosomal dominant and caused by FGFR3 gain-of-function, usually from a new paternal mutation. FGFR3 activation inhibits cartilage growth and causes growth plate arrest.",
+    "optionExplanations": {
+      "A": "FBN1 mutation causes Marfan syndrome.",
+      "B": "Correct. FGFR3 gain-of-function causes achondroplasia.",
+      "C": "COL1A1/type I collagen defects cause osteogenesis imperfecta.",
+      "D": "SMN1 loss-of-function causes spinal muscular atrophy."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A tall adolescent has long fingers, joint laxity, pectus deformity, ectopia lentis, mitral valve prolapse, and risk of ascending aortic aneurysm. Which protein is defective",
+    "topic": "Marfan syndrome",
+    "options": {
+      "A": "Tuberin",
+      "B": "Dystrophin",
+      "C": "Fibrillin-1",
+      "D": "Type V collagen"
+    },
+    "correct": "C",
+    "explanation": "Marfan syndrome is autosomal dominant due to an FBN1 missense mutation. Fibrillin-1 defects cause abnormal microfibrils in the aorta, ligaments, and ciliary zonules, producing skeletal, ocular, and cardiovascular findings.",
+    "optionExplanations": {
+      "A": "Tuberin is involved in tuberous sclerosis, not this lecture section’s Marfan findings.",
+      "B": "Dystrophin is defective in Duchenne and Becker muscular dystrophy.",
+      "C": "Correct. Fibrillin-1 is defective in Marfan syndrome.",
+      "D": "Type V collagen defects cause classic Ehlers-Danlos syndrome."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A child has fragile skin, hypermobile joints, poor wound healing, and risk of colon or large artery rupture. Which diagnosis best fits",
+    "topic": "Ehlers-Danlos syndrome",
+    "options": {
+      "A": "Marfan syndrome",
+      "B": "Osteogenesis imperfecta",
+      "C": "Achondroplasia",
+      "D": "Ehlers-Danlos syndrome"
+    },
+    "correct": "D",
+    "explanation": "Ehlers-Danlos syndromes involve collagen or extracellular matrix protein defects. Classic type involves COL5A1/COL5A2 and can cause fragile skin, hypermobile joints, poor wound healing, and colon/large artery rupture risk.",
+    "optionExplanations": {
+      "A": "Marfan syndrome causes tall habitus, ectopia lentis, and aortic aneurysm risk.",
+      "B": "OI causes fractures, blue sclerae, hearing loss, and poor dentition.",
+      "C": "Achondroplasia causes short limbs and frontal bossing.",
+      "D": "Correct. Hypermobile joints plus fragile skin and poor wound healing fits Ehlers-Danlos."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A 3-year-old has progressive bowing of the legs after walking begins, frontal bossing, squared head, pigeon breast, poor diet, and low calcium/phosphate. Which pathologic process is most likely",
+    "topic": "Rickets",
+    "options": {
+      "A": "Defective mineralization of growing bone and cartilage",
+      "B": "Defective osteoclast resorption causing generalized bone sclerosis",
+      "C": "Excess PTH causing osteitis fibrosa cystica",
+      "D": "Primary malignant osteoid production"
+    },
+    "correct": "A",
+    "explanation": "Rickets is defective mineralization of growing bone and cartilage, usually due to vitamin D deficiency. Low vitamin D causes excess unmineralized osteoid and disorganized cartilage replacement, leading to bowed legs, frontal bossing, squared head, and pigeon breast.",
+    "optionExplanations": {
+      "A": "Correct. Rickets is defective mineralization in children.",
+      "B": "Defective osteoclast resorption causes osteopetrosis.",
+      "C": "Excess PTH causes hyperparathyroid bone disease with brown tumors.",
+      "D": "Malignant osteoid production is osteosarcoma."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A child with hyperparathyroidism has fractures, osteoporosis, microfractures, and bone replaced by soft blood-rich fibrous tissue with giant cells. Which lesion is being described",
+    "topic": "Hyperparathyroidism bone disease",
+    "options": {
+      "A": "Osteoid osteoma",
+      "B": "Brown tumor",
+      "C": "Enchondroma",
+      "D": "Aneurysmal bone cyst"
+    },
+    "correct": "B",
+    "explanation": "Hyperparathyroidism increases PTH, which indirectly activates osteoclasts. Late childhood manifestations include fractures, osteoporosis, microfractures, brown tumors, and osteitis fibrosa cystica. Brown tumors represent bone replaced by blood-rich fibrous tissue and giant cells.",
+    "optionExplanations": {
+      "A": "Osteoid osteoma is a benign bone-forming tumor with nocturnal pain relieved by NSAIDs.",
+      "B": "Correct. Brown tumors are hyperparathyroid bone lesions.",
+      "C": "Enchondroma is a benign intraosseous cartilage tumor.",
+      "D": "Aneurysmal bone cyst has blood-filled cystic spaces and soap-bubble appearance."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A child has diffusely dense but brittle bones, recurrent fractures, cranial nerve compression causing deafness and optic atrophy, leukopenia, infections, and hepatosplenomegaly from extramedullary hematopoiesis. Which mechanism is most likely",
+    "topic": "Osteopetrosis",
+    "options": {
+      "A": "Vitamin D deficiency",
+      "B": "Increased osteoblast malignant osteoid production",
+      "C": "Decreased osteoclast resorption",
+      "D": "Type I collagen deficiency"
+    },
+    "correct": "C",
+    "explanation": "Osteopetrosis is a bone modeling abnormality due to abnormal osteoclast development or function. Decreased osteoclast resorption causes generalized bone sclerosis, dense brittle bones, marrow narrowing, cranial nerve compression, leukopenia, infections, and extramedullary hematopoiesis.",
+    "optionExplanations": {
+      "A": "Vitamin D deficiency causes rickets.",
+      "B": "Malignant osteoid production occurs in osteosarcoma.",
+      "C": "Correct. Osteopetrosis is defective osteoclast resorption.",
+      "D": "Type I collagen defects cause osteogenesis imperfecta."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A 9-year-old has arthritis in large joints for 8 weeks. ANA is positive, but rheumatoid nodules are absent. Which diagnosis best fits",
+    "topic": "Juvenile idiopathic arthritis",
+    "options": {
+      "A": "Dermatomyositis",
+      "B": "Rickets",
+      "C": "Osteopetrosis",
+      "D": "Juvenile idiopathic arthritis"
+    },
+    "correct": "D",
+    "explanation": "Juvenile idiopathic arthritis is autoimmune arthritis before age 16 lasting at least 6 weeks. It often involves large joints, can involve multiple joints, is ANA positive, and rheumatoid nodules are absent.",
+    "optionExplanations": {
+      "A": "Dermatomyositis causes proximal muscle weakness and heliotrope rash.",
+      "B": "Rickets causes defective mineralization and bowed legs.",
+      "C": "Osteopetrosis causes dense brittle bones from defective osteoclast function.",
+      "D": "Correct. Arthritis before age 16 for ≥6 weeks fits JIA."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A 7-year-old has proximal muscle weakness, difficulty standing from sitting, difficulty climbing stairs, heliotrope rash, calcinosis, and lipodystrophy. Muscle biopsy shows perifascicular atrophy. Which diagnosis is most likely",
+    "topic": "Dermatomyositis",
+    "options": {
+      "A": "Dermatomyositis",
+      "B": "Duchenne muscular dystrophy",
+      "C": "Myotonic dystrophy",
+      "D": "Spinal muscular atrophy"
+    },
+    "correct": "A",
+    "explanation": "Dermatomyositis is the most common inflammatory myopathy in children and is a systemic autoimmune disease affecting small vessels. It causes proximal muscle weakness, heliotrope rash, calcinosis, lipodystrophy, and perifascicular atrophy on biopsy.",
+    "optionExplanations": {
+      "A": "Correct. Proximal weakness plus heliotrope rash and perifascicular atrophy is dermatomyositis.",
+      "B": "Duchenne causes progressive weakness, waddling gait, pseudohypertrophic calves, and high CK due to absent dystrophin.",
+      "C": "Myotonic dystrophy causes myotonia, distal weakness, cataracts, and frontal balding.",
+      "D": "SMA causes floppy baby from motor neuron loss."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A 5-year-old boy has delayed walking, progressive weakness, difficulty climbing stairs, waddling gait, pseudohypertrophic calves, markedly elevated CK, and later cardiomyopathy risk. Which protein is completely absent",
+    "topic": "Duchenne muscular dystrophy",
+    "options": {
+      "A": "Fibrillin-1",
+      "B": "Dystrophin",
+      "C": "SMN protein",
+      "D": "Myotonic dystrophy protein kinase"
+    },
+    "correct": "B",
+    "explanation": "Duchenne muscular dystrophy is X-linked and due to complete absence of dystrophin. Dystrophin stabilizes myofibers during contraction; absence causes myofiber degeneration with replacement by fat and collagen.",
+    "optionExplanations": {
+      "A": "Fibrillin-1 is defective in Marfan syndrome.",
+      "B": "Correct. Complete absence of dystrophin causes Duchenne muscular dystrophy.",
+      "C": "SMN protein loss causes spinal muscular atrophy.",
+      "D": "CTG repeat expansion in the myotonic dystrophy protein kinase gene causes myotonic dystrophy."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A teen has later-onset, milder progressive muscle weakness with elevated CK. Genetic testing shows partial dystrophin deficiency. Which diagnosis is most likely",
+    "topic": "Becker muscular dystrophy",
+    "options": {
+      "A": "Duchenne muscular dystrophy",
+      "B": "Spinal muscular atrophy",
+      "C": "Becker muscular dystrophy",
+      "D": "Hypokalemic periodic paralysis"
+    },
+    "correct": "C",
+    "explanation": "Becker muscular dystrophy is X-linked and due to partial dystrophin deficiency. It is milder and has later onset than Duchenne, though cardiomyopathy can still occur.",
+    "optionExplanations": {
+      "A": "Duchenne has complete dystrophin absence and earlier, more severe disease.",
+      "B": "SMA is SMN1 loss with motor neuron loss and floppy infant presentation.",
+      "C": "Correct. Partial dystrophin deficiency causes Becker muscular dystrophy.",
+      "D": "Periodic paralysis causes episodic paralysis associated with potassium abnormalities."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "An adult has difficulty releasing his grip after a handshake, distal muscle weakness, facial weakness, early cataracts, frontal balding, dysphagia, cardiomyopathy/conduction defects, and diabetes. Which mutation pattern is most likely",
+    "topic": "Myotonic dystrophy",
+    "options": {
+      "A": "FGFR3 gain-of-function",
+      "B": "SMN1 loss-of-function",
+      "C": "RYR1 mutation triggered by anesthetics",
+      "D": "CTG repeat expansion"
+    },
+    "correct": "D",
+    "explanation": "Myotonic dystrophy is autosomal dominant due to CTG repeat expansion in the myotonic dystrophy protein kinase gene. Myotonia is sustained involuntary contraction, causing difficulty releasing grip, plus cataracts, frontal balding, cardiac conduction defects, and endocrine disease.",
+    "optionExplanations": {
+      "A": "FGFR3 gain-of-function causes achondroplasia.",
+      "B": "SMN1 loss causes spinal muscular atrophy.",
+      "C": "RYR1 mutation causes malignant hyperthermia.",
+      "D": "Correct. CTG repeat expansion causes myotonic dystrophy."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A floppy infant has hypotonia, weakness, muscle atrophy, and hip displacement. Biopsy shows a mixture of small atrophic fibers and normal/hypertrophic fibers. Which gene is most likely affected",
+    "topic": "Spinal muscular atrophy",
+    "options": {
+      "A": "SMN1",
+      "B": "DMD",
+      "C": "FBN1",
+      "D": "EXT1"
+    },
+    "correct": "A",
+    "explanation": "Spinal muscular atrophy is autosomal recessive due to SMN1 loss-of-function. Loss of motor neurons causes infantile hypotonia, weakness, muscle atrophy, and biopsy with mixed small atrophic fibers plus normal/hypertrophic fibers.",
+    "optionExplanations": {
+      "A": "Correct. SMN1 loss-of-function causes SMA.",
+      "B": "DMD/dystrophin defects cause Duchenne or Becker muscular dystrophy.",
+      "C": "FBN1 defects cause Marfan syndrome.",
+      "D": "EXT1/EXT2 defects cause multiple hereditary exostoses."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A patient develops high fever, tachycardia, and muscle spasm/tetany after succinylcholine during anesthesia. Which gene is implicated",
+    "topic": "Malignant hyperthermia",
+    "options": {
+      "A": "GLI3",
+      "B": "RYR1",
+      "C": "RB1",
+      "D": "EWSR1"
+    },
+    "correct": "B",
+    "explanation": "Malignant hyperthermia is triggered by halogenated inhaled anesthetics or succinylcholine. It involves RYR1 mutation causing abnormal calcium regulation, leading to high fever, tachycardia, and muscle spasm/tetany.",
+    "optionExplanations": {
+      "A": "GLI3 is associated with polydactyly in the congenital abnormalities section.",
+      "B": "Correct. RYR1 mutation causes malignant hyperthermia susceptibility.",
+      "C": "RB1 mutations increase osteosarcoma risk.",
+      "D": "EWSR1 translocation is associated with Ewing sarcoma."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "An adolescent girl has a right-sided lateral spinal curvature of 30 degrees in the coronal plane. Which management threshold from the material applies",
+    "topic": "Adolescent idiopathic scoliosis",
+    "options": {
+      "A": "Observation only because bracing is never used",
+      "B": "Immediate chemotherapy",
+      "C": "Bracing is considered for curves around 25 to 45 degrees",
+      "D": "Treat with vitamin D only"
+    },
+    "correct": "C",
+    "explanation": "Adolescent idiopathic scoliosis is abnormal lateral spinal curvature, defined as a curve greater than 10 degrees in the coronal plane. Females are affected more than males, right-sided curves are more common, and bracing is considered for curves around 25 to 45 degrees.",
+    "optionExplanations": {
+      "A": "Bracing is used for appropriate curve ranges.",
+      "B": "Chemotherapy is for malignant tumors, not idiopathic scoliosis.",
+      "C": "Correct. Bracing is considered for 25 to 45 degree curves.",
+      "D": "Vitamin D treats rickets if deficient, not idiopathic scoliosis."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A 16-year-old has night shoulder pain relieved by aspirin/NSAIDs. Imaging shows a 1.5 cm radiolucent nidus with surrounding sclerosis. Which tumor is most likely",
+    "topic": "Osteoid osteoma",
+    "options": {
+      "A": "Osteoblastoma",
+      "B": "Ewing sarcoma",
+      "C": "Osteosarcoma",
+      "D": "Osteoid osteoma"
+    },
+    "correct": "D",
+    "explanation": "Osteoid osteoma is a benign bone-forming tumor under 2 cm. It has woven bone trabeculae lined by osteoblasts, reactive cortical sclerosis, and nocturnal pain relieved by aspirin/NSAIDs due to prostaglandin E2 production.",
+    "optionExplanations": {
+      "A": "Osteoblastoma is larger than 2 cm and pain is not relieved by aspirin.",
+      "B": "Ewing sarcoma is a malignant small round blue cell tumor with systemic symptoms.",
+      "C": "Osteosarcoma is malignant with sunburst/Codman triangle and malignant osteoid.",
+      "D": "Correct. Small nidus with night pain relieved by NSAIDs is osteoid osteoma."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A benign bone-forming tumor is larger than 2 cm, shows woven bone lined by osteoblasts, lacks reactive cortical bone, and causes nocturnal pain not relieved by aspirin. Which tumor is most likely",
+    "topic": "Osteoblastoma",
+    "options": {
+      "A": "Osteoblastoma",
+      "B": "Non-ossifying fibroma",
+      "C": "Osteoid osteoma",
+      "D": "Enchondroma"
+    },
+    "correct": "A",
+    "explanation": "Osteoblastoma is a benign bone-forming tumor larger than 2 cm, similar histologically to osteoid osteoma but without reactive cortical bone and with pain not relieved by aspirin.",
+    "optionExplanations": {
+      "A": "Correct. Greater than 2 cm with pain not relieved by aspirin is osteoblastoma.",
+      "B": "Non-ossifying fibroma is a benign fibrous lesion, not a bone-forming tumor lined by osteoblasts.",
+      "C": "Osteoid osteoma is under 2 cm and has nocturnal pain relieved by aspirin/NSAIDs.",
+      "D": "Enchondroma is a benign intraosseous cartilage tumor."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A teen athlete has progressive metaphyseal knee pain and swelling, worse at night, with minimal NSAID relief. X-ray shows mixed lytic/blastic lesion with infiltrative margins, sunburst pattern, and Codman triangle. Biopsy shows lace-like malignant osteoid. Which diagnosis is most likely",
+    "topic": "Osteosarcoma",
+    "options": {
+      "A": "Osteochondroma",
+      "B": "Osteosarcoma",
+      "C": "Osteoid osteoma",
+      "D": "Ewing sarcoma"
+    },
+    "correct": "B",
+    "explanation": "Osteosarcoma is a malignant bone-forming tumor, classically in adolescents, around the knee, especially distal femur/proximal tibia. X-ray shows mixed lytic/blastic lesion, infiltrative margins, sunburst pattern, and Codman triangle. Histology shows malignant lace-like osteoid.",
+    "optionExplanations": {
+      "A": "Osteochondroma is a benign cartilage-capped bone stalk with medullary continuity.",
+      "B": "Correct. Malignant osteoid around the knee with sunburst/Codman triangle is osteosarcoma.",
+      "C": "Osteoid osteoma is <2 cm and pain is relieved by NSAIDs.",
+      "D": "Ewing sarcoma shows lytic moth-eaten lesion, systemic symptoms, and EWSR1 translocation."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A child develops osteosarcoma and has a family history suggesting tumor suppressor mutations. Which genes are emphasized as important osteosarcoma risks in the material",
+    "topic": "Osteosarcoma genetics",
+    "options": {
+      "A": "IDH1 and IDH2",
+      "B": "EXT1 and EXT2",
+      "C": "RB1 and TP53",
+      "D": "PAX3 and FOXO1"
+    },
+    "correct": "C",
+    "explanation": "Osteosarcoma is associated with RB1 mutations in many sporadic cases and increased risk with germline RB mutation. TP53 mutations may be sporadic or germline, and germline TP53 causes Li-Fraumeni syndrome with osteosarcoma risk.",
+    "optionExplanations": {
+      "A": "IDH1/IDH2 mutations are associated with enchondroma.",
+      "B": "EXT1/EXT2 are associated with multiple hereditary exostoses.",
+      "C": "Correct. RB1 and TP53 are key osteosarcoma-associated tumor suppressors.",
+      "D": "PAX3-FOXO1 is associated with alveolar rhabdomyosarcoma."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A child has a slow-growing benign cartilage-forming bone spur attached to the skeleton. Imaging shows medullary cavity continuity with host bone and a hyaline cartilage cap. Which diagnosis is most likely",
+    "topic": "Osteochondroma",
+    "options": {
+      "A": "Fibrous dysplasia",
+      "B": "Enchondroma",
+      "C": "Aneurysmal bone cyst",
+      "D": "Osteochondroma"
+    },
+    "correct": "D",
+    "explanation": "Osteochondroma, or exostosis, is the most common benign bone tumor and is cartilage-forming. It is a bone stalk/spur attached to the skeleton with a hyaline cartilage cap and medullary cavity continuous with host bone.",
+    "optionExplanations": {
+      "A": "Fibrous dysplasia has GNAS gain-of-function and curved woven bone trabeculae without osteoblastic rimming.",
+      "B": "Enchondroma is an intraosseous cartilage tumor arising in the medullary cavity, usually hands/feet.",
+      "C": "Aneurysmal bone cyst has blood-filled cystic spaces and soap-bubble appearance.",
+      "D": "Correct. Cartilage-capped bony stalk with medullary continuity is osteochondroma."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A child has multiple hereditary exostoses. Which genes are most likely affected",
+    "topic": "Multiple hereditary exostoses",
+    "options": {
+      "A": "EXT1/EXT2",
+      "B": "RB1/TP53",
+      "C": "IDH1/IDH2",
+      "D": "TSC1/TSC2"
+    },
+    "correct": "A",
+    "explanation": "Multiple hereditary exostoses are associated with germline loss-of-function mutations in EXT1 or EXT2.",
+    "optionExplanations": {
+      "A": "Correct. EXT1/EXT2 loss-of-function causes multiple hereditary exostoses.",
+      "B": "RB1/TP53 are associated with osteosarcoma risk.",
+      "C": "IDH1/IDH2 mutations are associated with enchondroma.",
+      "D": "TSC1/TSC2 mutations cause tuberous sclerosis."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "An adult has a solitary, well-circumscribed benign hyaline cartilage nodule under 3 cm arising in the medullary cavity of the hand. Which diagnosis is most likely",
+    "topic": "Enchondroma",
+    "options": {
+      "A": "Osteochondroma",
+      "B": "Enchondroma",
+      "C": "Osteoid osteoma",
+      "D": "Synovial sarcoma"
+    },
+    "correct": "B",
+    "explanation": "Enchondroma is the most common intraosseous cartilage tumor. It arises in the medullary cavity, is usually a solitary lesion of the hands/feet in adults, and can have IDH1/IDH2 mutations.",
+    "optionExplanations": {
+      "A": "Osteochondroma is a cartilage-capped bony stalk with medullary continuity.",
+      "B": "Correct. Intraosseous hyaline cartilage tumor in hands/feet is enchondroma.",
+      "C": "Osteoid osteoma is a small benign bone-forming tumor with night pain relieved by NSAIDs.",
+      "D": "Synovial sarcoma is a malignant soft tissue tumor with t(X;18)."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A patient has multiple enchondromas and spindle-cell hemangiomas. Which syndrome is most likely",
+    "topic": "Enchondroma syndromes",
+    "options": {
+      "A": "Ollier disease",
+      "B": "McCune-Albright syndrome",
+      "C": "Maffucci syndrome",
+      "D": "Mazabraud syndrome"
+    },
+    "correct": "C",
+    "explanation": "Multiple enchondromas occur in Ollier disease and Maffucci syndrome. Maffucci syndrome also has spindle-cell hemangiomas.",
+    "optionExplanations": {
+      "A": "Ollier disease has multiple enchondromas but not the added spindle-cell hemangioma clue.",
+      "B": "McCune-Albright is polyostotic fibrous dysplasia, café-au-lait macules, and endocrine abnormalities/precocious puberty.",
+      "C": "Correct. Multiple enchondromas plus spindle-cell hemangiomas suggests Maffucci syndrome.",
+      "D": "Mazabraud syndrome is fibrous dysplasia plus soft tissue tumors."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A benign locally aggressive bone lesion has blood-filled cystic spaces separated by fibrous septa, a soap-bubble appearance, thin sclerotic eggshell reactive bone, and may recur after resection. What is the diagnosis",
+    "topic": "Aneurysmal bone cyst",
+    "options": {
+      "A": "Non-ossifying fibroma",
+      "B": "Fibrous cortical defect",
+      "C": "Osteoblastoma",
+      "D": "Aneurysmal bone cyst"
+    },
+    "correct": "D",
+    "explanation": "Aneurysmal bone cyst is benign but locally aggressive. It has blood-filled cystic spaces separated by fibrous septa, may contain calcified basophilic matrix called blue bone, has a soap-bubble appearance, and can recur after resection. It is not a vascular tumor.",
+    "optionExplanations": {
+      "A": "Non-ossifying fibroma is a larger benign fibrous lesion, not blood-filled cystic spaces.",
+      "B": "Fibrous cortical defect is a small developmental fibrous replacement of bone.",
+      "C": "Osteoblastoma is a benign bone-forming tumor >2 cm.",
+      "D": "Correct. Blood-filled cystic spaces with soap-bubble appearance is aneurysmal bone cyst."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A small 0.5 cm benign fibrous replacement of bone is found incidentally in a child and is expected to resolve with time as it is replaced by bone. Which lesion is this",
+    "topic": "Fibrous cortical defect",
+    "options": {
+      "A": "Fibrous cortical defect",
+      "B": "Non-ossifying fibroma",
+      "C": "Fibrous dysplasia",
+      "D": "Osteoid osteoma"
+    },
+    "correct": "A",
+    "explanation": "Fibrous cortical defect is small, around 0.5 cm, and represents developmental fibrous replacement of bone. It is often bilateral/multiple and resolves with time as it is replaced by bone.",
+    "optionExplanations": {
+      "A": "Correct. A small 0.5 cm fibrous lesion that resolves is a fibrous cortical defect.",
+      "B": "Non-ossifying fibroma is the same process but larger, at least 5 cm.",
+      "C": "Fibrous dysplasia is a GNAS mosaic lesion with woven bone in fibrous background.",
+      "D": "Osteoid osteoma is a painful bone-forming tumor under 2 cm."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A child has a benign fibrous bone lesion at least 5 cm. Histology shows storiform benign spindle cells and scattered osteoclast-type giant cells. Which diagnosis best fits",
+    "topic": "Non-ossifying fibroma",
+    "options": {
+      "A": "Fibrous cortical defect",
+      "B": "Non-ossifying fibroma",
+      "C": "Osteochondroma",
+      "D": "Ewing sarcoma"
+    },
+    "correct": "B",
+    "explanation": "Non-ossifying fibroma is the same benign fibrous process as fibrous cortical defect but larger, at least 5 cm. Histology shows storiform benign spindle cells and scattered osteoclast-type giant cells.",
+    "optionExplanations": {
+      "A": "Fibrous cortical defect is smaller, around 0.5 cm.",
+      "B": "Correct. A larger benign fibrous lesion is non-ossifying fibroma.",
+      "C": "Osteochondroma is a cartilage-capped bony exostosis.",
+      "D": "Ewing sarcoma is malignant and has small round blue cells with EWSR1 translocation."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A child has fibrous dysplasia. Histology shows curved woven bone trabeculae without osteoblastic rimming in a fibrous background. Which mutation mechanism explains this",
+    "topic": "Fibrous dysplasia",
+    "options": {
+      "A": "EXT1 loss-of-function mutation",
+      "B": "SMN1 loss-of-function germline mutation",
+      "C": "GNAS1 gain-of-function mosaic mutation",
+      "D": "EWSR1-FLI1 translocation"
+    },
+    "correct": "C",
+    "explanation": "Fibrous dysplasia is a benign fibrous lesion with GNAS1 gain-of-function causing increased Gs signaling, proliferation, and impaired osteoblast differentiation. It is a mosaic mutation during embryogenesis, not germline.",
+    "optionExplanations": {
+      "A": "EXT1 loss causes hereditary exostoses.",
+      "B": "SMN1 loss causes spinal muscular atrophy.",
+      "C": "Correct. Fibrous dysplasia is due to mosaic GNAS1 gain-of-function.",
+      "D": "EWSR1-FLI1 translocation causes Ewing sarcoma."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A girl has polyostotic fibrous dysplasia, café-au-lait macules, and endocrine abnormalities causing precocious puberty. Which syndrome is most likely",
+    "topic": "McCune-Albright syndrome",
+    "options": {
+      "A": "Mazabraud syndrome",
+      "B": "Li-Fraumeni syndrome",
+      "C": "Maffucci syndrome",
+      "D": "McCune-Albright syndrome"
+    },
+    "correct": "D",
+    "explanation": "McCune-Albright syndrome is polyostotic fibrous dysplasia plus café-au-lait macules and endocrine abnormalities such as precocious puberty.",
+    "optionExplanations": {
+      "A": "Mazabraud syndrome is fibrous dysplasia plus soft tissue tumors.",
+      "B": "Li-Fraumeni syndrome is germline TP53 with sarcoma/breast/brain/leukemia/adrenocortical cancer risk.",
+      "C": "Maffucci syndrome involves multiple enchondromas and spindle-cell hemangiomas.",
+      "D": "Correct. Polyostotic fibrous dysplasia plus café-au-lait and endocrine hyperfunction is McCune-Albright."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A 10-year-old has fever, weight loss, anemia, leukocytosis, and hip pain. Imaging shows a destructive lytic femur lesion with moth-eaten margins extending into soft tissue. Biopsy shows uniform small round cells with scant clear cytoplasm. Which translocation is most likely",
+    "topic": "Ewing sarcoma",
+    "options": {
+      "A": "t(11;22) EWSR1-FLI1",
+      "B": "t(X;18) SS18-SSX",
+      "C": "t(2;13) PAX3-FOXO1",
+      "D": "t(9;22) BCR-ABL"
+    },
+    "correct": "A",
+    "explanation": "Ewing sarcoma is a malignant small round blue cell tumor with pain, systemic symptoms, destructive lytic moth-eaten lesion, and EWSR1 translocation on chromosome 22. The major fusion is EWSR1-FLI1 from t(11;22).",
+    "optionExplanations": {
+      "A": "Correct. Ewing sarcoma is classically t(11;22) EWSR1-FLI1.",
+      "B": "t(X;18) SS18-SSX is synovial sarcoma.",
+      "C": "t(2;13) PAX3-FOXO1 is alveolar rhabdomyosarcoma.",
+      "D": "t(9;22) BCR-ABL is Philadelphia chromosome, not Ewing sarcoma."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A malignant soft tissue tumor of the thigh has a biphasic glandular and spindle-cell pattern. It is not actually derived from synovium. Which fusion is most likely",
+    "topic": "Synovial sarcoma",
+    "options": {
+      "A": "EWSR1-FLI1",
+      "B": "SS18-SSX1/2/4",
+      "C": "PAX3-FOXO1",
+      "D": "MDM2-CDK4 amplification"
+    },
+    "correct": "B",
+    "explanation": "Synovial sarcoma is a malignant soft tissue tumor of uncertain origin, not actually derived from synovium. It often occurs in the thigh/leg and has a biphasic glandular plus spindle-cell pattern with t(X;18) producing SS18-SSX1/2/4 fusion.",
+    "optionExplanations": {
+      "A": "EWSR1-FLI1 is the major Ewing sarcoma fusion.",
+      "B": "Correct. Synovial sarcoma has t(X;18) SS18-SSX fusion.",
+      "C": "PAX3-FOXO1 is associated with alveolar rhabdomyosarcoma.",
+      "D": "MDM2/CDK4 amplification inhibits p53/RB pathways in osteosarcoma genetics."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

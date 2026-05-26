@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GI Diseases Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A newborn has vertebral defects, anal atresia, cardiac defects, tracheoesophageal fistula, renal anomalies, and radial/limb defects. Which association is most likely",
+    "topic": "VACTERL association",
+    "options": {
+      "A": "Beckwith-Wiedemann syndrome",
+      "B": "VACTERL association",
+      "C": "Lynch syndrome",
+      "D": "Peutz-Jeghers syndrome"
+    },
+    "correct": "B",
+    "explanation": "VACTERL includes Vertebral defects, Anal atresia, Cardiac defects, Tracheoesophageal fistula/esophageal atresia, Renal anomalies, and Limb/radial defects.",
+    "optionExplanations": {
+      "A": "This is associated with omphalocele in the section, not the full VACTERL pattern.",
+      "B": "Correct. VACTERL includes Vertebral defects, Anal atresia, Cardiac defects, Tracheoesophageal fistula/esophageal atresia, Renal anomalies, and Limb/radial defects.",
+      "C": "Lynch syndrome is a mismatch repair colorectal cancer syndrome.",
+      "D": "Peutz-Jeghers causes hamartomatous polyps and mucocutaneous pigmentation."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A newborn has drooling, respiratory distress, coughing/choking/cyanosis with feeds, and maternal polyhydramnios. An NG tube cannot pass and coils in the upper chest. Which diagnosis is most likely",
+    "topic": "Esophageal atresia / TEF",
+    "options": {
+      "A": "Pyloric stenosis",
+      "B": "Meconium ileus",
+      "C": "Intussusception",
+      "D": "Esophageal atresia with distal tracheoesophageal fistula"
+    },
+    "correct": "D",
+    "explanation": "Esophageal atresia/TEF presents with drooling, respiratory distress, choking/cyanosis with feeds, maternal polyhydramnios, and NG/OG tube coiling in the upper chest. The most common type is esophageal atresia with distal TEF.",
+    "optionExplanations": {
+      "A": "Pyloric stenosis causes nonbilious projectile vomiting at 3–6 weeks.",
+      "B": "Meconium ileus causes failure to pass meconium, bilious vomiting, distention, and soap-bubble RLQ X-ray.",
+      "C": "Intussusception causes severe colicky pain, currant jelly stool, and target sign.",
+      "D": "Correct. Esophageal atresia/TEF presents with drooling, respiratory distress, choking/cyanosis with feeds, maternal polyhydramnios, and NG/OG tube coiling in the upper chest. The most common type is esophageal atresia with distal TEF."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A newborn has esophageal atresia with pure atresia and no fistula. Which chest/abdominal X-ray finding is expected",
+    "topic": "EA/TEF imaging",
+    "options": {
+      "A": "Prominent gastric bubble",
+      "B": "Double bubble with distal gas",
+      "C": "Gasless abdomen",
+      "D": "Soap-bubble RLQ"
+    },
+    "correct": "C",
+    "explanation": "Pure esophageal atresia produces a gasless abdomen. TEF with or without EA can show a prominent gastric bubble due to air entering the stomach through the fistula.",
+    "optionExplanations": {
+      "A": "This is expected with TEF because air can enter the stomach.",
+      "B": "This suggests malrotation or partial duodenal obstruction patterns.",
+      "C": "Correct. Pure esophageal atresia produces a gasless abdomen. TEF with or without EA can show a prominent gastric bubble due to air entering the stomach through the fistula.",
+      "D": "This suggests meconium ileus."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A neonate has an abdominal wall defect lateral to the umbilicus, most commonly on the right, with uncovered bowel loops and no chromosomal association. Which diagnosis is most likely",
+    "topic": "Gastroschisis",
+    "options": {
+      "A": "Gastroschisis",
+      "B": "Omphalocele",
+      "C": "Umbilical hernia",
+      "D": "Bladder exstrophy"
+    },
+    "correct": "A",
+    "explanation": "Gastroschisis is a full-thickness abdominal wall defect lateral to the umbilicus, usually right-sided, with uncovered herniated bowel and no association with chromosomal abnormalities.",
+    "optionExplanations": {
+      "A": "Correct. Gastroschisis is a full-thickness abdominal wall defect lateral to the umbilicus, usually right-sided, with uncovered herniated bowel and no association with chromosomal abnormalities.",
+      "B": "Omphalocele is midline through the umbilical ring and covered by a peritoneal sac; it is associated with trisomy 13/18 and Beckwith-Wiedemann.",
+      "C": "Umbilical hernia is not an uncovered lateral abdominal wall defect.",
+      "D": "Bladder exstrophy is exposed bladder from anterior bladder/abdominal wall failure."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A neonate has a midline abdominal wall defect through the umbilical ring covered by a peritoneal sac. Which association is most likely",
+    "topic": "Omphalocele",
+    "options": {
+      "A": "No chromosomal association",
+      "B": "Cystic fibrosis only",
+      "C": "Maternal cocaine use only",
+      "D": "Trisomy 13, trisomy 18, or Beckwith-Wiedemann syndrome"
+    },
+    "correct": "D",
+    "explanation": "Omphalocele is midline, herniates through the umbilical ring, is covered by a peritoneal sac, and is associated with trisomy 13, trisomy 18, and Beckwith-Wiedemann syndrome.",
+    "optionExplanations": {
+      "A": "That is more characteristic of gastroschisis.",
+      "B": "CF is associated with meconium ileus.",
+      "C": "Maternal cocaine is associated with intestinal atresia due to vascular accident.",
+      "D": "Correct. Omphalocele is midline, herniates through the umbilical ring, is covered by a peritoneal sac, and is associated with trisomy 13, trisomy 18, and Beckwith-Wiedemann syndrome."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A newborn has green bilious vomiting. Which high-yield rule should guide management",
+    "topic": "Bilious emesis rule",
+    "options": {
+      "A": "Always benign reflux",
+      "B": "Surgical emergency until proven otherwise",
+      "C": "Treat only with oral rehydration and discharge",
+      "D": "Assume pyloric stenosis first"
+    },
+    "correct": "B",
+    "explanation": "Green/bilious emesis in a newborn is a surgical emergency until proven otherwise.",
+    "optionExplanations": {
+      "A": "Bilious vomiting suggests obstruction or volvulus risk and requires urgent evaluation.",
+      "B": "Correct. Green/bilious emesis in a newborn is a surgical emergency until proven otherwise.",
+      "C": "This risks missing a surgical emergency.",
+      "D": "Pyloric stenosis causes nonbilious projectile vomiting."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A newborn has bilious vomiting, maternal polyhydramnios, and X-ray showing a double bubble sign without distal gas. The defect is failure of duodenal recanalization. Which diagnosis is most likely",
+    "topic": "Duodenal atresia",
+    "options": {
+      "A": "Duodenal atresia",
+      "B": "Malrotation",
+      "C": "Intestinal atresia",
+      "D": "Pyloric stenosis"
+    },
+    "correct": "A",
+    "explanation": "Duodenal atresia is due to failure of duodenal recanalization and causes bilious vomiting, polyhydramnios, and a double bubble sign. It is associated with trisomy 21.",
+    "optionExplanations": {
+      "A": "Correct. Duodenal atresia is due to failure of duodenal recanalization and causes bilious vomiting, polyhydramnios, and a double bubble sign. It is associated with trisomy 21.",
+      "B": "Malrotation may show double bubble with distal gas and is dangerous because of volvulus.",
+      "C": "Intestinal atresia is due to a vascular accident in utero and can show triple bubble.",
+      "D": "Pyloric stenosis causes nonbilious vomiting at 3–6 weeks."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A neonate has bilious vomiting and X-ray shows a triple bubble sign. The mechanism is failed intestinal recanalization due to an in utero vascular accident. Which exposure is associated",
+    "topic": "Intestinal atresia",
+    "options": {
+      "A": "Trisomy 21",
+      "B": "Cystic fibrosis",
+      "C": "Maternal cocaine use",
+      "D": "Rotavirus vaccine"
+    },
+    "correct": "C",
+    "explanation": "Intestinal atresia is associated with failed recanalization from vascular accident in utero and maternal cocaine use; X-ray may show a triple bubble sign.",
+    "optionExplanations": {
+      "A": "Trisomy 21 is associated with duodenal atresia and Hirschsprung disease.",
+      "B": "CF is associated with meconium ileus.",
+      "C": "Correct. Intestinal atresia is associated with failed recanalization from vascular accident in utero and maternal cocaine use; X-ray may show a triple bubble sign.",
+      "D": "Rotavirus vaccine is associated with intussusception risk."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A newborn has bilious vomiting and imaging shows a double bubble with distal gas. The clinician is most worried about bowel twisting on the mesentery. Which diagnosis is most dangerous",
+    "topic": "Malrotation",
+    "options": {
+      "A": "Physiologic jaundice",
+      "B": "Pyloric stenosis",
+      "C": "Encopresis",
+      "D": "Malrotation with volvulus risk"
+    },
+    "correct": "D",
+    "explanation": "Malrotation is abnormal intestinal rotation; bowel can twist on the mesentery, making it the most dangerous bilious vomiting cause in the section. X-ray can show double bubble with distal gas.",
+    "optionExplanations": {
+      "A": "This is unconjugated hyperbilirubinemia, not bilious obstruction.",
+      "B": "Pyloric stenosis causes nonbilious projectile vomiting.",
+      "C": "Encopresis is fecal incontinence from chronic constipation.",
+      "D": "Correct. Malrotation is abnormal intestinal rotation; bowel can twist on the mesentery, making it the most dangerous bilious vomiting cause in the section. X-ray can show double bubble with distal gas."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A 4-week-old boy has nonbilious projectile vomiting after feeds, remains hungry, and has dehydration with hypochloremic hypokalemic metabolic alkalosis. Which diagnosis is most likely",
+    "topic": "Pyloric stenosis",
+    "options": {
+      "A": "Duodenal atresia",
+      "B": "Hirschsprung disease",
+      "C": "Pyloric stenosis",
+      "D": "Meckel diverticulum"
+    },
+    "correct": "C",
+    "explanation": "Pyloric stenosis occurs around 3–6 weeks and causes nonbilious projectile vomiting after feeding, persistent hunger, and hypochloremic hypokalemic metabolic alkalosis.",
+    "optionExplanations": {
+      "A": "Duodenal atresia causes neonatal bilious vomiting and double bubble.",
+      "B": "Hirschsprung causes delayed meconium, distention, bilious vomiting, and explosive stool on DRE.",
+      "C": "Correct. Pyloric stenosis occurs around 3–6 weeks and causes nonbilious projectile vomiting after feeding, persistent hunger, and hypochloremic hypokalemic metabolic alkalosis.",
+      "D": "Meckel diverticulum classically causes painless bloody stool."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "An infant with suspected pyloric stenosis has no palpable olive. Which diagnostic test is most appropriate",
+    "topic": "Pyloric stenosis diagnosis",
+    "options": {
+      "A": "Ultrasound",
+      "B": "Rectal biopsy",
+      "C": "Technetium-99m pertechnetate scan",
+      "D": "Sweat chloride test"
+    },
+    "correct": "A",
+    "explanation": "Pyloric stenosis may have an olive-sized mass and visible gastric peristalsis. Ultrasound is used if the olive is not palpable.",
+    "optionExplanations": {
+      "A": "Correct. Pyloric stenosis may have an olive-sized mass and visible gastric peristalsis. Ultrasound is used if the olive is not palpable.",
+      "B": "Rectal biopsy is the gold standard for Hirschsprung disease.",
+      "C": "This diagnoses Meckel diverticulum by detecting ectopic gastric mucosa.",
+      "D": "This confirms cystic fibrosis."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "Which management sequence is most appropriate for pyloric stenosis",
+    "topic": "Pyloric stenosis treatment",
+    "options": {
+      "A": "Immediate feeding challenge without correction",
+      "B": "Phototherapy only",
+      "C": "Pneumatic enema",
+      "D": "Rehydrate and correct acid-base/electrolytes, then pyloromyotomy"
+    },
+    "correct": "D",
+    "explanation": "Pyloric stenosis treatment is rehydration and correction of acid-base/electrolyte abnormalities followed by pyloromyotomy.",
+    "optionExplanations": {
+      "A": "Electrolyte/acid-base derangements should be corrected first.",
+      "B": "Phototherapy treats unconjugated hyperbilirubinemia.",
+      "C": "Pneumatic enema treats intussusception.",
+      "D": "Correct. Pyloric stenosis treatment is rehydration and correction of acid-base/electrolyte abnormalities followed by pyloromyotomy."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A newborn fails to pass meconium within 24 hours, develops bilious vomiting and abdominal distention, and has explosive stool after digital rectal exam. Which diagnosis is most likely",
+    "topic": "Hirschsprung disease",
+    "options": {
+      "A": "Meconium ileus",
+      "B": "Hirschsprung disease",
+      "C": "Pyloric stenosis",
+      "D": "Constipation with encopresis"
+    },
+    "correct": "B",
+    "explanation": "Hirschsprung disease causes delayed meconium >24 hr, bilious vomiting, distention, and explosive stool after DRE.",
+    "optionExplanations": {
+      "A": "Meconium ileus also causes delayed meconium and obstruction but has no squirt sign and is associated with CF.",
+      "B": "Correct. Hirschsprung disease causes delayed meconium >24 hr, bilious vomiting, distention, and explosive stool after DRE.",
+      "C": "Pyloric stenosis causes nonbilious projectile vomiting at 3–6 weeks.",
+      "D": "Encopresis usually occurs after age 4 due to chronic constipation."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "Which pathogenesis best explains Hirschsprung disease",
+    "topic": "Hirschsprung pathogenesis",
+    "options": {
+      "A": "Thick sticky meconium obstructing ileum from CF",
+      "B": "Hypertrophy of the pylorus",
+      "C": "Failure of neural crest migration causing absent ganglion cells in Auerbach and Meissner plexuses",
+      "D": "Remnant of the vitelline duct"
+    },
+    "correct": "C",
+    "explanation": "Hirschsprung disease results from failure of neural crest migration, causing absent ganglion cells in Auerbach and Meissner plexuses.",
+    "optionExplanations": {
+      "A": "This describes meconium ileus.",
+      "B": "This describes pyloric stenosis.",
+      "C": "Correct. Hirschsprung disease results from failure of neural crest migration, causing absent ganglion cells in Auerbach and Meissner plexuses.",
+      "D": "This describes Meckel diverticulum."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "What is the gold standard diagnostic test for Hirschsprung disease",
+    "topic": "Hirschsprung diagnosis",
+    "options": {
+      "A": "Sweat chloride testing",
+      "B": "Technetium-99m scan",
+      "C": "Abdominal ultrasound target sign",
+      "D": "Rectal biopsy showing absent ganglion cells"
+    },
+    "correct": "D",
+    "explanation": "Rectal biopsy is the gold standard for Hirschsprung disease and shows aganglionic bowel.",
+    "optionExplanations": {
+      "A": "This confirms cystic fibrosis.",
+      "B": "This diagnoses Meckel diverticulum.",
+      "C": "This diagnoses intussusception.",
+      "D": "Correct. Rectal biopsy is the gold standard for Hirschsprung disease and shows aganglionic bowel."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A newborn fails to pass meconium, has bilious vomiting and distention, no explosive stool with DRE, and an X-ray showing soap-bubble appearance in the RLQ. Which condition is most likely",
+    "topic": "Meconium ileus",
+    "options": {
+      "A": "Meconium ileus",
+      "B": "Hirschsprung disease",
+      "C": "Pyloric stenosis",
+      "D": "Meckel diverticulum"
+    },
+    "correct": "A",
+    "explanation": "Meconium ileus is thick sticky meconium obstructing the ileum, associated with CF. It causes failure to pass meconium, bilious vomiting, distention, no squirt sign, and soap-bubble RLQ X-ray.",
+    "optionExplanations": {
+      "A": "Correct. Meconium ileus is thick sticky meconium obstructing the ileum, associated with CF. It causes failure to pass meconium, bilious vomiting, distention, no squirt sign, and soap-bubble RLQ X-ray.",
+      "B": "Hirschsprung often has explosive stool on DRE and biopsy shows aganglionosis.",
+      "C": "Pyloric stenosis causes nonbilious projectile vomiting.",
+      "D": "Meckel diverticulum causes painless bloody stool."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "Which association is most important for meconium ileus",
+    "topic": "Meconium ileus association",
+    "options": {
+      "A": "Trisomy 13",
+      "B": "Turner syndrome",
+      "C": "Cystic fibrosis",
+      "D": "Rotavirus vaccine"
+    },
+    "correct": "C",
+    "explanation": "Meconium ileus is strongly associated with cystic fibrosis.",
+    "optionExplanations": {
+      "A": "Trisomy 13 is associated with omphalocele in the notes.",
+      "B": "Turner syndrome is associated with coarctation/bicuspid aortic valve, not meconium ileus.",
+      "C": "Correct. Meconium ileus is strongly associated with cystic fibrosis.",
+      "D": "Rotavirus vaccine is associated with intussusception risk."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "An infant has episodes of severe colicky abdominal pain, draws knees to the chest, and passes currant jelly stool. Ultrasound shows a target sign. Which diagnosis is most likely",
+    "topic": "Intussusception",
+    "options": {
+      "A": "Meckel diverticulum",
+      "B": "Intussusception",
+      "C": "Pyloric stenosis",
+      "D": "Duodenal atresia"
+    },
+    "correct": "B",
+    "explanation": "Intussusception occurs when proximal bowel telescopes into distal bowel, causing colicky pain, knees-to-chest posture, currant jelly stool, and target sign on ultrasound.",
+    "optionExplanations": {
+      "A": "Meckel causes painless bloody stool and is diagnosed with technetium scan.",
+      "B": "Correct. Intussusception occurs when proximal bowel telescopes into distal bowel, causing colicky pain, knees-to-chest posture, currant jelly stool, and target sign on ultrasound.",
+      "C": "Pyloric stenosis causes nonbilious projectile vomiting.",
+      "D": "Duodenal atresia causes bilious vomiting and double bubble."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "Which treatment is most appropriate for intussusception if there is no perforation or peritonitis",
+    "topic": "Intussusception treatment",
+    "options": {
+      "A": "Pyloromyotomy",
+      "B": "Kasai procedure",
+      "C": "Phototherapy",
+      "D": "Pneumatic enema"
+    },
+    "correct": "D",
+    "explanation": "Intussusception is treated with pneumatic enema when appropriate.",
+    "optionExplanations": {
+      "A": "Pyloromyotomy treats pyloric stenosis.",
+      "B": "Kasai procedure is used for biliary atresia.",
+      "C": "Phototherapy treats unconjugated hyperbilirubinemia.",
+      "D": "Correct. Intussusception is treated with pneumatic enema when appropriate."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A toddler has painless bloody stool. A true diverticulum from a vitelline/omphalomesenteric duct remnant is suspected. Which diagnostic test is most appropriate",
+    "topic": "Meckel diverticulum",
+    "options": {
+      "A": "Technetium-99m pertechnetate scan",
+      "B": "Rectal biopsy",
+      "C": "Sweat chloride test",
+      "D": "Abdominal ultrasound for target sign"
+    },
+    "correct": "A",
+    "explanation": "Meckel diverticulum is a true diverticulum from a vitelline duct remnant and classically causes painless bloody stool. Technetium-99m pertechnetate scan detects ectopic gastric mucosa.",
+    "optionExplanations": {
+      "A": "Correct. Meckel diverticulum is a true diverticulum from a vitelline duct remnant and classically causes painless bloody stool. Technetium-99m pertechnetate scan detects ectopic gastric mucosa.",
+      "B": "Rectal biopsy diagnoses Hirschsprung disease.",
+      "C": "Sweat chloride confirms cystic fibrosis.",
+      "D": "Target sign suggests intussusception."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A 5-year-old has chronic constipation with stool retention and recurrent fecal soiling from liquid stool leaking around impacted stool. Which diagnosis is most likely",
+    "topic": "Encopresis",
+    "options": {
+      "A": "Hirschsprung disease",
+      "B": "Encopresis from chronic constipation",
+      "C": "Intussusception",
+      "D": "Meconium ileus"
+    },
+    "correct": "B",
+    "explanation": "Encopresis usually occurs after age 4 due to chronic constipation with impacted stool and liquid stool leakage around retained stool, causing recurrent fecal soiling.",
+    "optionExplanations": {
+      "A": "Hirschsprung usually presents neonatally with delayed meconium, distention, and bilious vomiting.",
+      "B": "Correct. Encopresis usually occurs after age 4 due to chronic constipation with impacted stool and liquid stool leakage around retained stool, causing recurrent fecal soiling.",
+      "C": "Intussusception presents with colicky pain and currant jelly stool.",
+      "D": "Meconium ileus is neonatal obstruction associated with CF."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "Which medication is an osmotic agent used for pediatric constipation in the notes",
+    "topic": "Constipation treatment",
+    "options": {
+      "A": "Senna",
+      "B": "Bisacodyl",
+      "C": "Docusate",
+      "D": "Polyethylene glycol"
+    },
+    "correct": "D",
+    "explanation": "Osmotic constipation medications listed include polyethylene glycol, lactulose, sorbitol, and milk of magnesia.",
+    "optionExplanations": {
+      "A": "Senna is a stimulant laxative.",
+      "B": "Bisacodyl is a stimulant laxative.",
+      "C": "Docusate is a stool softener.",
+      "D": "Correct. Osmotic constipation medications listed include polyethylene glycol, lactulose, sorbitol, and milk of magnesia."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child swallows a small blunt object and is asymptomatic. Imaging shows the object is below the diaphragm. Which management is most appropriate",
+    "topic": "Foreign body ingestion",
+    "options": {
+      "A": "Emergent endoscopy",
+      "B": "Immediate laparotomy",
+      "C": "Observe",
+      "D": "Phototherapy"
+    },
+    "correct": "C",
+    "explanation": "Most ingested foreign bodies pass spontaneously. Observe if the child is asymptomatic and the object is small/blunt and below the diaphragm.",
+    "optionExplanations": {
+      "A": "Emergent endoscopy is needed for a button battery or sharp object in the esophagus.",
+      "B": "Surgery is considered if a blunt object beyond the stomach remains in the same location.",
+      "C": "Correct. Most ingested foreign bodies pass spontaneously. Observe if the child is asymptomatic and the object is small/blunt and below the diaphragm.",
+      "D": "Phototherapy treats unconjugated hyperbilirubinemia."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A toddler has a button battery lodged in the esophagus. Which management is required",
+    "topic": "Button battery ingestion",
+    "options": {
+      "A": "Emergent endoscopy",
+      "B": "Observation only",
+      "C": "Wait for stool passage",
+      "D": "Pneumatic enema"
+    },
+    "correct": "A",
+    "explanation": "A button battery in the esophagus requires emergent endoscopy due to caustic injury, liquefactive necrosis, and perforation risk.",
+    "optionExplanations": {
+      "A": "Correct. A button battery in the esophagus requires emergent endoscopy due to caustic injury, liquefactive necrosis, and perforation risk.",
+      "B": "Observation is for asymptomatic small blunt objects below the diaphragm, not esophageal button batteries.",
+      "C": "Esophageal button batteries require urgent removal.",
+      "D": "Pneumatic enema treats intussusception."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A jaundiced newborn has unconjugated bilirubin. Which property makes this form dangerous to the brain",
+    "topic": "Indirect hyperbilirubinemia",
+    "options": {
+      "A": "It is water soluble and cannot cross the BBB",
+      "B": "It is excreted directly in urine",
+      "C": "It always indicates biliary atresia",
+      "D": "It is fat soluble and can cross the blood-brain barrier, causing kernicterus"
+    },
+    "correct": "D",
+    "explanation": "Unconjugated bilirubin is fat soluble, can cross the blood-brain barrier, and can cause kernicterus. It is not excreted in urine.",
+    "optionExplanations": {
+      "A": "This describes conjugated bilirubin.",
+      "B": "Unconjugated bilirubin is not water soluble and has no urinary excretion.",
+      "C": "Biliary atresia causes direct/conjugated hyperbilirubinemia.",
+      "D": "Correct. Unconjugated bilirubin is fat soluble, can cross the blood-brain barrier, and can cause kernicterus. It is not excreted in urine."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A newborn has direct hyperbilirubinemia. Which interpretation is most accurate",
+    "topic": "Direct hyperbilirubinemia",
+    "options": {
+      "A": "Usually physiologic and resolves by day 5",
+      "B": "Can cause kernicterus because it crosses the BBB",
+      "C": "Always pathological and suggests cholestasis or duct problem",
+      "D": "Cannot be excreted in urine"
+    },
+    "correct": "C",
+    "explanation": "Direct/conjugated hyperbilirubinemia is always pathological and suggests cholestasis or a duct problem. Conjugated bilirubin is water soluble, cannot cross the BBB, and is excreted in urine.",
+    "optionExplanations": {
+      "A": "That describes physiologic unconjugated jaundice.",
+      "B": "Conjugated bilirubin cannot cross the BBB.",
+      "C": "Correct. Direct/conjugated hyperbilirubinemia is always pathological and suggests cholestasis or a duct problem. Conjugated bilirubin is water soluble, cannot cross the BBB, and is excreted in urine.",
+      "D": "Conjugated bilirubin is water soluble and can be excreted in urine."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A newborn has physiologic jaundice. Which mechanism is most accurate",
+    "topic": "Physiologic jaundice",
+    "options": {
+      "A": "Complete obstruction of extrahepatic bile ducts",
+      "B": "Increased bilirubin production, immature liver with decreased UGT conjugation, and low gut flora",
+      "C": "Absent ganglion cells in myenteric plexus",
+      "D": "Failure of duodenal recanalization"
+    },
+    "correct": "B",
+    "explanation": "Physiologic jaundice is usually unconjugated and results from increased bilirubin production, decreased conjugation from immature liver/low UGT, and low gut flora.",
+    "optionExplanations": {
+      "A": "This describes biliary atresia and causes direct hyperbilirubinemia.",
+      "B": "Correct. Physiologic jaundice is usually unconjugated and results from increased bilirubin production, decreased conjugation from immature liver/low UGT, and low gut flora.",
+      "C": "This describes Hirschsprung disease.",
+      "D": "This causes duodenal atresia."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "How does phototherapy treat neonatal indirect hyperbilirubinemia",
+    "topic": "Phototherapy",
+    "options": {
+      "A": "Converts bilirubin into a water-soluble form for urinary excretion",
+      "B": "Creates a recto-anal inhibitory reflex",
+      "C": "Closes the ductus arteriosus",
+      "D": "Removes ectopic gastric mucosa"
+    },
+    "correct": "A",
+    "explanation": "Phototherapy converts bilirubin into a water-soluble form, allowing urinary excretion.",
+    "optionExplanations": {
+      "A": "Correct. Phototherapy converts bilirubin into a water-soluble form, allowing urinary excretion.",
+      "B": "Absent RAIR is a Hirschsprung diagnostic finding, not phototherapy mechanism.",
+      "C": "Indomethacin/ibuprofen promote ductal closure.",
+      "D": "Surgical correction may treat Meckel diverticulum; technetium scan detects ectopic gastric mucosa."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "An infant has jaundice lasting more than 2 weeks, dark urine, pale acholic stools, and progressive cholestasis. Histology shows ductular proliferation. Which diagnosis is most likely",
+    "topic": "Biliary atresia",
+    "options": {
+      "A": "Physiologic jaundice",
+      "B": "Pyloric stenosis",
+      "C": "Biliary atresia",
+      "D": "Intussusception"
+    },
+    "correct": "C",
+    "explanation": "Biliary atresia causes neonatal cholestasis with jaundice >2 weeks, dark urine, pale/acholic stools, ductular proliferation, and rapid progression to biliary cirrhosis.",
+    "optionExplanations": {
+      "A": "Physiologic jaundice is usually unconjugated and resolves by day of life 5.",
+      "B": "Pyloric stenosis causes nonbilious projectile vomiting at 3–6 weeks.",
+      "C": "Correct. Biliary atresia causes neonatal cholestasis with jaundice >2 weeks, dark urine, pale/acholic stools, ductular proliferation, and rapid progression to biliary cirrhosis.",
+      "D": "Intussusception causes colicky pain, currant jelly stool, and target sign."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "Which treatment improves outcomes in biliary atresia, although many cases still progress to transplant",
+    "topic": "Biliary atresia treatment",
+    "options": {
+      "A": "Pyloromyotomy",
+      "B": "Kasai procedure",
+      "C": "Pneumatic enema",
+      "D": "Gastrografin enema only"
+    },
+    "correct": "B",
+    "explanation": "Kasai procedure improves outcomes in biliary atresia, though many cases still progress to liver transplant.",
+    "optionExplanations": {
+      "A": "Pyloromyotomy treats pyloric stenosis.",
+      "B": "Correct. Kasai procedure improves outcomes in biliary atresia, though many cases still progress to liver transplant.",
+      "C": "Pneumatic enema treats intussusception.",
+      "D": "Gastrografin enema is used for meconium ileus."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

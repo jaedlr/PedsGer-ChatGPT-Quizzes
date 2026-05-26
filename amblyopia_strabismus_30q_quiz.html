@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amblyopia and Strabismus Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 4-year-old has decreased vision in one eye due to abnormal visual development. The eye itself may appear structurally normal. Which diagnosis best fits",
+    "topic": "Amblyopia definition",
+    "options": {
+      "A": "Strabismus",
+      "B": "Pseudostrabismus",
+      "C": "Congenital glaucoma",
+      "D": "Amblyopia"
+    },
+    "correct": "D",
+    "explanation": "Amblyopia is decreased vision from abnormal visual development. It is a vision problem, not primarily an alignment problem.",
+    "optionExplanations": {
+      "A": "Strabismus is eye misalignment and can cause amblyopia, but it is not itself the decreased visual development problem.",
+      "B": "Pseudostrabismus is false appearance of crossed eyes from epicanthal folds with symmetric corneal light reflex.",
+      "C": "Congenital glaucoma causes cloudy/enlarged cornea and photophobia.",
+      "D": "Correct. Amblyopia is decreased vision from abnormal visual development. It is a vision problem, not primarily an alignment problem."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A toddler’s eyes appear crossed. Exam shows epicanthal folds, but the corneal light reflex is symmetric in both eyes. Which diagnosis is most likely",
+    "topic": "Pseudostrabismus",
+    "options": {
+      "A": "Comitant strabismus",
+      "B": "Non-comitant strabismus",
+      "C": "Pseudostrabismus",
+      "D": "Amblyopia"
+    },
+    "correct": "C",
+    "explanation": "Epicanthal folds can make eyes appear crossed, but a symmetric corneal light reflex suggests pseudostrabismus rather than true strabismus.",
+    "optionExplanations": {
+      "A": "True strabismus would have misalignment; corneal light reflex may be asymmetric.",
+      "B": "Non-comitant strabismus varies by gaze direction and suggests muscle/nerve/restrictive pathology.",
+      "C": "Correct. Epicanthal folds can make eyes appear crossed, but a symmetric corneal light reflex suggests pseudostrabismus rather than true strabismus.",
+      "D": "Amblyopia is decreased vision from abnormal visual development, not the false appearance of misalignment."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A child has eye misalignment that can lead the brain to suppress input from one eye, resulting in reduced visual development. Which amblyopia subtype is this",
+    "topic": "Strabismic amblyopia",
+    "options": {
+      "A": "Refractive amblyopia",
+      "B": "Strabismic amblyopia",
+      "C": "Form-deprivation amblyopia",
+      "D": "Pseudostrabismus"
+    },
+    "correct": "B",
+    "explanation": "Strabismic amblyopia occurs when misaligned eyes cause the brain to suppress one eye, impairing visual development.",
+    "optionExplanations": {
+      "A": "Refractive amblyopia is due to unequal or uncorrected refractive error and may occur without obvious strabismus.",
+      "B": "Correct. Strabismic amblyopia occurs when misaligned eyes cause the brain to suppress one eye, impairing visual development.",
+      "C": "Form-deprivation amblyopia occurs when cataract or occlusion prevents normal visual input.",
+      "D": "Pseudostrabismus is apparent misalignment from epicanthal folds with symmetric light reflex."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A child has decreased vision in one eye from unequal uncorrected refractive error, but there is no obvious eye misalignment. Which amblyopia subtype is most likely",
+    "topic": "Refractive amblyopia",
+    "options": {
+      "A": "Strabismic amblyopia",
+      "B": "Form-deprivation amblyopia",
+      "C": "Comitant strabismus",
+      "D": "Refractive amblyopia"
+    },
+    "correct": "D",
+    "explanation": "Refractive amblyopia results from unequal or uncorrected refractive error and may occur without obvious strabismus.",
+    "optionExplanations": {
+      "A": "Strabismic amblyopia is due to misaligned eyes and suppression of one eye.",
+      "B": "Form-deprivation amblyopia results from visual deprivation such as cataract or occlusion.",
+      "C": "Comitant strabismus is alignment deviation that remains similar in all gaze directions.",
+      "D": "Correct. Refractive amblyopia results from unequal or uncorrected refractive error and may occur without obvious strabismus."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "An infant has a unilateral congenital cataract that prevents normal visual input and later develops poor vision in that eye. Which amblyopia subtype is most likely",
+    "topic": "Form-deprivation amblyopia",
+    "options": {
+      "A": "Refractive amblyopia",
+      "B": "Form-deprivation amblyopia",
+      "C": "Strabismic amblyopia",
+      "D": "Pseudostrabismus"
+    },
+    "correct": "B",
+    "explanation": "Form-deprivation amblyopia occurs when visual deprivation, such as cataract or occlusion, prevents normal visual input.",
+    "optionExplanations": {
+      "A": "Refractive amblyopia is due to unequal or uncorrected refractive error.",
+      "B": "Correct. Form-deprivation amblyopia occurs when visual deprivation, such as cataract or occlusion, prevents normal visual input.",
+      "C": "Strabismic amblyopia is due to ocular misalignment and suppression.",
+      "D": "Pseudostrabismus is false appearance of crossing with symmetric light reflex."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A student asks for the key distinction between amblyopia and strabismus. Which statement is most accurate",
+    "topic": "Amblyopia vs strabismus",
+    "options": {
+      "A": "Amblyopia is always eye misalignment; strabismus is always poor vision from refractive error",
+      "B": "Amblyopia and strabismus are identical terms",
+      "C": "Amblyopia is a vision problem; strabismus is an alignment problem",
+      "D": "Amblyopia only occurs in neonates; strabismus only occurs in adults"
+    },
+    "correct": "C",
+    "explanation": "High-yield distinction: amblyopia is a vision problem; strabismus is an alignment problem. Amblyopia may or may not be associated with strabismus.",
+    "optionExplanations": {
+      "A": "This reverses and overstates the definitions.",
+      "B": "They are related but distinct.",
+      "C": "Correct. High-yield distinction: amblyopia is a vision problem; strabismus is an alignment problem. Amblyopia may or may not be associated with strabismus.",
+      "D": "Both are pediatric-relevant problems."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A newborn presents for routine vision screening. Which test approach is most appropriate according to the pediatric vision testing table",
+    "topic": "Vision testing by age",
+    "options": {
+      "A": "Snellen chart",
+      "B": "Tumbling E chart",
+      "C": "Cross-cover test only",
+      "D": "Red reflex and general ocular exam"
+    },
+    "correct": "D",
+    "explanation": "Newborn vision screening includes red reflex and general ocular exam.",
+    "optionExplanations": {
+      "A": "Snellen chart is used for older children who can cooperate with standard visual acuity testing.",
+      "B": "Tumbling E is used around age 2–4/5 years.",
+      "C": "Cross-cover can assess alignment, but newborn screening emphasizes red reflex/general ocular exam.",
+      "D": "Correct. Newborn vision screening includes red reflex and general ocular exam."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "An 18-month-old is being evaluated for vision. Which testing approach is most age-appropriate",
+    "topic": "Infant vision testing",
+    "options": {
+      "A": "Snellen chart only",
+      "B": "Tumbling E chart only",
+      "C": "Formal refraction only without exam",
+      "D": "Fixes and follows, hand-cover test, and visual tracking"
+    },
+    "correct": "D",
+    "explanation": "For infants to 2 years, the table lists fixes and follows, hand-cover test, and visual tracking.",
+    "optionExplanations": {
+      "A": "Snellen chart is for older children.",
+      "B": "Tumbling E is for children around age 2–4/5.",
+      "C": "General exam and tracking/cover tests remain important.",
+      "D": "Correct. For infants to 2 years, the table lists fixes and follows, hand-cover test, and visual tracking."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A 3-year-old needs visual acuity screening but cannot reliably read letters. Which test is most appropriate",
+    "topic": "Tumbling E chart",
+    "options": {
+      "A": "Snellen chart as first choice",
+      "B": "Red reflex only",
+      "C": "Tumbling E chart while watching for peeking",
+      "D": "No vision testing until age 7"
+    },
+    "correct": "C",
+    "explanation": "For ages 2–4/5, the table lists the Tumbling E chart and watching for peeking.",
+    "optionExplanations": {
+      "A": "Snellen chart is used in older children.",
+      "B": "Red reflex is important but does not replace age-appropriate visual acuity testing.",
+      "C": "Correct. For ages 2–4/5, the table lists the Tumbling E chart and watching for peeking.",
+      "D": "Vision screening is performed earlier."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "An older child who can read letters presents for routine visual acuity testing. Which test is most appropriate",
+    "topic": "Snellen chart",
+    "options": {
+      "A": "Fixes and follows only",
+      "B": "Tumbling E only",
+      "C": "Red reflex only",
+      "D": "Snellen chart"
+    },
+    "correct": "D",
+    "explanation": "Older children can be tested with a Snellen chart.",
+    "optionExplanations": {
+      "A": "This is more appropriate for infants to 2 years.",
+      "B": "This is more useful for younger children who cannot read letters.",
+      "C": "Red reflex screens ocular media but does not replace visual acuity testing in older children.",
+      "D": "Correct. Older children can be tested with a Snellen chart."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A clinician shines a light at both eyes. The light reflex is asymmetric between the pupils. What does this suggest",
+    "topic": "Corneal light reflex",
+    "options": {
+      "A": "Possible strabismus",
+      "B": "Normal alignment",
+      "C": "Pseudostrabismus only",
+      "D": "Retinopathy of prematurity"
+    },
+    "correct": "A",
+    "explanation": "Corneal light reflex testing uses a light shined at both eyes. Symmetric reflexes are normal; asymmetric reflex suggests possible strabismus.",
+    "optionExplanations": {
+      "A": "Correct. Corneal light reflex testing uses a light shined at both eyes. Symmetric reflexes are normal; asymmetric reflex suggests possible strabismus.",
+      "B": "Normal corneal light reflex is symmetric.",
+      "C": "Pseudostrabismus should have symmetric corneal light reflex despite apparent crossing.",
+      "D": "ROP is a retinal vascular disease in preterm infants, not diagnosed by asymmetric light reflex."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "During cover-uncover testing, the uncovered eye makes a refocusing movement. What type of deviation does this test detect",
+    "topic": "Cover-uncover test",
+    "options": {
+      "A": "Phoria only",
+      "B": "Congenital glaucoma",
+      "C": "Tropia / manifest deviation",
+      "D": "Retinal detachment"
+    },
+    "correct": "C",
+    "explanation": "Cover-uncover testing detects tropias. A refocusing movement suggests a manifest deviation.",
+    "optionExplanations": {
+      "A": "Phorias are latent deviations better detected with alternate/cross-cover testing.",
+      "B": "Congenital glaucoma presents with cloudy/enlarged cornea and photophobia.",
+      "C": "Correct. Cover-uncover testing detects tropias. A refocusing movement suggests a manifest deviation.",
+      "D": "Retinal detachment is a possible severe ROP complication, not detected by cover-uncover testing."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A child has intermittent or latent ocular misalignment controlled by fusion. Which test is most helpful",
+    "topic": "Alternate cover test",
+    "options": {
+      "A": "Red reflex only",
+      "B": "Cross-cover / alternate cover test",
+      "C": "Snellen chart only",
+      "D": "Heel prick screen"
+    },
+    "correct": "B",
+    "explanation": "Cross-cover/alternate cover testing helps detect latent or intermittent misalignment and is useful for phorias/tropias.",
+    "optionExplanations": {
+      "A": "Red reflex detects ocular media/reflex abnormalities, not latent misalignment as well as alternate cover testing.",
+      "B": "Correct. Cross-cover/alternate cover testing helps detect latent or intermittent misalignment and is useful for phorias/tropias.",
+      "C": "Snellen assesses acuity, not latent eye deviation.",
+      "D": "Heel prick newborn screen is for metabolic/endocrine disorders, not strabismus."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A child’s ocular deviation stays similar in all gaze directions. Which strabismus type is this",
+    "topic": "Comitant strabismus",
+    "options": {
+      "A": "Comitant / non-paralytic strabismus",
+      "B": "Non-comitant / paralytic strabismus",
+      "C": "Phoria only",
+      "D": "Pseudostrabismus"
+    },
+    "correct": "A",
+    "explanation": "Comitant/non-paralytic strabismus means the deviation stays similar in all gaze directions.",
+    "optionExplanations": {
+      "A": "Correct. Comitant/non-paralytic strabismus means the deviation stays similar in all gaze directions.",
+      "B": "Non-comitant deviation varies by gaze direction and suggests muscle/nerve/restrictive pathology.",
+      "C": "Phoria is a latent deviation controlled by fusion, not the gaze-direction description.",
+      "D": "Pseudostrabismus is false crossing appearance with symmetric light reflex."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A child’s ocular deviation varies depending on gaze direction. Which implication is most accurate",
+    "topic": "Non-comitant strabismus",
+    "options": {
+      "A": "Always normal pseudostrabismus",
+      "B": "Always isolated amblyopia without alignment problem",
+      "C": "Always neonatal conjunctivitis",
+      "D": "Suggests muscle, nerve, or restrictive problem"
+    },
+    "correct": "D",
+    "explanation": "Non-comitant/paralytic/restrictive strabismus varies by gaze direction and suggests a muscle, nerve, or restrictive problem.",
+    "optionExplanations": {
+      "A": "Pseudostrabismus has symmetric corneal light reflex and is not true variable deviation.",
+      "B": "Variable deviation is an alignment issue.",
+      "C": "Neonatal conjunctivitis presents with conjunctival discharge/eye inflammation, not gaze-dependent deviation.",
+      "D": "Correct. Non-comitant/paralytic/restrictive strabismus varies by gaze direction and suggests a muscle, nerve, or restrictive problem."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A deviation is present when both eyes are open. Which term describes this finding",
+    "topic": "Tropia",
+    "options": {
+      "A": "Tropia",
+      "B": "Phoria",
+      "C": "Amblyopia",
+      "D": "Pseudostrabismus"
+    },
+    "correct": "A",
+    "explanation": "A tropia is a manifest deviation present when both eyes are open.",
+    "optionExplanations": {
+      "A": "Correct. A tropia is a manifest deviation present when both eyes are open.",
+      "B": "A phoria is latent and controlled by fusion, appearing with cover testing.",
+      "C": "Amblyopia is decreased vision from abnormal visual development.",
+      "D": "Pseudostrabismus is apparent misalignment without true deviation."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A latent ocular deviation is controlled by fusion and appears only with cover testing. Which term describes this finding",
+    "topic": "Phoria",
+    "options": {
+      "A": "Phoria",
+      "B": "Tropia",
+      "C": "Amblyopia",
+      "D": "Form-deprivation amblyopia"
+    },
+    "correct": "A",
+    "explanation": "A phoria is a latent deviation controlled by fusion that appears with cover testing.",
+    "optionExplanations": {
+      "A": "Correct. A phoria is a latent deviation controlled by fusion that appears with cover testing.",
+      "B": "A tropia is manifest and present when both eyes are open.",
+      "C": "Amblyopia is abnormal visual development causing decreased vision.",
+      "D": "Form-deprivation amblyopia is caused by deprivation such as cataract or occlusion."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A 5-year-old is diagnosed with amblyopia. Which treatment principle is most important",
+    "topic": "Amblyopia treatment timing",
+    "options": {
+      "A": "Wait until teenage years because outcomes improve with age",
+      "B": "Treat early because amblyopia is usually most treatable before age 6",
+      "C": "Treat only if strabismus surgery is planned first",
+      "D": "Avoid refractive correction until adulthood"
+    },
+    "correct": "B",
+    "explanation": "Amblyopia must be detected and treated early for best outcome and is usually most treatable before age 6.",
+    "optionExplanations": {
+      "A": "Delayed treatment reduces chance of best visual recovery.",
+      "B": "Correct. Amblyopia must be detected and treated early for best outcome and is usually most treatable before age 6.",
+      "C": "Amblyopia should be treated early and before strabismus surgery when both are present.",
+      "D": "Correcting refractive error is a treatment option."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A child has amblyopia due to refractive error. Which intervention is appropriate",
+    "topic": "Amblyopia treatment options",
+    "options": {
+      "A": "Ignore until age 10",
+      "B": "Acyclovir",
+      "C": "Ceftriaxone single dose",
+      "D": "Correct the refractive error"
+    },
+    "correct": "D",
+    "explanation": "Amblyopia treatment options include correcting refractive error, patching/occlusion of the stronger eye, and pharmacologic penalization such as atropine blur of the stronger eye.",
+    "optionExplanations": {
+      "A": "Amblyopia should be treated early, usually before age 6 for best outcomes.",
+      "B": "Acyclovir is used for high-risk varicella, not amblyopia.",
+      "C": "Ceftriaxone treats gonococcal conjunctivitis, not amblyopia.",
+      "D": "Correct. Amblyopia treatment options include correcting refractive error, patching/occlusion of the stronger eye, and pharmacologic penalization such as atropine blur of the stronger eye."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A child with amblyopia is prescribed occlusion therapy. Which eye is patched",
+    "topic": "Patching therapy",
+    "options": {
+      "A": "The weaker eye",
+      "B": "Both eyes continuously",
+      "C": "The stronger eye",
+      "D": "Neither eye because patching is never used"
+    },
+    "correct": "C",
+    "explanation": "Patching/occlusion of the stronger eye forces use of the weaker amblyopic eye.",
+    "optionExplanations": {
+      "A": "Patching the weaker eye would worsen deprivation and does not train the amblyopic eye.",
+      "B": "This would deprive visual input.",
+      "C": "Correct. Patching/occlusion of the stronger eye forces use of the weaker amblyopic eye.",
+      "D": "Patching is a standard amblyopia treatment option."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A child with amblyopia is treated with atropine blur of one eye. Which eye is pharmacologically penalized",
+    "topic": "Atropine penalization",
+    "options": {
+      "A": "The weaker eye",
+      "B": "The stronger eye",
+      "C": "Both eyes equally for congenital glaucoma",
+      "D": "Only the eye with gonococcal infection"
+    },
+    "correct": "B",
+    "explanation": "Pharmacologic penalization uses atropine to blur the stronger eye, encouraging use of the weaker amblyopic eye.",
+    "optionExplanations": {
+      "A": "Blurring the weaker eye would not help amblyopia.",
+      "B": "Correct. Pharmacologic penalization uses atropine to blur the stronger eye, encouraging use of the weaker amblyopic eye.",
+      "C": "Atropine penalization is an amblyopia therapy, not glaucoma treatment.",
+      "D": "Gonococcal conjunctivitis is treated with ceftriaxone."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A child is found to have true strabismus. What is the appropriate referral principle",
+    "topic": "Strabismus referral",
+    "options": {
+      "A": "Refer all patients with strabismus to ophthalmology",
+      "B": "Only refer if the child is older than 10",
+      "C": "Never refer if there is no pain",
+      "D": "Treat only with oral erythromycin"
+    },
+    "correct": "A",
+    "explanation": "The notes state that all patients with strabismus should be referred to ophthalmology.",
+    "optionExplanations": {
+      "A": "Correct. The notes state that all patients with strabismus should be referred to ophthalmology.",
+      "B": "Referral should occur when strabismus is identified, not delayed until later childhood.",
+      "C": "Strabismus can cause amblyopia even without pain.",
+      "D": "Oral erythromycin treats chlamydial neonatal conjunctivitis, not strabismus."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child has both amblyopia and strabismus. Which management sequence is emphasized before considering strabismus surgery",
+    "topic": "Amblyopia before surgery",
+    "options": {
+      "A": "Treat amblyopia first",
+      "B": "Perform strabismus surgery before treating vision",
+      "C": "Avoid ophthalmology referral",
+      "D": "Treat with vitamin A first"
+    },
+    "correct": "A",
+    "explanation": "When amblyopia and strabismus coexist, amblyopia should be treated first before considering strabismus surgery.",
+    "optionExplanations": {
+      "A": "Correct. When amblyopia and strabismus coexist, amblyopia should be treated first before considering strabismus surgery.",
+      "B": "The notes emphasize treating amblyopia first.",
+      "C": "All strabismus should be referred to ophthalmology.",
+      "D": "Vitamin A is used in measles, not amblyopia/strabismus management."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A neonate has cloudy cornea, photophobia, and enlarged cornea. Which diagnosis requires urgent referral",
+    "topic": "Congenital glaucoma",
+    "options": {
+      "A": "Pseudostrabismus",
+      "B": "Congenital glaucoma",
+      "C": "Refractive amblyopia",
+      "D": "Roseola"
+    },
+    "correct": "B",
+    "explanation": "Classic congenital glaucoma signs include cloudy cornea, photophobia, and enlarged cornea. It requires urgent referral and can have good surgical outcomes with goniotomy.",
+    "optionExplanations": {
+      "A": "Pseudostrabismus is apparent eye crossing from epicanthal folds with symmetric light reflex.",
+      "B": "Correct. Classic congenital glaucoma signs include cloudy cornea, photophobia, and enlarged cornea. It requires urgent referral and can have good surgical outcomes with goniotomy.",
+      "C": "Refractive amblyopia is decreased vision from refractive error.",
+      "D": "Roseola is a viral exanthem with high fever and trunk-first rash."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "Which finding is an urgent ophthalmology referral trigger according to the notes",
+    "topic": "Urgent referral",
+    "options": {
+      "A": "Symmetric corneal light reflex with epicanthal folds only",
+      "B": "Normal red reflex in a well infant",
+      "C": "Mild growing pains at night",
+      "D": "Decreased or absent red reflex"
+    },
+    "correct": "D",
+    "explanation": "Urgent referral triggers include unusually large eyes, decreased or absent red reflex, poor vision, suspected congenital cataract, strabismus, and possible amblyopia needing early treatment.",
+    "optionExplanations": {
+      "A": "This suggests pseudostrabismus rather than urgent true strabismus.",
+      "B": "Normal red reflex is reassuring, not an urgent trigger.",
+      "C": "Growing pains are musculoskeletal and not an urgent ophthalmology referral trigger.",
+      "D": "Correct. Urgent referral triggers include unusually large eyes, decreased or absent red reflex, poor vision, suspected congenital cataract, strabismus, and possible amblyopia needing early treatment."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A neonate develops purulent conjunctivitis 24–48 hours after birth. Which cause and treatment pairing is most likely",
+    "topic": "Gonococcal conjunctivitis",
+    "options": {
+      "A": "Chlamydial conjunctivitis; oral erythromycin for 14 days",
+      "B": "Chemical irritation; no infectious treatment",
+      "C": "Gonococcal conjunctivitis; ceftriaxone single dose",
+      "D": "ROP; anti-VEGF"
+    },
+    "correct": "C",
+    "explanation": "Neonatal conjunctivitis at 24–48 hours suggests gonococcal conjunctivitis, treated with ceftriaxone 25–50 mg/kg up to 125 mg single dose.",
+    "optionExplanations": {
+      "A": "Chlamydial conjunctivitis usually occurs at 1–2 weeks.",
+      "B": "Chemical irritation is immediate after prophylaxis, not classically 24–48 hours.",
+      "C": "Correct. Neonatal conjunctivitis at 24–48 hours suggests gonococcal conjunctivitis, treated with ceftriaxone 25–50 mg/kg up to 125 mg single dose.",
+      "D": "ROP is a retinal vascular disease in preterm infants."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A neonate develops conjunctivitis 1–2 weeks after birth. Which cause and treatment pairing is most likely",
+    "topic": "Chlamydial conjunctivitis",
+    "options": {
+      "A": "Gonococcal conjunctivitis; ceftriaxone single dose",
+      "B": "Chlamydial conjunctivitis; oral erythromycin for 14 days",
+      "C": "Chemical irritation; historically silver nitrate-related",
+      "D": "Congenital glaucoma; goniotomy"
+    },
+    "correct": "B",
+    "explanation": "Neonatal conjunctivitis at 1–2 weeks suggests chlamydial conjunctivitis. The notes list oral erythromycin 50 mg/kg/day for 14 days, with cefotaxime/ceftazidime alternatives listed.",
+    "optionExplanations": {
+      "A": "Gonococcal conjunctivitis is classically 24–48 hours after birth.",
+      "B": "Correct. Neonatal conjunctivitis at 1–2 weeks suggests chlamydial conjunctivitis. The notes list oral erythromycin 50 mg/kg/day for 14 days, with cefotaxime/ceftazidime alternatives listed.",
+      "C": "Chemical irritation is immediate.",
+      "D": "Congenital glaucoma presents with cloudy/enlarged cornea and photophobia."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A newborn develops eye irritation immediately after prophylaxis. Which cause best fits the timing",
+    "topic": "Chemical conjunctivitis",
+    "options": {
+      "A": "Gonococcal conjunctivitis",
+      "B": "Chlamydial conjunctivitis",
+      "C": "Chemical irritation/prophylaxis-related conjunctivitis",
+      "D": "Retinopathy of prematurity"
+    },
+    "correct": "C",
+    "explanation": "Immediate neonatal conjunctivitis is chemical irritation/prophylaxis-related. Historically this was associated with silver nitrate; erythromycin ointment is used prophylactically.",
+    "optionExplanations": {
+      "A": "Gonococcal conjunctivitis is 24–48 hours after birth.",
+      "B": "Chlamydial conjunctivitis is 1–2 weeks after birth.",
+      "C": "Correct. Immediate neonatal conjunctivitis is chemical irritation/prophylaxis-related. Historically this was associated with silver nitrate; erythromycin ointment is used prophylactically.",
+      "D": "ROP is retinal vascular disease, not immediate conjunctivitis."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A premature infant with birthweight 1200 g received supplemental oxygen. Which eye screening is indicated",
+    "topic": "Retinopathy of prematurity",
+    "options": {
+      "A": "Retinopathy of prematurity screening",
+      "B": "Tumbling E chart only",
+      "C": "No screening because low birthweight is protective",
+      "D": "Only corneal light reflex testing"
+    },
+    "correct": "A",
+    "explanation": "ROP occurs in preterm infants with incomplete retinal vascularization and is associated with supplemental oxygen exposure. Screen all infants with birthweight less than 1500 g.",
+    "optionExplanations": {
+      "A": "Correct. ROP occurs in preterm infants with incomplete retinal vascularization and is associated with supplemental oxygen exposure. Screen all infants with birthweight less than 1500 g.",
+      "B": "This is for visual acuity screening in young children, not ROP screening in a preterm infant.",
+      "C": "Low birthweight under 1500 g is an indication for screening.",
+      "D": "Corneal light reflex screens strabismus; ROP requires ophthalmology/telemedicine photo screening."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A preterm infant is diagnosed with retinopathy of prematurity. Which treatment options are listed",
+    "topic": "ROP treatment",
+    "options": {
+      "A": "Patching the stronger eye only",
+      "B": "Ceftriaxone single dose",
+      "C": "Anti-VEGF therapy or laser photocoagulation",
+      "D": "Goniotomy for all cases"
+    },
+    "correct": "C",
+    "explanation": "ROP may spontaneously clear, but treatment options include anti-VEGF therapy and laser photocoagulation. Severe disease can progress through stages up to retinal detachment.",
+    "optionExplanations": {
+      "A": "Patching treats amblyopia, not ROP.",
+      "B": "Ceftriaxone treats gonococcal conjunctivitis.",
+      "C": "Correct. ROP may spontaneously clear, but treatment options include anti-VEGF therapy and laser photocoagulation. Severe disease can progress through stages up to retinal detachment.",
+      "D": "Goniotomy is used for congenital glaucoma, not ROP."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADHD Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 9-year-old has inattention, hyperactivity, and impulsivity at home and school. Symptoms are greater than expected for developmental level and are causing academic impairment. Which additional requirement best supports ADHD diagnosis",
+    "topic": "Core ADHD diagnosis",
+    "options": {
+      "A": "Symptoms resolve completely with stimulant medication",
+      "B": "Symptoms occur only during math class",
+      "C": "Symptoms began before age 12",
+      "D": "Neuroimaging shows a diagnostic ADHD pattern"
+    },
+    "correct": "C",
+    "explanation": "ADHD is a neurobehavioral disorder involving inattention, hyperactivity, and/or impulsivity. Symptoms must begin before age 12, occur in multiple settings, cause significant impairment, and be greater than expected for developmental level.",
+    "optionExplanations": {
+      "A": "Medication response does not confirm ADHD diagnosis.",
+      "B": "Symptoms must occur in multiple settings, not only one class.",
+      "C": "Correct. Onset before age 12 is required.",
+      "D": "Neuroimaging is not diagnostic because it lacks adequate sensitivity/specificity."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A bright 15-year-old girl has late homework, careless mistakes, poor sustained attention, disorganization, forgetfulness, and distractibility. She has no significant hyperactivity or impulsivity. Which presentation best fits",
+    "topic": "ADHD presentations",
+    "options": {
+      "A": "ADHD, predominantly inattentive presentation",
+      "B": "ADHD, combined presentation",
+      "C": "ADHD, predominantly hyperactive/impulsive presentation",
+      "D": "Bipolar disorder"
+    },
+    "correct": "A",
+    "explanation": "Predominantly inattentive ADHD requires inattentive symptoms without meeting the hyperactive/impulsive threshold. It may be missed in high-achieving students, especially girls.",
+    "optionExplanations": {
+      "A": "Correct. Careless mistakes, poor attention, disorganization, and forgetfulness are inattentive symptoms.",
+      "B": "Combined presentation requires both inattentive and hyperactive/impulsive symptom thresholds.",
+      "C": "Hyperactive/impulsive symptoms such as fidgeting, excessive talking, interrupting, and difficulty waiting are not prominent.",
+      "D": "Grandiosity, elevated mood, and episodic manic symptoms would favor bipolar disorder."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A 7-year-old interrupts others, fidgets constantly, talks excessively, leaves his seat, and has poor turn-taking. He has friends and shows remorse after impulsive behavior. Which ADHD presentation best fits",
+    "topic": "ADHD presentations",
+    "options": {
+      "A": "ADHD, predominantly inattentive presentation",
+      "B": "Autism spectrum disorder",
+      "C": "Specific learning disorder",
+      "D": "ADHD, predominantly hyperactive/impulsive presentation"
+    },
+    "correct": "D",
+    "explanation": "Predominantly hyperactive/impulsive ADHD includes fidgeting, leaving the seat, excessive talking, interrupting, and difficulty waiting a turn. Social issues may result from impulsivity rather than core ASD social deficits.",
+    "optionExplanations": {
+      "A": "Inattentive ADHD centers on poor attention, careless mistakes, disorganization, losing things, and forgetfulness.",
+      "B": "Having friends and remorse with impulsivity favors ADHD social difficulties rather than core ASD social deficits.",
+      "C": "Specific learning disorder affects academic skills, not the core hyperactive/impulsive cluster.",
+      "D": "Correct. The symptoms are mostly hyperactive/impulsive."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A 20-year-old is evaluated for ADHD. Which DSM symptom threshold applies for adults age 17 or older",
+    "topic": "ADHD symptom thresholds",
+    "options": {
+      "A": "At least 2 symptoms in either cluster for 1 month",
+      "B": "At least 5 symptoms rather than 6 in the relevant cluster",
+      "C": "At least 6 symptoms in all patients regardless of age",
+      "D": "At least 4 symptoms total for 3 months"
+    },
+    "correct": "B",
+    "explanation": "For ADHD, the symptom threshold is usually 6 symptoms in the relevant cluster for at least 6 months, but if age is 17 or older, the threshold is 5 symptoms instead of 6.",
+    "optionExplanations": {
+      "A": "This threshold is too low and too short.",
+      "B": "Correct. Age ≥17 uses a 5-symptom threshold.",
+      "C": "The threshold changes to 5 symptoms at age 17 or older.",
+      "D": "This is not the DSM threshold described in the lecture."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A child is being evaluated for possible ADHD. Which approach best matches the required diagnostic evaluation",
+    "topic": "ADHD diagnosis and evaluation",
+    "options": {
+      "A": "Only the child’s self-report without collateral information",
+      "B": "Diagnosis by stimulant response alone",
+      "C": "Brain MRI as the required diagnostic test",
+      "D": "History and physical, screening neuro exam, parent/caregiver history, and school information"
+    },
+    "correct": "D",
+    "explanation": "ADHD evaluation requires multiple sources: history/physical, screening neuro exam, parent/caregiver history about symptoms/settings/onset/duration/impairment, and school information such as classroom behavior, learning, attendance, teacher evaluations, report cards, and schoolwork examples.",
+    "optionExplanations": {
+      "A": "Collateral information is important because symptoms must occur across settings.",
+      "B": "Medication response does not confirm ADHD.",
+      "C": "Neuroimaging is not diagnostic.",
+      "D": "Correct. ADHD diagnosis requires multi-source clinical assessment."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A parent asks whether brain imaging can diagnose ADHD. Which answer is most accurate",
+    "topic": "ADHD imaging",
+    "options": {
+      "A": "MRI is diagnostic if basal ganglia volume is low",
+      "B": "CT is required before starting behavioral therapy",
+      "C": "Neuroimaging is not diagnostic because it lacks adequate sensitivity and specificity",
+      "D": "PET scan response to stimulants confirms ADHD"
+    },
+    "correct": "C",
+    "explanation": "Neuroimaging is not diagnostic for ADHD because it lacks adequate specificity and sensitivity.",
+    "optionExplanations": {
+      "A": "The lecture does not support MRI as diagnostic.",
+      "B": "CT is not required before behavioral therapy.",
+      "C": "Correct. Imaging cannot diagnose ADHD.",
+      "D": "Response to stimulants does not confirm ADHD."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A child undergoes Continuous Performance Testing, Wisconsin Card Sorting Test, Stroop testing, and working memory testing during ADHD evaluation. Which interpretation is most accurate",
+    "topic": "Neuropsychological testing",
+    "options": {
+      "A": "These tests are objective and may identify cognitive/learning patterns but are not diagnostic",
+      "B": "These tests replace parent and teacher collateral",
+      "C": "These tests definitively diagnose ADHD",
+      "D": "These tests are used only to diagnose bipolar disorder"
+    },
+    "correct": "A",
+    "explanation": "Neuropsychological testing is objective but not diagnostic for ADHD. It can help identify strength/weakness patterns, cognitive deficits, and learning disorder screening.",
+    "optionExplanations": {
+      "A": "Correct. These tests help characterize deficits but do not diagnose ADHD alone.",
+      "B": "Parent/caregiver and school information remain important.",
+      "C": "Neuropsych testing is supportive, not diagnostic.",
+      "D": "These are listed in the ADHD evaluation context, not as bipolar-specific tests."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A child has inattention and poor school performance. Which group of mimics/comorbidities should be assessed before diagnosing ADHD",
+    "topic": "ADHD mimics and comorbidities",
+    "options": {
+      "A": "Only viral illnesses",
+      "B": "Only congenital heart disease",
+      "C": "Only joint hypermobility",
+      "D": "Vision/hearing problems, learning/language disorder, seizures/tics/migraines, sleep disorders, lead toxicity, substance use, abuse/neglect, and mood/anxiety disorders"
+    },
+    "correct": "D",
+    "explanation": "ADHD evaluation should assess for mimics and comorbidities including vision/hearing impairment, learning/speech/language disorders, seizures, tics, migraines, sleep disorders, medical illness/malnutrition, lead toxicity, pica, substance use, abuse/neglect sequelae, ODD, intermittent explosive disorder, and mood/anxiety disorders.",
+    "optionExplanations": {
+      "A": "This is too narrow.",
+      "B": "Cardiac abnormalities matter for stimulant caution, but this does not cover ADHD mimics.",
+      "C": "Joint hypermobility is not the main mimic group emphasized.",
+      "D": "Correct. ADHD diagnosis requires broad assessment for mimics and comorbidities."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A child with poor attention also has grandiosity, elevated mood, daredevil behavior, uninhibited people-seeking, and excessive silliness/laughing. Which diagnosis is more strongly suggested than ADHD",
+    "topic": "ADHD vs bipolar disorder",
+    "options": {
+      "A": "Specific learning disorder",
+      "B": "Bipolar disorder",
+      "C": "Social pragmatic communication disorder",
+      "D": "Enuresis"
+    },
+    "correct": "B",
+    "explanation": "Features more suggestive of bipolar disorder than ADHD include grandiosity, elevated mood, daredevil acts, uninhibited people-seeking, and excessive silliness/laughing.",
+    "optionExplanations": {
+      "A": "Learning disorder causes academic skill deficits, not elevated mood/grandiosity.",
+      "B": "Correct. Grandiosity and elevated mood strongly favor bipolar disorder over ADHD.",
+      "C": "Social pragmatic communication disorder affects social language use.",
+      "D": "Enuresis is urinary elimination, not mood dysregulation."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A 5-year-old is newly diagnosed with ADHD. Which first-line/main treatment is recommended for ages 4 to 6 years",
+    "topic": "Age-based ADHD treatment",
+    "options": {
+      "A": "Amphetamine as mandatory first-line therapy",
+      "B": "Atomoxetine only because stimulants are prohibited",
+      "C": "Parent training in behavior management, with methylphenidate if behavioral interventions fail",
+      "D": "No treatment until age 12"
+    },
+    "correct": "C",
+    "explanation": "For ages 4 to 6 years, first-line/main treatment is parent training in behavior management; methylphenidate may be used if behavioral interventions fail.",
+    "optionExplanations": {
+      "A": "Behavioral parent training is first-line for this age group.",
+      "B": "Atomoxetine is a nonstimulant option but not the first-line/main treatment listed here.",
+      "C": "Correct. Parent behavior training comes first at age 4–6.",
+      "D": "Early diagnosis and treatment improve academic outcomes; treatment is not delayed until 12."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A 9-year-old has ADHD causing school impairment. Which treatment plan best matches the age-based approach",
+    "topic": "Age-based ADHD treatment",
+    "options": {
+      "A": "FDA-approved ADHD medications plus parent training and classroom behavioral interventions, with IEP support as needed",
+      "B": "Medication only; school intervention is unnecessary",
+      "C": "Parent training only; medications are not used for ages 6 to 12",
+      "D": "Psychodynamic therapy as the only recommended treatment"
+    },
+    "correct": "A",
+    "explanation": "For ages 6 to 12 years, the listed approach is FDA-approved ADHD medications plus parent training and classroom behavioral interventions, with IEP support as needed.",
+    "optionExplanations": {
+      "A": "Correct. Medication plus parent/classroom interventions is the recommended approach.",
+      "B": "School and classroom behavioral interventions remain important.",
+      "C": "Medications are part of treatment for ages 6–12.",
+      "D": "Psychodynamic therapy alone is not the listed main approach."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A child’s attention improves after taking a stimulant. Which diagnostic interpretation is correct",
+    "topic": "Medication response and diagnosis",
+    "options": {
+      "A": "This proves the child has ADHD",
+      "B": "This excludes anxiety and sleep disorders",
+      "C": "This replaces parent and teacher reports",
+      "D": "Medication response does not confirm ADHD diagnosis"
+    },
+    "correct": "D",
+    "explanation": "Medication response does not confirm the diagnosis of ADHD. Diagnosis remains clinical and requires symptoms across settings, impairment, developmental context, and evaluation for mimics/comorbidities.",
+    "optionExplanations": {
+      "A": "Improvement on stimulants does not prove ADHD.",
+      "B": "Mimics such as anxiety and sleep disorders still need assessment.",
+      "C": "Collateral reports remain important.",
+      "D": "Correct. Stimulant response alone is not diagnostic."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A clinician recommends parent management training, reward systems, time-out, response cost/token economy, explicit rules, coordination between school and home, and matching workload to ability. Which ADHD treatment category is this",
+    "topic": "Non-pharmacologic ADHD treatment",
+    "options": {
+      "A": "Neuroimaging-based treatment",
+      "B": "Stimulant pharmacotherapy",
+      "C": "Behavioral and school supports",
+      "D": "Unsupported supplement therapy"
+    },
+    "correct": "C",
+    "explanation": "Non-pharmacologic ADHD treatment includes parent management training, reinforcement/reward systems, time-out, response cost/token economy, explicit house/classroom rules, coordination between school and home, decreasing workload to match ability, and setting time limits for task completion.",
+    "optionExplanations": {
+      "A": "Neuroimaging is not diagnostic or treatment-guiding here.",
+      "B": "Stimulants are medications, not these behavioral strategies.",
+      "C": "Correct. These are behavioral/school supports.",
+      "D": "Diet/supplements are only considered if nutritional deficiency or food intolerance is present."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A child starts methylphenidate for ADHD. Which mechanism best describes methylphenidate and amphetamine-class stimulant action",
+    "topic": "Stimulant mechanism",
+    "options": {
+      "A": "Selective serotonin reuptake inhibition",
+      "B": "Inhibition of dopamine and norepinephrine transporters",
+      "C": "Direct GABA-A receptor activation",
+      "D": "Muscarinic receptor blockade"
+    },
+    "correct": "B",
+    "explanation": "Amphetamines and methylphenidate are structurally similar to dopamine and norepinephrine and inhibit dopamine and norepinephrine transporters.",
+    "optionExplanations": {
+      "A": "SSRIs treat depression/anxiety but not ADHD core symptoms.",
+      "B": "Correct. Stimulants inhibit DA/NE transporters.",
+      "C": "GABA-A activation is not the ADHD stimulant mechanism.",
+      "D": "Muscarinic blockade is not the stimulant mechanism."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A student asks how amphetamines differ from methylphenidate in the lecture. Which additional amphetamine effect was emphasized",
+    "topic": "Amphetamine mechanism",
+    "options": {
+      "A": "Enhances dopamine release",
+      "B": "Suppresses serotonin synthesis",
+      "C": "Blocks acetylcholinesterase",
+      "D": "Irreversibly blocks MAO-B"
+    },
+    "correct": "A",
+    "explanation": "Both methylphenidate and amphetamines inhibit dopamine/norepinephrine transporters, but amphetamines also enhance dopamine release.",
+    "optionExplanations": {
+      "A": "Correct. Amphetamines also enhance dopamine release.",
+      "B": "Serotonin suppression is not the emphasized mechanism.",
+      "C": "Acetylcholinesterase blockade was not the listed ADHD stimulant mechanism.",
+      "D": "MAO-B inhibition is not the mechanism described."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "Which stimulant property was described for amphetamine enantiomers",
+    "topic": "Stimulant pharmacology",
+    "options": {
+      "A": "L-enantiomers provide all therapeutic benefit with no side effects",
+      "B": "D-enantiomers are responsible only for GI adverse effects",
+      "C": "Both enantiomers are inactive prodrugs",
+      "D": "D-enantiomers produce most therapeutic effects, while L-enantiomers are thought to cause more side effects"
+    },
+    "correct": "D",
+    "explanation": "The lecture notes that D-enantiomers produce most therapeutic effects of amphetamines, while L-enantiomers are thought to be responsible for side effects.",
+    "optionExplanations": {
+      "A": "This reverses the lecture’s statement.",
+      "B": "D-enantiomers are described as producing most therapeutic effects.",
+      "C": "They are not both inactive prodrugs.",
+      "D": "Correct. D is therapeutic; L is more associated with side effects."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A child with ADHD starts stimulant therapy. Which group of benefits is expected from stimulants according to the material",
+    "topic": "Stimulant benefits",
+    "options": {
+      "A": "Definitive confirmation of ADHD diagnosis",
+      "B": "Cure of anxiety/depression without other therapy",
+      "C": "Improved inattention, hyperactivity, impulsivity, noncompliance, impulsive aggression, social interaction, and academic productivity/accuracy",
+      "D": "Elimination of all substance use disorder risk"
+    },
+    "correct": "C",
+    "explanation": "Stimulants improve inattention, hyperactivity, impulsivity, noncompliance, impulsive aggression, social interaction, academic productivity/accuracy, motor vehicle accident risk, and criminality risk.",
+    "optionExplanations": {
+      "A": "Response to stimulants does not confirm ADHD diagnosis.",
+      "B": "Stimulants do not treat mood/anxiety disorders as primary therapy.",
+      "C": "Correct. These are listed stimulant benefits.",
+      "D": "ADHD pharmacotherapy may reduce SUD risk, but does not eliminate it."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A child taking methylphenidate develops multiple symptoms. Which is least likely to be a common stimulant adverse effect based on the lecture",
+    "topic": "Stimulant adverse effects",
+    "options": {
+      "A": "Constipation",
+      "B": "Tics",
+      "C": "Decreased appetite",
+      "D": "Headache"
+    },
+    "correct": "A",
+    "explanation": "Common stimulant adverse effects include decreased appetite, insomnia, headache, stomachache, irritability/dysphoria, tics, increased BP/HR, and a very small increased risk of psychosis or bipolar disorder. Constipation was the least likely option in the slide practice question.",
+    "optionExplanations": {
+      "A": "Correct. Constipation is not among the common stimulant effects emphasized.",
+      "B": "Tics are listed as a possible stimulant adverse effect.",
+      "C": "Decreased appetite is common.",
+      "D": "Headache is common."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A child on stimulant therapy develops decreased appetite, insomnia, headache, stomachache, irritability, increased BP/HR, and tics. Which interpretation is most accurate",
+    "topic": "Stimulant adverse effects",
+    "options": {
+      "A": "These are not associated with stimulant medications",
+      "B": "These are recognized stimulant adverse effects that should be monitored",
+      "C": "These prove the original diagnosis was bipolar disorder",
+      "D": "These mean stimulants have no abuse/diversion risk"
+    },
+    "correct": "B",
+    "explanation": "Common stimulant adverse effects include decreased appetite, insomnia, headache, stomachache, irritability/dysphoria, tics, and increased BP/HR. Stimulants also have abuse/diversion risk and cardiovascular warnings.",
+    "optionExplanations": {
+      "A": "These are listed stimulant adverse effects.",
+      "B": "Correct. These adverse effects should be tracked during follow-up.",
+      "C": "Adverse effects do not prove bipolar disorder, though mood symptoms should be monitored.",
+      "D": "Stimulants have abuse/diversion risk."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A child taking an evening stimulant dose has insomnia. Which management step is most appropriate from the lecture table",
+    "topic": "Managing stimulant side effects",
+    "options": {
+      "A": "Add nightly high-dose caffeine",
+      "B": "Increase the evening stimulant dose",
+      "C": "Ignore it because insomnia is never medication-related",
+      "D": "Use sleep hygiene, avoid evening dosing, and consider melatonin or clonidine/guanfacine"
+    },
+    "correct": "D",
+    "explanation": "Stimulant-associated insomnia can be managed with sleep hygiene, avoiding evening dosing, and considering melatonin or clonidine/guanfacine.",
+    "optionExplanations": {
+      "A": "Caffeine would likely worsen insomnia.",
+      "B": "Increasing evening dosing would likely worsen insomnia.",
+      "C": "Insomnia is a recognized stimulant adverse effect.",
+      "D": "Correct. These are the listed management steps."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A child on stimulant therapy has weight loss and poor appetite. Which management strategy was listed",
+    "topic": "Managing stimulant side effects",
+    "options": {
+      "A": "Increase the dose until appetite returns",
+      "B": "Give medication with meals, add snacks, and consider drug holidays",
+      "C": "Switch immediately to an SSRI as monotherapy for ADHD",
+      "D": "Avoid all meals before school"
+    },
+    "correct": "B",
+    "explanation": "For stimulant-related weight loss/appetite suppression, the lecture recommends giving with meals, adding snacks, and considering drug holidays.",
+    "optionExplanations": {
+      "A": "Increasing dose may worsen appetite suppression.",
+      "B": "Correct. These are listed management steps for appetite/weight loss.",
+      "C": "SSRIs do not treat core ADHD symptoms.",
+      "D": "Avoiding meals would worsen weight loss."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A child on stimulant medication develops worsening tics. Which management approach is listed",
+    "topic": "Managing stimulant side effects",
+    "options": {
+      "A": "Continue unchanged because tics are unrelated to stimulants",
+      "B": "Add a benzodiazepine as first-line ADHD therapy",
+      "C": "Decrease dose, switch stimulant, treat tics, or try a nonstimulant",
+      "D": "Start chelation therapy"
+    },
+    "correct": "C",
+    "explanation": "For tics during stimulant treatment, management includes decreasing the dose, switching stimulants, treating tics, or trying a nonstimulant.",
+    "optionExplanations": {
+      "A": "Tics are listed as a stimulant adverse effect/caution.",
+      "B": "Benzodiazepines are not first-line ADHD therapy.",
+      "C": "Correct. These are the listed strategies for tics.",
+      "D": "Chelation is unrelated and not an ADHD treatment."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A patient with ADHD and concern for diversion is started on atomoxetine. Which description is most accurate",
+    "topic": "Non-stimulant ADHD medications",
+    "options": {
+      "A": "Controlled stimulant that enhances dopamine release",
+      "B": "SSRI that treats core ADHD symptoms",
+      "C": "Alpha-2 agonist mainly used for tics",
+      "D": "Noncontrolled norepinephrine reuptake inhibitor with daily dosing and suicide warning"
+    },
+    "correct": "D",
+    "explanation": "Atomoxetine is a nonstimulant norepinephrine reuptake inhibitor. It is noncontrolled, dosed daily, and has a suicide warning.",
+    "optionExplanations": {
+      "A": "Atomoxetine is noncontrolled and nonstimulant.",
+      "B": "SSRIs treat depression/anxiety but not ADHD core symptoms.",
+      "C": "Clonidine/guanfacine are alpha-2 agonists.",
+      "D": "Correct. Atomoxetine is a noncontrolled NE reuptake inhibitor with a suicide warning."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A child with ADHD has prominent impulsivity, emotional lability, irritability, aggression, anxiety, and tics. Which nonstimulant class was described as helpful for these features",
+    "topic": "Alpha-2 agonists",
+    "options": {
+      "A": "Alpha-2 agonists such as clonidine or guanfacine",
+      "B": "SSRIs",
+      "C": "Modafinil only",
+      "D": "TCAs only"
+    },
+    "correct": "A",
+    "explanation": "Alpha-2 agonists such as clonidine and guanfacine are helpful for impulsivity, emotional lability, irritability, aggression, anxiety, and tics.",
+    "optionExplanations": {
+      "A": "Correct. Clonidine/guanfacine are alpha-2 agonists helpful for these symptoms.",
+      "B": "SSRIs treat anxiety/depression but not ADHD core symptoms.",
+      "C": "Modafinil is listed as a nonstimulant option, but not the class highlighted for these features.",
+      "D": "TCAs are listed as nonstimulants but have cardiac risk and are not the specific class for this symptom cluster."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "An adolescent with ADHD has active substance use disorder. Which medication approach best matches the lecture",
+    "topic": "ADHD with substance use disorder",
+    "options": {
+      "A": "Start immediate-release stimulant without monitoring",
+      "B": "Avoid all ADHD treatment permanently",
+      "C": "Use a nonstimulant first",
+      "D": "Treat only with an SSRI"
+    },
+    "correct": "C",
+    "explanation": "For ADHD with active substance use disorder, the lecture recommends using a nonstimulant first. If nonstimulants fail, an extended-release stimulant may be considered with monitoring.",
+    "optionExplanations": {
+      "A": "Immediate-release stimulants without monitoring are not the recommended approach.",
+      "B": "ADHD can still be treated, but medication choice/monitoring changes.",
+      "C": "Correct. Active SUD → nonstimulant first.",
+      "D": "SSRIs do not treat ADHD core symptoms."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A patient with ADHD has a past substance use disorder but has been abstinent for 4 months. Which management approach is recommended if pharmacotherapy is used",
+    "topic": "ADHD with substance use disorder",
+    "options": {
+      "A": "No follow-up is required once abstinent",
+      "B": "Use more intensive follow-up, careful prescription tracking, and urine toxicology screens",
+      "C": "Use only short-acting stimulants without documentation",
+      "D": "Avoid asking about substance use to preserve rapport"
+    },
+    "correct": "B",
+    "explanation": "For past SUD with 3 to 6 months of abstinence, the lecture recommends more intensive follow-up, careful prescription tracking, and urine toxicology screens.",
+    "optionExplanations": {
+      "A": "More monitoring is recommended.",
+      "B": "Correct. Abstinent past SUD requires careful monitoring.",
+      "C": "This increases misuse/diversion risk.",
+      "D": "Substance use history is clinically important."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A teenager has ADHD and major anxiety symptoms. Which principle best guides treatment",
+    "topic": "ADHD with depression/anxiety",
+    "options": {
+      "A": "Treat only ADHD because anxiety always resolves with stimulants",
+      "B": "Treat only anxiety because ADHD medications are never used with anxiety",
+      "C": "Use stimulant response to determine whether anxiety is real",
+      "D": "Prioritize the most impairing condition; combination therapy is often required"
+    },
+    "correct": "D",
+    "explanation": "For ADHD with depression/anxiety, the lecture recommends prioritizing the most impairing condition. Combination therapy is often required, and psychotherapy/behavior therapy is often important.",
+    "optionExplanations": {
+      "A": "Stimulants treat ADHD core symptoms, not mood/anxiety disorders.",
+      "B": "ADHD may still require treatment.",
+      "C": "Medication response does not diagnose or invalidate anxiety.",
+      "D": "Correct. Prioritize the most impairing condition and often combine therapies."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A student asks how medications differ when ADHD coexists with depression or anxiety. Which statement is accurate",
+    "topic": "ADHD with depression/anxiety",
+    "options": {
+      "A": "SSRIs treat ADHD core symptoms better than stimulants",
+      "B": "Stimulants treat mood/anxiety disorders directly",
+      "C": "Noradrenergic agents may help ADHD plus depressive symptoms; SSRIs treat depression/anxiety but not ADHD; stimulants treat ADHD but not mood/anxiety disorders",
+      "D": "Benzodiazepines are first-line for core ADHD symptoms"
+    },
+    "correct": "C",
+    "explanation": "The lecture notes that noradrenergic agents may help ADHD plus depressive symptoms, SSRIs treat depression/anxiety but not ADHD, and stimulants treat ADHD but not mood/anxiety disorders.",
+    "optionExplanations": {
+      "A": "SSRIs do not treat ADHD core symptoms.",
+      "B": "Stimulants treat ADHD core symptoms, not mood/anxiety disorders.",
+      "C": "Correct. This matches the lecture medication distinction.",
+      "D": "Benzodiazepines are not first-line for core ADHD symptoms."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "Which statement about ADHD epidemiology and course matches the material",
+    "topic": "ADHD epidemiology and course",
+    "options": {
+      "A": "About 75 to 80 percent of children have symptoms as adolescents and about 60 percent have symptoms or impairment as adults",
+      "B": "ADHD occurs only in boys",
+      "C": "Most children immediately outgrow all symptoms by adolescence",
+      "D": "Adult ADHD is not associated with substance use disorders or accidents"
+    },
+    "correct": "A",
+    "explanation": "The lecture states that 75–80% of children have symptoms as adolescents and about 60% have symptoms/impairment as adults. Adult ADHD is associated with academic, occupational/interpersonal, SUD, accident, financial, and suicide-attempt risks.",
+    "optionExplanations": {
+      "A": "Correct. This is the listed course pattern.",
+      "B": "ADHD is more common in males, but also occurs in females.",
+      "C": "Many children continue to have symptoms into adolescence and adulthood.",
+      "D": "Adult ADHD is associated with SUD and increased accidents."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A researcher describes ADHD neurobiology. Which neurotransmitter systems are emphasized",
+    "topic": "ADHD pathophysiology",
+    "options": {
+      "A": "Histamine and acetylcholine only",
+      "B": "Dopamine and norepinephrine catecholaminergic pathways",
+      "C": "Serotonin only",
+      "D": "GABA and glutamate only"
+    },
+    "correct": "B",
+    "explanation": "The lecture emphasizes catecholaminergic pathways in ADHD, specifically dopamine and norepinephrine. NE/DA modulate attention and psychomotor activity, and ADHD may involve low baseline dopaminergic tone.",
+    "optionExplanations": {
+      "A": "These are not the primary pathways emphasized.",
+      "B": "Correct. Dopamine and norepinephrine pathways are central.",
+      "C": "Serotonin is not the primary ADHD neurotransmitter system emphasized.",
+      "D": "GABA/glutamate are not the ADHD systems highlighted in the lecture."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

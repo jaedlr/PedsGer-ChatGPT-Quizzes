@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Endocrine Disorders Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 9-year-old with weight loss, polyuria, and polydipsia is diagnosed with type 1 diabetes mellitus. Which pathogenesis best explains this disease",
+    "topic": "Type 1 diabetes pathogenesis",
+    "options": {
+      "A": "Peripheral insulin resistance with amyloid deposition in islets",
+      "B": "Excess cortisol causing insulin resistance",
+      "C": "Congenital absence of thyroid hormone production",
+      "D": "Genetic susceptibility plus environmental trigger causing autoimmune β-cell destruction and decreased insulin"
+    },
+    "correct": "D",
+    "explanation": "T1DM results from genetic susceptibility plus an environmental trigger leading to autoimmune β-cell destruction and severe insulin deficiency.",
+    "optionExplanations": {
+      "A": "This pattern is characteristic of T2DM, not T1DM.",
+      "B": "This describes Cushing physiology, not the listed T1DM mechanism.",
+      "C": "This describes congenital hypothyroidism mechanisms, not diabetes.",
+      "D": "Correct. T1DM results from genetic susceptibility plus an environmental trigger leading to autoimmune β-cell destruction and severe insulin deficiency."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A child develops type 1 diabetes mellitus. Which HLA association increases risk according to the notes",
+    "topic": "T1DM genetics",
+    "options": {
+      "A": "HLA-DQ1",
+      "B": "HLA-DR3",
+      "C": "HLA-B27",
+      "D": "HLA-DR4 only in Turner syndrome"
+    },
+    "correct": "B",
+    "explanation": "The notes list T1DM as HLA-linked on chromosome 6p21, with increased risk from HLA-DR3 and decreased risk from HLA-DQ1.",
+    "optionExplanations": {
+      "A": "HLA-DQ1 is listed as decreasing risk.",
+      "B": "Correct. The notes list T1DM as HLA-linked on chromosome 6p21, with increased risk from HLA-DR3 and decreased risk from HLA-DQ1.",
+      "C": "HLA-B27 is associated with juvenile spondyloarthropathy.",
+      "D": "HLA-DR4 is not the listed increased-risk marker here, and Turner syndrome is unrelated to this T1DM HLA point."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A pathology specimen from a child with longstanding type 1 diabetes shows islet cell antibodies, lymphocytic infiltration, islet atrophy/fibrosis, and β-cell depletion. What is the name of this inflammatory islet process",
+    "topic": "T1DM pathology",
+    "options": {
+      "A": "Insulitis",
+      "B": "Amyloid deposition",
+      "C": "Rachitic rosary",
+      "D": "Thyroid dyshormonogenesis"
+    },
+    "correct": "A",
+    "explanation": "T1DM pathology includes islet cell antibodies and insulitis with lymphocytic infiltration, followed by islet atrophy/fibrosis and β-cell depletion.",
+    "optionExplanations": {
+      "A": "Correct. T1DM pathology includes islet cell antibodies and insulitis with lymphocytic infiltration, followed by islet atrophy/fibrosis and β-cell depletion.",
+      "B": "Amyloid in islets is associated with T2DM.",
+      "C": "Rachitic rosary is costochondral beading in rickets.",
+      "D": "This is impaired thyroid hormone production causing congenital hypothyroidism."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "An unconscious child with known type 1 diabetes is found to have DKA. Which pancreatic finding is most expected",
+    "topic": "T1DM board trap",
+    "options": {
+      "A": "Amyloid in pancreatic islets",
+      "B": "Normal β-cell mass with pure insulin resistance",
+      "C": "Loss of β-cells",
+      "D": "Diffuse thyroid dysgenesis"
+    },
+    "correct": "C",
+    "explanation": "The board trap in the notes: unconscious child with DKA and known T1DM → pancreas shows loss of β-cells.",
+    "optionExplanations": {
+      "A": "This is more characteristic of T2DM.",
+      "B": "T1DM has autoimmune β-cell destruction and severe insulin deficiency.",
+      "C": "Correct. The board trap in the notes: unconscious child with DKA and known T1DM → pancreas shows loss of β-cells.",
+      "D": "This causes congenital hypothyroidism, not DKA."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "Which comparison between type 1 and type 2 diabetes mellitus is most accurate from the notes",
+    "topic": "T1DM vs T2DM",
+    "options": {
+      "A": "T1DM: obesity and amyloid; T2DM: autoimmune β-cell destruction",
+      "B": "T1DM: DKA rare; T2DM: DKA common",
+      "C": "T1DM and T2DM both require congenital thyroid dysgenesis",
+      "D": "T1DM: young, normal weight, antibodies positive, DKA common; T2DM: obesity, insulin resistance, islet amyloid, DKA rare"
+    },
+    "correct": "D",
+    "explanation": "The notes contrast T1DM as young/normal weight/antibody positive/DKA common and T2DM as obesity/insulin resistance/amyloid in islets/DKA rare.",
+    "optionExplanations": {
+      "A": "This reverses the comparison.",
+      "B": "This reverses the DKA association.",
+      "C": "Thyroid dysgenesis causes congenital hypothyroidism, not diabetes.",
+      "D": "Correct. The notes contrast T1DM as young/normal weight/antibody positive/DKA common and T2DM as obesity/insulin resistance/amyloid in islets/DKA rare."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A patient with chronic hyperglycemia develops nephropathy, retinopathy, and neuropathy. Which vascular pathology is emphasized",
+    "topic": "Diabetes microangiopathy",
+    "options": {
+      "A": "Diffuse thickening of the basement membrane",
+      "B": "Poor mineralization of osteoid",
+      "C": "Absent thyroid gland",
+      "D": "Compression of the physis"
+    },
+    "correct": "A",
+    "explanation": "Diabetic microangiopathy involves diffuse thickening of the basement membrane, leading to nephropathy, retinopathy, and neuropathy.",
+    "optionExplanations": {
+      "A": "Correct. Diabetic microangiopathy involves diffuse thickening of the basement membrane, leading to nephropathy, retinopathy, and neuropathy.",
+      "B": "This is rickets/osteomalacia pathology.",
+      "C": "This is thyroid dysgenesis causing congenital hypothyroidism.",
+      "D": "This is Salter-Harris V fracture."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A child with diabetes develops accelerated atherosclerosis. Which diabetic vascular complication category does this represent",
+    "topic": "Diabetes macroangiopathy",
+    "options": {
+      "A": "Microangiopathy",
+      "B": "Insulitis",
+      "C": "Macroangiopathy",
+      "D": "Rickets"
+    },
+    "correct": "C",
+    "explanation": "Diabetic macroangiopathy leads to atherosclerosis.",
+    "optionExplanations": {
+      "A": "Microangiopathy causes nephropathy, retinopathy, and neuropathy from basement membrane thickening.",
+      "B": "Insulitis is lymphocytic inflammation of islets in T1DM.",
+      "C": "Correct. Diabetic macroangiopathy leads to atherosclerosis.",
+      "D": "Rickets is defective mineralization of growing bone."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A newborn screen shows elevated TSH and low T4. The infant has poor feeding, lethargy, constipation, dry skin, and a hoarse cry. Which diagnosis is most likely",
+    "topic": "Congenital hypothyroidism",
+    "options": {
+      "A": "Type 1 diabetes mellitus",
+      "B": "Congenital hypothyroidism",
+      "C": "Rickets",
+      "D": "Precocious puberty"
+    },
+    "correct": "B",
+    "explanation": "Congenital hypothyroidism presents with poor feeding, lethargy, hoarse cry, constipation, and dry skin, and newborn screening shows increased TSH with decreased T4.",
+    "optionExplanations": {
+      "A": "T1DM causes hyperglycemia/DKA physiology, not high TSH and low T4.",
+      "B": "Correct. Congenital hypothyroidism presents with poor feeding, lethargy, hoarse cry, constipation, and dry skin, and newborn screening shows increased TSH with decreased T4.",
+      "C": "Rickets causes bowed legs, widened wrists/knees/ankles, rachitic rosary, and abnormal mineralization labs.",
+      "D": "Precocious puberty is early pubertal development."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "Why is congenital hypothyroidism especially high-yield in pediatrics",
+    "topic": "Congenital hypothyroidism importance",
+    "options": {
+      "A": "It is the most common cause of DKA",
+      "B": "It always resolves without treatment",
+      "C": "It only presents after puberty",
+      "D": "It is a preventable cause of intellectual disability/cretinism"
+    },
+    "correct": "D",
+    "explanation": "Congenital hypothyroidism is high-yield because early recognition and treatment prevent intellectual disability/cretinism.",
+    "optionExplanations": {
+      "A": "DKA is associated with diabetes, especially T1DM.",
+      "B": "Treatment with levothyroxine is urgent after positive screen/confirmation.",
+      "C": "It is detected on newborn screening and can present in infancy.",
+      "D": "Correct. Congenital hypothyroidism is high-yield because early recognition and treatment prevent intellectual disability/cretinism."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A newborn has primary congenital hypothyroidism due to absent or underdeveloped thyroid tissue. Which pathogenesis is this",
+    "topic": "Thyroid dysgenesis",
+    "options": {
+      "A": "Thyroid dyshormonogenesis",
+      "B": "Pituitary dysfunction",
+      "C": "Thyroid dysgenesis",
+      "D": "Iodine deficiency"
+    },
+    "correct": "C",
+    "explanation": "Thyroid dysgenesis means absent or underdeveloped thyroid and is a primary cause of congenital hypothyroidism.",
+    "optionExplanations": {
+      "A": "Dyshormonogenesis means impaired thyroid hormone production, not absent/underdeveloped gland.",
+      "B": "Pituitary dysfunction is a rare secondary cause.",
+      "C": "Correct. Thyroid dysgenesis means absent or underdeveloped thyroid and is a primary cause of congenital hypothyroidism.",
+      "D": "Iodine deficiency is listed separately as a cause."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A newborn has an anatomically present thyroid gland but impaired thyroid hormone production. Which mechanism best explains the congenital hypothyroidism",
+    "topic": "Thyroid dyshormonogenesis",
+    "options": {
+      "A": "Thyroid dyshormonogenesis",
+      "B": "Thyroid dysgenesis",
+      "C": "Autoimmune β-cell destruction",
+      "D": "Vitamin D resistance"
+    },
+    "correct": "A",
+    "explanation": "Thyroid dyshormonogenesis means impaired thyroid hormone production and is a primary cause of congenital hypothyroidism.",
+    "optionExplanations": {
+      "A": "Correct. Thyroid dyshormonogenesis means impaired thyroid hormone production and is a primary cause of congenital hypothyroidism.",
+      "B": "Dysgenesis is absent or underdeveloped thyroid.",
+      "C": "This causes T1DM.",
+      "D": "This causes rickets/osteomalacia physiology."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A positive newborn screen suggests congenital hypothyroidism. What is the best next management step",
+    "topic": "Congenital hypothyroidism management",
+    "options": {
+      "A": "Wait for thyroid ultrasound before treatment",
+      "B": "Recheck at age 2 years",
+      "C": "Start insulin immediately",
+      "D": "Confirm TSH/free T4 but start levothyroxine as soon as possible"
+    },
+    "correct": "D",
+    "explanation": "After a positive newborn screen, confirm TSH/free T4 but start levothyroxine ASAP. Do not wait for ultrasound or genetic testing before treatment.",
+    "optionExplanations": {
+      "A": "The notes explicitly say not to wait for ultrasound/genetic testing.",
+      "B": "Delaying treatment risks preventable intellectual disability.",
+      "C": "Insulin treats diabetes, not congenital hypothyroidism.",
+      "D": "Correct. After a positive newborn screen, confirm TSH/free T4 but start levothyroxine ASAP. Do not wait for ultrasound or genetic testing before treatment."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A child has bowed legs, delayed walking, widened wrists/knees/ankles, and costochondral beading. Which diagnosis is most likely",
+    "topic": "Rickets clinical findings",
+    "options": {
+      "A": "Osteomalacia",
+      "B": "Rickets",
+      "C": "Type 1 diabetes",
+      "D": "Congenital hypothyroidism"
+    },
+    "correct": "B",
+    "explanation": "Rickets occurs in children and causes bowed legs, delayed walking/motor milestones, widened wrists/knees/ankles, rachitic rosary, and poor ossification/widened epiphyses.",
+    "optionExplanations": {
+      "A": "Osteomalacia is the adult counterpart of defective mineralization.",
+      "B": "Correct. Rickets occurs in children and causes bowed legs, delayed walking/motor milestones, widened wrists/knees/ankles, rachitic rosary, and poor ossification/widened epiphyses.",
+      "C": "T1DM causes hyperglycemia/DKA and vascular complications.",
+      "D": "Congenital hypothyroidism causes poor feeding, lethargy, hoarse cry, constipation, dry skin, and high TSH/low T4."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "Which statement correctly distinguishes rickets from osteomalacia",
+    "topic": "Rickets vs osteomalacia",
+    "options": {
+      "A": "Rickets occurs only in adults; osteomalacia only in children",
+      "B": "Both are forms of autoimmune β-cell destruction",
+      "C": "Rickets occurs in children; osteomalacia occurs in adults",
+      "D": "Rickets is congenital thyroid absence"
+    },
+    "correct": "C",
+    "explanation": "The notes define rickets as defective mineralization in children and osteomalacia as the adult counterpart.",
+    "optionExplanations": {
+      "A": "This reverses the definitions.",
+      "B": "That describes T1DM pathology, not rickets/osteomalacia.",
+      "C": "Correct. The notes define rickets as defective mineralization in children and osteomalacia as the adult counterpart.",
+      "D": "That is thyroid dysgenesis."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "Vitamin D deficiency causes rickets by disrupting which step of normal endochondral ossification",
+    "topic": "Rickets pathogenesis",
+    "options": {
+      "A": "Initial cartilage growth at the epiphyseal plate",
+      "B": "Blood vessel entry only",
+      "C": "Osteoclast removal of calcified cartilage only",
+      "D": "Calcification of cartilage matrix"
+    },
+    "correct": "D",
+    "explanation": "Normal physiology: cartilage grows at the epiphyseal plate, moves toward metaphysis, cartilage matrix calcifies, chondrocytes die, osteoclasts remove calcified cartilage, vessels enter, and osteoblasts lay down bone. Vitamin D deficiency affects cartilage matrix calcification.",
+    "optionExplanations": {
+      "A": "The highlighted affected step is matrix calcification.",
+      "B": "This occurs after calcification/chondrocyte death but is not the primary affected step emphasized.",
+      "C": "The primary affected step is cartilage matrix calcification.",
+      "D": "Correct. Normal physiology: cartilage grows at the epiphyseal plate, moves toward metaphysis, cartilage matrix calcifies, chondrocytes die, osteoclasts remove calcified cartilage, vessels enter, and osteoblasts lay down bone. Vitamin D deficiency affects cartilage matrix calcification."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "Which pathology best explains widened growth plates and bent skeletal deformities in rickets",
+    "topic": "Rickets pathology",
+    "options": {
+      "A": "Poor mineralization of osteoid with excess epiphyseal cartilage growth",
+      "B": "Diffuse basement membrane thickening",
+      "C": "Islet atrophy and fibrosis",
+      "D": "Absent tricuspid valve development"
+    },
+    "correct": "A",
+    "explanation": "Rickets pathology includes poor mineralization of osteoid, excess epiphyseal cartilage growth causing widened growth plates, and soft unmineralized bone causing bent skeletal deformities.",
+    "optionExplanations": {
+      "A": "Correct. Rickets pathology includes poor mineralization of osteoid, excess epiphyseal cartilage growth causing widened growth plates, and soft unmineralized bone causing bent skeletal deformities.",
+      "B": "This is diabetic microangiopathy.",
+      "C": "This is T1DM pathology after autoimmune insulitis.",
+      "D": "This is tricuspid atresia, a cardiac disorder."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A child with rickets has costochondral beading. What is this finding called",
+    "topic": "Rachitic rosary",
+    "options": {
+      "A": "Russell sign",
+      "B": "Rachitic rosary",
+      "C": "Koplik spots",
+      "D": "Forchheimer spots"
+    },
+    "correct": "B",
+    "explanation": "Rachitic rosary means costochondral beading in rickets.",
+    "optionExplanations": {
+      "A": "Russell sign is scars/calluses from self-induced vomiting.",
+      "B": "Correct. Rachitic rosary means costochondral beading in rickets.",
+      "C": "Koplik spots are a measles finding.",
+      "D": "Forchheimer spots are a rubella finding."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A child with vitamin D deficiency rickets has labs drawn. Which classic lab pattern is expected",
+    "topic": "Rickets labs",
+    "options": {
+      "A": "Increased TSH and decreased T4",
+      "B": "Hyperglycemia with islet cell antibodies",
+      "C": "Increased calcium, increased phosphate, decreased alkaline phosphatase",
+      "D": "Decreased calcium, decreased phosphate, increased alkaline phosphatase"
+    },
+    "correct": "D",
+    "explanation": "Classic rickets labs include decreased calcium, decreased phosphate, and increased alkaline phosphatase.",
+    "optionExplanations": {
+      "A": "This is congenital hypothyroidism.",
+      "B": "This supports T1DM.",
+      "C": "This is the opposite of the classic rickets pattern.",
+      "D": "Correct. Classic rickets labs include decreased calcium, decreased phosphate, and increased alkaline phosphatase."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "Vitamin D deficiency or resistance causes decreased calcium/phosphate mineralization. Which compensatory hormone response is expected",
+    "topic": "Rickets endocrine physiology",
+    "options": {
+      "A": "Decreased PTH",
+      "B": "Increased insulin",
+      "C": "Increased PTH",
+      "D": "Decreased TSH"
+    },
+    "correct": "C",
+    "explanation": "Rickets pathogenesis is vitamin D deficiency/resistance causing decreased calcium/phosphate mineralization with compensatory increased PTH.",
+    "optionExplanations": {
+      "A": "The notes state PTH increases as compensation.",
+      "B": "Insulin is not the compensatory hormone in rickets.",
+      "C": "Correct. Rickets pathogenesis is vitamin D deficiency/resistance causing decreased calcium/phosphate mineralization with compensatory increased PTH.",
+      "D": "TSH relates to thyroid disease, not rickets compensation."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A 7-year-old girl develops breast development and menses. Which puberty disorder definition applies",
+    "topic": "Precocious puberty definition",
+    "options": {
+      "A": "Precocious puberty in girls is puberty before age 8",
+      "B": "Delayed puberty because menses occurred before 13",
+      "C": "Normal puberty because any menses before 8 is expected",
+      "D": "Precocious puberty only if no breast development occurs"
+    },
+    "correct": "A",
+    "explanation": "Precocious puberty is defined as puberty before age 8 in girls and before age 9 in boys.",
+    "optionExplanations": {
+      "A": "Correct. Precocious puberty is defined as puberty before age 8 in girls and before age 9 in boys.",
+      "B": "Delayed puberty in girls is no puberty/no menarche by 13, not early puberty.",
+      "C": "Puberty before age 8 in girls is precocious.",
+      "D": "Early breast development/menstruation are findings of precocious puberty."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "An 8-year-old boy has testicular enlargement, pubic hair, and other pubertal changes. Which definition applies",
+    "topic": "Precocious puberty boys",
+    "options": {
+      "A": "Normal puberty because boys start at 8",
+      "B": "Delayed puberty because boys require puberty by 8",
+      "C": "Delayed puberty only if menarche is absent",
+      "D": "Precocious puberty in boys is puberty before age 9"
+    },
+    "correct": "D",
+    "explanation": "Precocious puberty is defined as puberty before age 9 in boys.",
+    "optionExplanations": {
+      "A": "Before age 9 is considered precocious in boys.",
+      "B": "Delayed puberty in boys is no puberty by 14.",
+      "C": "Menarche is a female milestone; boys have spermarche/nocturnal emissions.",
+      "D": "Correct. Precocious puberty is defined as puberty before age 9 in boys."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A child has precocious puberty due to early activation of the hypothalamic-pituitary-gonadal axis. Which category is this",
+    "topic": "Central precocious puberty",
+    "options": {
+      "A": "Peripheral, GnRH-independent precocious puberty",
+      "B": "Central, GnRH-dependent precocious puberty",
+      "C": "Constitutional delay",
+      "D": "Congenital hypothyroidism"
+    },
+    "correct": "B",
+    "explanation": "Central precocious puberty is early HPG axis activation and is GnRH-dependent.",
+    "optionExplanations": {
+      "A": "Peripheral precocious puberty is due to excess sex steroids independent of GnRH.",
+      "B": "Correct. Central precocious puberty is early HPG axis activation and is GnRH-dependent.",
+      "C": "Constitutional delay is the most common cause of delayed puberty, not early puberty.",
+      "D": "This is neonatal thyroid hormone deficiency."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child has precocious puberty from an adrenal or gonadal tumor producing excess sex steroids without HPG-axis activation. Which category is this",
+    "topic": "Peripheral precocious puberty",
+    "options": {
+      "A": "Central, GnRH-dependent precocious puberty",
+      "B": "Constitutional delay",
+      "C": "Peripheral, GnRH-independent precocious puberty",
+      "D": "Primary congenital hypothyroidism"
+    },
+    "correct": "C",
+    "explanation": "Peripheral precocious puberty is caused by excess sex steroids and is GnRH-independent.",
+    "optionExplanations": {
+      "A": "Central puberty is early HPG axis activation.",
+      "B": "Constitutional delay causes delayed puberty, not excess early sex steroid production.",
+      "C": "Correct. Peripheral precocious puberty is caused by excess sex steroids and is GnRH-independent.",
+      "D": "Primary congenital hypothyroidism involves thyroid dysgenesis or dyshormonogenesis."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "Which finding is expected in precocious puberty according to the notes",
+    "topic": "Precocious puberty findings",
+    "options": {
+      "A": "Early breast development or menstruation in girls, testicular enlargement in boys, and pubic hair growth in both",
+      "B": "No pubic hair development in either sex",
+      "C": "Only delayed walking and rachitic rosary",
+      "D": "Only poor feeding and hoarse cry"
+    },
+    "correct": "A",
+    "explanation": "Precocious puberty findings include early breast development/menstruation in girls, testicular enlargement in boys, and pubic hair growth in both.",
+    "optionExplanations": {
+      "A": "Correct. Precocious puberty findings include early breast development/menstruation in girls, testicular enlargement in boys, and pubic hair growth in both.",
+      "B": "Pubic hair growth can occur in both.",
+      "C": "These are rickets findings.",
+      "D": "These are congenital hypothyroidism findings."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A 13-year-old girl has not started puberty and has not had menarche. Which classification is most appropriate based on the lecture definition",
+    "topic": "Delayed puberty girls",
+    "options": {
+      "A": "Precocious puberty",
+      "B": "Delayed puberty",
+      "C": "Normal puberty by definition",
+      "D": "Central precocious puberty"
+    },
+    "correct": "B",
+    "explanation": "Delayed puberty in girls is no puberty or no menarche by age 13 according to the notes.",
+    "optionExplanations": {
+      "A": "Precocious puberty in girls is puberty before age 8.",
+      "B": "Correct. Delayed puberty in girls is no puberty or no menarche by age 13 according to the notes.",
+      "C": "The notes define no puberty/no menarche by 13 as delayed.",
+      "D": "Central precocious puberty is early HPG axis activation, not absence of puberty."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A 14-year-old boy has no pubertal development. Which classification applies",
+    "topic": "Delayed puberty boys",
+    "options": {
+      "A": "Normal puberty by definition",
+      "B": "Precocious puberty",
+      "C": "Peripheral precocious puberty",
+      "D": "Delayed puberty"
+    },
+    "correct": "D",
+    "explanation": "Delayed puberty in boys is no puberty by age 14.",
+    "optionExplanations": {
+      "A": "The notes define no puberty by 14 in boys as delayed.",
+      "B": "Precocious puberty in boys is before age 9.",
+      "C": "Peripheral precocious puberty is early sex steroid excess.",
+      "D": "Correct. Delayed puberty in boys is no puberty by age 14."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A teen has delayed puberty with family history of late puberty and otherwise normal health. Which cause is most common",
+    "topic": "Constitutional delay",
+    "options": {
+      "A": "Turner syndrome in all patients",
+      "B": "Type 1 diabetes",
+      "C": "Constitutional delay",
+      "D": "Vitamin D deficiency"
+    },
+    "correct": "C",
+    "explanation": "The most common cause of delayed puberty is constitutional delay, often with family history.",
+    "optionExplanations": {
+      "A": "Turner syndrome is listed as a cause in girls but is not the most common cause overall.",
+      "B": "T1DM is autoimmune β-cell destruction, not the most common delayed puberty cause.",
+      "C": "Correct. The most common cause of delayed puberty is constitutional delay, often with family history.",
+      "D": "Vitamin D deficiency causes rickets/osteomalacia."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "Which cause of delayed puberty involves low gonadotropin signaling from the hypothalamus or pituitary",
+    "topic": "Hypogonadotropic hypogonadism",
+    "options": {
+      "A": "Peripheral precocious puberty",
+      "B": "Hypogonadotropic hypogonadism",
+      "C": "Thyroid dyshormonogenesis",
+      "D": "Diabetic macroangiopathy"
+    },
+    "correct": "B",
+    "explanation": "Delayed puberty causes listed include hypogonadotropic hypogonadism, chronic disease/malnutrition, constitutional delay, and Turner syndrome.",
+    "optionExplanations": {
+      "A": "Peripheral precocious puberty causes early puberty via excess sex steroids.",
+      "B": "Correct. Delayed puberty causes listed include hypogonadotropic hypogonadism, chronic disease/malnutrition, constitutional delay, and Turner syndrome.",
+      "C": "This causes congenital hypothyroidism.",
+      "D": "This causes atherosclerosis in diabetes."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A girl with delayed puberty is found to have short stature and gonadal dysgenesis. Which syndrome is listed as a cause of delayed puberty",
+    "topic": "Turner syndrome and delayed puberty",
+    "options": {
+      "A": "Turner syndrome",
+      "B": "Klinefelter syndrome only",
+      "C": "Down syndrome only",
+      "D": "DiGeorge syndrome only"
+    },
+    "correct": "A",
+    "explanation": "Turner syndrome is listed as a cause of delayed puberty.",
+    "optionExplanations": {
+      "A": "Correct. Turner syndrome is listed as a cause of delayed puberty.",
+      "B": "Klinefelter is not the delayed-puberty cause listed in this section.",
+      "C": "Down syndrome is not the listed delayed-puberty cause here.",
+      "D": "DiGeorge is associated with conotruncal cardiac defects, not this delayed puberty point."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A child with chronic disease and malnutrition has no expected pubertal development. Which puberty disorder mechanism does this support",
+    "topic": "Chronic disease and delayed puberty",
+    "options": {
+      "A": "Central precocious puberty",
+      "B": "Peripheral precocious puberty",
+      "C": "Normal pubertal timing regardless of nutrition",
+      "D": "Delayed puberty due to chronic disease/malnutrition"
+    },
+    "correct": "D",
+    "explanation": "Chronic disease and malnutrition are listed causes of delayed puberty.",
+    "optionExplanations": {
+      "A": "Central precocious puberty is early HPG-axis activation.",
+      "B": "Peripheral precocious puberty is excess sex steroids independent of GnRH.",
+      "C": "The notes list chronic disease/malnutrition as a cause of delayed puberty.",
+      "D": "Correct. Chronic disease and malnutrition are listed causes of delayed puberty."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

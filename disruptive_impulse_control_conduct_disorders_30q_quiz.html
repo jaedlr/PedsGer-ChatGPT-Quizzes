@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disruptive, Impulse-Control, and Conduct Disorders Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 14-year-old repeatedly bullies peers, starts fights, steals with confrontation, skips school, and has destroyed property. Which diagnosis is most likely",
+    "topic": "Main disorder comparison",
+    "options": {
+      "A": "Oppositional defiant disorder",
+      "B": "Intermittent explosive disorder",
+      "C": "Kleptomania",
+      "D": "Conduct disorder"
+    },
+    "correct": "D",
+    "explanation": "Conduct disorder is a repetitive, persistent pattern violating the basic rights of others or major age-appropriate societal norms/rules. Aggression, cruelty, theft, property destruction, and serious rule-breaking are key differentiators.",
+    "optionExplanations": {
+      "A": "ODD involves angry/irritable, argumentative/defiant, or vindictive behavior without serious rights violations.",
+      "B": "IED involves sudden impulsive aggressive outbursts out of proportion, not a broad persistent pattern of rights/rule violations.",
+      "C": "Kleptomania involves stealing unneeded items with tension before and relief after, not aggression/property destruction.",
+      "D": "Correct. Conduct disorder is a repetitive, persistent pattern violating the basic rights of others or major age-appropriate societal norms/rules. Aggression, cruelty, theft, property destruction, and serious rule-breaking are key differentiators."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A 10-year-old is chronically angry, argues with teachers, defies rules, deliberately annoys others, blames others, and is spiteful. There is no cruelty, theft, truancy, weapon use, or major rights violation. Which diagnosis best fits",
+    "topic": "ODD vs conduct disorder",
+    "options": {
+      "A": "Conduct disorder",
+      "B": "Pyromania",
+      "C": "Oppositional defiant disorder",
+      "D": "Antisocial personality disorder"
+    },
+    "correct": "C",
+    "explanation": "ODD involves angry/irritable mood, argumentative/defiant behavior, and vindictiveness without serious violation of others’ rights.",
+    "optionExplanations": {
+      "A": "Conduct disorder requires serious violation of rights/rules such as aggression, theft, property destruction, or serious rule-breaking.",
+      "B": "Pyromania involves repeated deliberate fire-setting due to fascination/tension/relief.",
+      "C": "Correct. ODD involves angry/irritable mood, argumentative/defiant behavior, and vindictiveness without serious violation of others’ rights.",
+      "D": "ASPD is an adult diagnosis and conduct disorder criteria must be considered first in youth."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A 17-year-old has sudden aggressive outbursts that are grossly out of proportion, not planned, and not done for money, revenge, or another goal. Which diagnosis best fits",
+    "topic": "Intermittent explosive disorder",
+    "options": {
+      "A": "Conduct disorder",
+      "B": "Intermittent explosive disorder",
+      "C": "Kleptomania",
+      "D": "Oppositional defiant disorder"
+    },
+    "correct": "B",
+    "explanation": "Intermittent explosive disorder is recurrent impulsive aggression out of proportion to the trigger, not premeditated, and not done for tangible gain.",
+    "optionExplanations": {
+      "A": "CD is a persistent pattern of violating rights/rules, not isolated impulsive outbursts.",
+      "B": "Correct. Intermittent explosive disorder is recurrent impulsive aggression out of proportion to the trigger, not premeditated, and not done for tangible gain.",
+      "C": "Kleptomania centers on stealing unneeded objects with tension before and relief during theft.",
+      "D": "ODD is chronic angry/defiant/vindictive behavior without serious rights violations."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A college student repeatedly steals inexpensive items he does not need. He feels increasing tension before theft and relief afterward. The behavior is not due to anger, delusions, mania, conduct disorder, or antisocial personality disorder. Which diagnosis best fits",
+    "topic": "Kleptomania",
+    "options": {
+      "A": "Conduct disorder",
+      "B": "Pyromania",
+      "C": "Intermittent explosive disorder",
+      "D": "Kleptomania"
+    },
+    "correct": "D",
+    "explanation": "Kleptomania is recurrent failure to resist stealing objects that are not needed for personal use or monetary value, with tension before theft and pleasure/gratification/relief during theft.",
+    "optionExplanations": {
+      "A": "Conduct disorder involves broader rights/rule violations and may include theft, but not stealing solely for tension relief.",
+      "B": "Pyromania involves fire-setting, not stealing.",
+      "C": "IED involves aggressive outbursts, not stealing.",
+      "D": "Correct. Kleptomania is recurrent failure to resist stealing objects that are not needed for personal use or monetary value, with tension before theft and pleasure/gratification/relief during theft."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A 19-year-old repeatedly sets fires. He reports fascination with fire, tension before setting fires, and pleasure after seeing the flames. There is no financial, political, revenge, or criminal goal. Which diagnosis best fits",
+    "topic": "Pyromania",
+    "options": {
+      "A": "Conduct disorder",
+      "B": "Pyromania",
+      "C": "Intermittent explosive disorder",
+      "D": "Kleptomania"
+    },
+    "correct": "B",
+    "explanation": "Pyromania requires deliberate purposeful fire-setting on more than one occasion, tension or arousal beforehand, fascination with fire, and pleasure/gratification/relief when setting fires or witnessing aftermath. It is excluded if fire-setting is for financial gain, revenge, crime, politics, or other goal-directed reasons.",
+    "optionExplanations": {
+      "A": "Fire-setting in CD is typically part of a broader pattern of rights/rule violation and may be goal-directed property destruction.",
+      "B": "Correct. Pyromania requires deliberate purposeful fire-setting on more than one occasion, tension or arousal beforehand, fascination with fire, and pleasure/gratification/relief when setting fires or witnessing aftermath. It is excluded if fire-setting is for financial gain, revenge, crime, politics, or other goal-directed reasons.",
+      "C": "IED involves impulsive aggression, not fascination-based fire-setting.",
+      "D": "Kleptomania involves stealing, not fire-setting."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A 13-year-old is evaluated for conduct disorder. What minimum symptom pattern is required",
+    "topic": "Conduct disorder criteria",
+    "options": {
+      "A": "At least 1 criterion ever before age 18",
+      "B": "At least 4 symptoms for 6 months with one nonsibling",
+      "C": "At least 3 criteria in the past 12 months and at least 1 criterion in the past 6 months",
+      "D": "Verbal aggression twice weekly for 3 months only"
+    },
+    "correct": "C",
+    "explanation": "Conduct disorder requires at least 3 criteria in the past 12 months, with at least 1 criterion in the past 6 months, plus impairment.",
+    "optionExplanations": {
+      "A": "This is insufficient for conduct disorder diagnosis.",
+      "B": "This describes ODD criteria.",
+      "C": "Correct. Conduct disorder requires at least 3 criteria in the past 12 months, with at least 1 criterion in the past 6 months, plus impairment.",
+      "D": "This is one IED pathway, not CD."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A 15-year-old is diagnosed with conduct disorder. Which behavior falls under the aggression to people/animals category",
+    "topic": "Conduct disorder symptom categories",
+    "options": {
+      "A": "Truancy before age 13",
+      "B": "Breaking into a car",
+      "C": "Staying out at night before age 13",
+      "D": "Using a weapon or cruelty to people/animals"
+    },
+    "correct": "D",
+    "explanation": "Aggression to people/animals includes bullying/threatening, starting fights, using a weapon, cruelty to people or animals, stealing with confrontation, and forced sexual activity.",
+    "optionExplanations": {
+      "A": "This is a serious rule violation.",
+      "B": "This is deceitfulness/theft.",
+      "C": "This is a serious rule violation.",
+      "D": "Correct. Aggression to people/animals includes bullying/threatening, starting fights, using a weapon, cruelty to people or animals, stealing with confrontation, and forced sexual activity."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "Which conduct disorder behavior is classified under serious rule violations",
+    "topic": "Conduct disorder symptom categories",
+    "options": {
+      "A": "Cruelty to animals",
+      "B": "Stealing with confrontation",
+      "C": "Fire-setting with intent to damage property",
+      "D": "Running away overnight twice, or once without returning for a lengthy period"
+    },
+    "correct": "D",
+    "explanation": "Serious rule violations include staying out at night before age 13, running away overnight at least twice or once if not returning for a lengthy period, and truancy before age 13.",
+    "optionExplanations": {
+      "A": "This is aggression to people/animals.",
+      "B": "This is aggression to people/animals.",
+      "C": "This is destruction of property.",
+      "D": "Correct. Serious rule violations include staying out at night before age 13, running away overnight at least twice or once if not returning for a lengthy period, and truancy before age 13."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A 9-year-old meets conduct disorder criteria before age 10. Which subtype and prognosis are most accurate",
+    "topic": "Conduct disorder subtypes",
+    "options": {
+      "A": "Adolescent-onset type; more favorable prognosis",
+      "B": "Unspecified onset; always favorable prognosis",
+      "C": "Childhood-onset type; more guarded prognosis",
+      "D": "ODD; no risk of progression"
+    },
+    "correct": "C",
+    "explanation": "Childhood-onset conduct disorder has at least one criterion before age 10 and has a more guarded prognosis. Adolescent-onset has no criteria before age 10 and has a more favorable prognosis.",
+    "optionExplanations": {
+      "A": "Adolescent-onset requires no criteria before age 10.",
+      "B": "Unspecified onset means age is unknown; prognosis is variable.",
+      "C": "Correct. Childhood-onset conduct disorder has at least one criterion before age 10 and has a more guarded prognosis. Adolescent-onset has no criteria before age 10 and has a more favorable prognosis.",
+      "D": "This patient meets CD, and ODD can progress to CD."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "An 18-year-old meets criteria for conduct disorder-like behaviors. What must also be true for conduct disorder diagnosis at this age",
+    "topic": "Conduct disorder diagnosis in adults",
+    "options": {
+      "A": "Symptoms must begin after age 18",
+      "B": "There must be no impairment",
+      "C": "Only vindictiveness is required",
+      "D": "Criteria for antisocial personality disorder must not be met"
+    },
+    "correct": "D",
+    "explanation": "For conduct disorder, if the patient is age 18 or older, they must not meet criteria for antisocial personality disorder.",
+    "optionExplanations": {
+      "A": "CD is a childhood/adolescent pattern and childhood onset matters prognostically.",
+      "B": "CD requires significant impairment.",
+      "C": "Vindictiveness is an ODD symptom category, not sufficient for CD.",
+      "D": "Correct. For conduct disorder, if the patient is age 18 or older, they must not meet criteria for antisocial personality disorder."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A child with conduct disorder has ADHD, substance use, poor frustration tolerance, externalizing blame, manipulation, and lack of guilt/empathy. Which statement is most accurate",
+    "topic": "Conduct disorder associations/features",
+    "options": {
+      "A": "These are common associations and psychological features of conduct disorder",
+      "B": "These findings exclude conduct disorder",
+      "C": "These findings diagnose pyromania",
+      "D": "These findings prove bipolar disorder"
+    },
+    "correct": "A",
+    "explanation": "Conduct disorder may overlap with ADHD and substance use, and psychological features can include attention deficits, learning disorders, impulsivity, anger, poor frustration tolerance, poor problem-solving, denial, manipulation, suspiciousness, misperceiving others as hostile, and lack of guilt/empathy.",
+    "optionExplanations": {
+      "A": "Correct. Conduct disorder may overlap with ADHD and substance use, and psychological features can include attention deficits, learning disorders, impulsivity, anger, poor frustration tolerance, poor problem-solving, denial, manipulation, suspiciousness, misperceiving others as hostile, and lack of guilt/empathy.",
+      "B": "They are compatible with CD.",
+      "C": "Pyromania specifically requires fascination/tension/relief around fire-setting.",
+      "D": "Bipolar disorder requires mood episode features such as elevated mood/grandiosity."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "Which management plan best fits mild conduct disorder",
+    "topic": "Conduct disorder management",
+    "options": {
+      "A": "No treatment unless fire-setting occurs",
+      "B": "Medication only for all core conduct disorder symptoms",
+      "C": "Individual and family therapy with parent training and psychotherapy targeting communication, problem-solving, impulse control, anger, and school functioning",
+      "D": "Immediate juvenile detention for every case"
+    },
+    "correct": "C",
+    "explanation": "Mild conduct disorder is managed with individual and family therapy. Psychotherapy targets communication, problem-solving, impulse control, anger management, and school attendance/achievement. Parent training focuses on consistent discipline, monitoring, avoiding delinquent peers, and improving relationships.",
+    "optionExplanations": {
+      "A": "CD requires intervention even without fire-setting.",
+      "B": "Medications are not typical for core CD unless significant aggression; comorbidities are treated.",
+      "C": "Correct. Mild conduct disorder is managed with individual and family therapy. Psychotherapy targets communication, problem-solving, impulse control, anger management, and school attendance/achievement. Parent training focuses on consistent discipline, monitoring, avoiding delinquent peers, and improving relationships.",
+      "D": "Severe cases may require group home or juvenile detention, not every case."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "In conduct disorder, which medication principle is most accurate",
+    "topic": "Conduct disorder medication",
+    "options": {
+      "A": "SSRIs are curative for all core conduct symptoms",
+      "B": "Medications are not typical for core symptoms unless significant aggression; treat comorbidities, especially ADHD",
+      "C": "Medication is never used even for severe aggression",
+      "D": "Naltrexone is first-line for all conduct disorder"
+    },
+    "correct": "B",
+    "explanation": "For conduct disorder, medications are not typical for core symptoms unless significant aggression is present. Lithium, stimulants, or second-generation antipsychotics may be used, and comorbidities, especially ADHD, should be treated.",
+    "optionExplanations": {
+      "A": "SSRIs are not listed as curative for core CD.",
+      "B": "Correct. For conduct disorder, medications are not typical for core symptoms unless significant aggression is present. Lithium, stimulants, or second-generation antipsychotics may be used, and comorbidities, especially ADHD, should be treated.",
+      "C": "Medication may be used when significant aggression is present.",
+      "D": "Naltrexone may reduce stealing urges in kleptomania, not all CD."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A child has ODD-like symptoms. Which diagnostic requirement must be met",
+    "topic": "ODD criteria",
+    "options": {
+      "A": "At least 4 symptoms for at least 6 months occurring with at least one person who is not a sibling",
+      "B": "At least 3 conduct criteria in 12 months",
+      "C": "At least 3 damaging aggressive outbursts in 12 months only",
+      "D": "Repeated fire-setting with fascination"
+    },
+    "correct": "A",
+    "explanation": "ODD requires a pattern of at least 4 symptoms lasting at least 6 months, occurring with at least one person who is not a sibling, causing distress/impairment, not exclusively during psychotic/mood disorder, and not meeting CD or ASPD criteria.",
+    "optionExplanations": {
+      "A": "Correct. ODD requires a pattern of at least 4 symptoms lasting at least 6 months, occurring with at least one person who is not a sibling, causing distress/impairment, not exclusively during psychotic/mood disorder, and not meeting CD or ASPD criteria.",
+      "B": "This is conduct disorder.",
+      "C": "This is one IED pathway.",
+      "D": "This is pyromania."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "Which symptom belongs to the angry/irritable mood category of ODD",
+    "topic": "ODD symptom categories",
+    "options": {
+      "A": "Uses a weapon",
+      "B": "Runs away overnight repeatedly",
+      "C": "Steals objects for relief",
+      "D": "Often loses temper or is touchy/easily annoyed"
+    },
+    "correct": "D",
+    "explanation": "ODD angry/irritable mood symptoms include often losing temper, being touchy/easily annoyed, and being angry/resentful.",
+    "optionExplanations": {
+      "A": "This is conduct disorder aggression to people/animals.",
+      "B": "This is a conduct disorder serious rule violation.",
+      "C": "This suggests kleptomania.",
+      "D": "Correct. ODD angry/irritable mood symptoms include often losing temper, being touchy/easily annoyed, and being angry/resentful."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "Which symptom belongs to the argumentative/defiant behavior category of ODD",
+    "topic": "ODD symptom categories",
+    "options": {
+      "A": "Argues with authority, defies rules, deliberately annoys, or blames others",
+      "B": "Cruelty to animals",
+      "C": "Fire-setting for property damage",
+      "D": "Stealing nontrivial items without confrontation"
+    },
+    "correct": "A",
+    "explanation": "ODD argumentative/defiant behavior includes arguing with authority, defying rules, deliberately annoying others, and blaming others.",
+    "optionExplanations": {
+      "A": "Correct. ODD argumentative/defiant behavior includes arguing with authority, defying rules, deliberately annoying others, and blaming others.",
+      "B": "This is conduct disorder aggression.",
+      "C": "This is conduct disorder property destruction.",
+      "D": "This is conduct disorder deceitfulness/theft."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A child has ODD. Which outcome/course association is most accurate",
+    "topic": "ODD course",
+    "options": {
+      "A": "About one-third may progress to conduct disorder and about 10 percent may develop antisocial personality disorder",
+      "B": "There is no risk of progression",
+      "C": "All children progress to pyromania",
+      "D": "ODD is more severe than conduct disorder because it includes major rights violations"
+    },
+    "correct": "A",
+    "explanation": "ODD can progress: about one-third may develop conduct disorder and about 10% may develop antisocial personality disorder.",
+    "optionExplanations": {
+      "A": "Correct. ODD can progress: about one-third may develop conduct disorder and about 10% may develop antisocial personality disorder.",
+      "B": "Progression to CD or ASPD can occur.",
+      "C": "This is not true.",
+      "D": "ODD does not include serious rights violations; CD does."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "Which management plan best fits ODD",
+    "topic": "ODD management",
+    "options": {
+      "A": "Naltrexone as first-line core therapy",
+      "B": "Problem-solving skills training and parent management training; medications reserved for comorbid disorders",
+      "C": "No family involvement",
+      "D": "Mandatory juvenile detention"
+    },
+    "correct": "B",
+    "explanation": "ODD management includes problem-solving skills training and parent management training. Medications are reserved for comorbid disorders.",
+    "optionExplanations": {
+      "A": "Naltrexone may reduce stealing urges in kleptomania, not ODD.",
+      "B": "Correct. ODD management includes problem-solving skills training and parent management training. Medications are reserved for comorbid disorders.",
+      "C": "Parent management training is central.",
+      "D": "This is not standard ODD management."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A 7-year-old has verbal aggression twice weekly for 4 months without injury or property damage. Outbursts are impulsive, not premeditated, and grossly out of proportion. Which diagnosis is most likely",
+    "topic": "IED criteria",
+    "options": {
+      "A": "Conduct disorder",
+      "B": "ODD",
+      "C": "Kleptomania",
+      "D": "Intermittent explosive disorder"
+    },
+    "correct": "D",
+    "explanation": "IED can be diagnosed with verbal or physical aggression at least twice weekly for 3 months without injury/property damage, or at least 3 outbursts with property damage or assault/injury in 12 months. Aggression is grossly out of proportion, not premeditated, not for tangible gain, and age must be at least 6.",
+    "optionExplanations": {
+      "A": "CD is a broader persistent pattern of rights/rule violations.",
+      "B": "ODD is chronic angry/defiant/vindictive behavior, not discrete aggressive outbursts.",
+      "C": "Kleptomania is stealing-related.",
+      "D": "Correct. IED can be diagnosed with verbal or physical aggression at least twice weekly for 3 months without injury/property damage, or at least 3 outbursts with property damage or assault/injury in 12 months. Aggression is grossly out of proportion, not premeditated, not for tangible gain, and age must be at least 6."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "Which pattern meets the more severe intermittent explosive disorder frequency pathway",
+    "topic": "IED criteria",
+    "options": {
+      "A": "One verbal argument in 12 months",
+      "B": "One fire set for insurance money",
+      "C": "At least 3 outbursts with property damage or physical assault/injury within 12 months",
+      "D": "At least 4 ODD symptoms for 6 months"
+    },
+    "correct": "C",
+    "explanation": "IED can involve at least 3 outbursts with property damage or physical assault/injury within 12 months.",
+    "optionExplanations": {
+      "A": "This is insufficient for IED.",
+      "B": "This is goal-directed and not pyromania or IED by itself.",
+      "C": "Correct. IED can involve at least 3 outbursts with property damage or physical assault/injury within 12 months.",
+      "D": "This is ODD criteria."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "Which feature argues against intermittent explosive disorder",
+    "topic": "IED exclusions/key differentiator",
+    "options": {
+      "A": "The outburst is grossly out of proportion",
+      "B": "The aggression is premeditated and done for tangible gain",
+      "C": "The patient is at least 6 years old",
+      "D": "Outbursts are impulsive"
+    },
+    "correct": "B",
+    "explanation": "IED aggression is grossly out of proportion, not premeditated, and not done for tangible gain.",
+    "optionExplanations": {
+      "A": "This supports IED.",
+      "B": "Correct. IED aggression is grossly out of proportion, not premeditated, and not done for tangible gain.",
+      "C": "Age at least 6 is required for IED.",
+      "D": "Impulsivity supports IED."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "Which treatment is emphasized for intermittent explosive disorder",
+    "topic": "IED management",
+    "options": {
+      "A": "CBT to recognize anger cues, identify triggers, and diffuse triggers",
+      "B": "Exposure to consequences of fire as the core treatment",
+      "C": "Prophylactic detention for all patients",
+      "D": "Nutritional counseling and meal planning"
+    },
+    "correct": "A",
+    "explanation": "IED management includes CBT to recognize anger cues, identify triggers, and diffuse triggers. Medications such as SSRIs, mood stabilizers, beta-blockers, second-generation antipsychotics, and benzodiazepines may reduce tension/outbursts, but benzodiazepines can cause disinhibition.",
+    "optionExplanations": {
+      "A": "Correct. IED management includes CBT to recognize anger cues, identify triggers, and diffuse triggers. Medications such as SSRIs, mood stabilizers, beta-blockers, second-generation antipsychotics, and benzodiazepines may reduce tension/outbursts, but benzodiazepines can cause disinhibition.",
+      "B": "This is used for pyromania/fire-setting education.",
+      "C": "This is not standard IED treatment.",
+      "D": "This applies to eating disorders, not IED."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "Which medication caution was specifically noted in intermittent explosive disorder management",
+    "topic": "IED medication caution",
+    "options": {
+      "A": "Benzodiazepines may cause disinhibition",
+      "B": "SSRIs always worsen aggression and are contraindicated",
+      "C": "Beta-blockers have no role in tension/outbursts",
+      "D": "Second-generation antipsychotics are diagnostic"
+    },
+    "correct": "A",
+    "explanation": "Medications may reduce tension/outbursts in IED, including SSRIs, mood stabilizers, beta-blockers, second-generation antipsychotics, and benzodiazepines, but benzodiazepines may cause disinhibition.",
+    "optionExplanations": {
+      "A": "Correct. Medications may reduce tension/outbursts in IED, including SSRIs, mood stabilizers, beta-blockers, second-generation antipsychotics, and benzodiazepines, but benzodiazepines may cause disinhibition.",
+      "B": "SSRIs may reduce tension/outbursts.",
+      "C": "Beta-blockers are listed as possible medications.",
+      "D": "Medication response is not diagnostic."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A teenager shoplifts expensive electronics to resell online. There is no mounting tension before theft and no relief afterward. Which statement is most accurate",
+    "topic": "Kleptomania differentiation",
+    "options": {
+      "A": "This is classic kleptomania",
+      "B": "This is not kleptomania because theft is for monetary value or usefulness",
+      "C": "This is pyromania",
+      "D": "This proves ODD"
+    },
+    "correct": "B",
+    "explanation": "Kleptomania involves stealing items not needed for personal use or monetary value, with tension before and relief during theft. Theft for usefulness/money or as part of an antisocial pattern is not kleptomania.",
+    "optionExplanations": {
+      "A": "Kleptomania requires items not needed and not stolen for monetary value.",
+      "B": "Correct. Kleptomania involves stealing items not needed for personal use or monetary value, with tension before and relief during theft. Theft for usefulness/money or as part of an antisocial pattern is not kleptomania.",
+      "C": "Pyromania is fire-setting.",
+      "D": "ODD involves defiant/vindictive behavior, not theft for resale."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "Which statement about kleptomania is most accurate",
+    "topic": "Kleptomania clinical features",
+    "options": {
+      "A": "All shoplifting is kleptomania",
+      "B": "Kleptomania requires stealing due to delusions",
+      "C": "Kleptomania is most common in early childhood males only",
+      "D": "Most shoplifters do not have kleptomania"
+    },
+    "correct": "D",
+    "explanation": "Most shoplifters do not have kleptomania. Kleptomania often begins in adolescence/early adulthood, is often chronic, and has comorbidities such as mood, anxiety, substance use, and eating disorders.",
+    "optionExplanations": {
+      "A": "Most shoplifters do not have kleptomania.",
+      "B": "Kleptomania is not due to delusions or hallucinations.",
+      "C": "The material notes female:male about 3:1 and onset usually adolescence/early adulthood.",
+      "D": "Correct. Most shoplifters do not have kleptomania. Kleptomania often begins in adolescence/early adulthood, is often chronic, and has comorbidities such as mood, anxiety, substance use, and eating disorders."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "Which treatment may reduce stealing urges and behaviors in kleptomania",
+    "topic": "Kleptomania management",
+    "options": {
+      "A": "Antenatal steroids",
+      "B": "Desmopressin",
+      "C": "Naltrexone",
+      "D": "Exogenous surfactant"
+    },
+    "correct": "C",
+    "explanation": "Kleptomania has no well-established treatment. Behavioral strategies include aversive therapy, covert sensitization, and self-imposed ban on shopping. Naltrexone may reduce stealing urges/behaviors; antidepressants and mood stabilizers have conflicting results.",
+    "optionExplanations": {
+      "A": "Antenatal steroids are used for fetal lung maturation, not kleptomania.",
+      "B": "Desmopressin is used in enuresis, not kleptomania.",
+      "C": "Correct. Kleptomania has no well-established treatment. Behavioral strategies include aversive therapy, covert sensitization, and self-imposed ban on shopping. Naltrexone may reduce stealing urges/behaviors; antidepressants and mood stabilizers have conflicting results.",
+      "D": "Surfactant is used for NRDS, not kleptomania."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A patient sets a fire to destroy evidence of a crime. Which statement is most accurate",
+    "topic": "Pyromania exclusion",
+    "options": {
+      "A": "This is classic pyromania",
+      "B": "This is not pyromania because the fire-setting is goal-directed for a criminal purpose",
+      "C": "This is kleptomania",
+      "D": "This is ODD if it happens once"
+    },
+    "correct": "B",
+    "explanation": "Pyromania is excluded when fire-setting is for financial gain, criminal/political purpose, pure revenge/anger, or other goal-directed reasons.",
+    "optionExplanations": {
+      "A": "Classic pyromania requires fascination/tension/relief, not a criminal goal.",
+      "B": "Correct. Pyromania is excluded when fire-setting is for financial gain, criminal/political purpose, pure revenge/anger, or other goal-directed reasons.",
+      "C": "Kleptomania is stealing-related.",
+      "D": "ODD requires a pattern of symptoms over at least 6 months."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "Which statement about fire-setting in children with conduct disorder is most accurate",
+    "topic": "Pyromania vs conduct disorder",
+    "options": {
+      "A": "It automatically diagnoses pyromania",
+      "B": "It rules out aggression risk",
+      "C": "Fire-setting in children with conduct disorder is a poor prognostic sign",
+      "D": "It is always done for tension relief"
+    },
+    "correct": "C",
+    "explanation": "The material notes that fire-setting in children with conduct disorder is a poor prognostic sign. Fire-setting for damage or as part of CD is not necessarily pyromania.",
+    "optionExplanations": {
+      "A": "Pyromania has specific tension/fascination/relief criteria and exclusions.",
+      "B": "Fire-setting correlates with aggression in adults, and in CD it is concerning.",
+      "C": "Correct. The material notes that fire-setting in children with conduct disorder is a poor prognostic sign. Fire-setting for damage or as part of CD is not necessarily pyromania.",
+      "D": "Fire-setting may be goal-directed or part of CD, not always pyromania."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "Which management approach is appropriate for pyromania",
+    "topic": "Pyromania management",
+    "options": {
+      "A": "Treat comorbidities, educate about dangerousness, expose to consequences of fire, use family therapy if child/adolescent, and develop alternative stress outlets",
+      "B": "Medications are first-line for core pyromania symptoms",
+      "C": "Ignore dangerousness if no one was injured",
+      "D": "Use naltrexone as definitive cure"
+    },
+    "correct": "A",
+    "explanation": "Pyromania management includes treating comorbid conditions, education about dangerousness, exposure to consequences of fire, family therapy if child/adolescent, and psychotherapy to develop alternative stress outlets. Medications have no role for core pyromania symptoms.",
+    "optionExplanations": {
+      "A": "Correct. Pyromania management includes treating comorbid conditions, education about dangerousness, exposure to consequences of fire, family therapy if child/adolescent, and psychotherapy to develop alternative stress outlets. Medications have no role for core pyromania symptoms.",
+      "B": "Medications have no role for core pyromania symptoms.",
+      "C": "Education about dangerousness is part of management.",
+      "D": "Naltrexone may reduce stealing urges in kleptomania, not core pyromania."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A child is angry, argumentative, defiant, and vindictive after previously being well-behaved. Which diagnostic caution from the practice question is most appropriate",
+    "topic": "New-onset defiant behavior",
+    "options": {
+      "A": "New-onset defiance automatically proves ODD",
+      "B": "Conduct disorder is impossible if defiance is present",
+      "C": "Broad differential should be considered, including mood disorder, bipolar disorder, adjustment disorder, and substance use, before assuming primary ODD",
+      "D": "Pyromania is the least likely diagnosis only if stealing occurs"
+    },
+    "correct": "C",
+    "explanation": "The practice question emphasizes that new-onset defiant/oppositional behavior should prompt evaluation for other psychiatric or substance-related causes before assuming primary ODD.",
+    "optionExplanations": {
+      "A": "New-onset behavior requires broad differential evaluation.",
+      "B": "CD and defiant behavior can overlap, but rights/rule violations matter.",
+      "C": "Correct. The practice question emphasizes that new-onset defiant/oppositional behavior should prompt evaluation for other psychiatric or substance-related causes before assuming primary ODD.",
+      "D": "Pyromania depends on fire-setting criteria, not stealing."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

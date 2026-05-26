@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pediatric Respiratory Disorders Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A newborn has small, poorly developed lungs after a pregnancy complicated by severe oligohydramnios. Which congenital lung abnormality best explains this finding",
+    "topic": "Pulmonary hypoplasia",
+    "options": {
+      "A": "Pulmonary hypoplasia",
+      "B": "Pulmonary sequestration",
+      "C": "Laryngomalacia",
+      "D": "Cystic adenomatoid malformation"
+    },
+    "correct": "A",
+    "explanation": "Pulmonary hypoplasia is defective or small lung development. It is the most common congenital lung lesion in the provided material and can be caused by congenital diaphragmatic hernia or oligohydramnios.",
+    "optionExplanations": {
+      "A": "Correct. Oligohydramnios can cause pulmonary hypoplasia.",
+      "B": "Pulmonary sequestration is accessory lung tissue without bronchial tree connection and with systemic blood supply.",
+      "C": "Laryngomalacia causes inspiratory stridor from immature laryngeal cartilage collapse.",
+      "D": "CPAM involves abnormal branching/growth of terminal respiratory structures."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A 2-month-old has noisy breathing that worsens with inspiration. Evaluation suggests immature laryngeal cartilage collapses during inspiration. Which diagnosis is most likely",
+    "topic": "Laryngomalacia",
+    "options": {
+      "A": "Tracheomalacia",
+      "B": "Laryngomalacia",
+      "C": "Tracheoesophageal fistula",
+      "D": "Pulmonary sequestration"
+    },
+    "correct": "B",
+    "explanation": "Laryngomalacia is due to immature laryngeal cartilage collapsing during inspiration and is a common cause of infant stridor. Reflux is also commonly associated.",
+    "optionExplanations": {
+      "A": "Tracheomalacia produces expiratory stridor from weak distal tracheal cartilage rings.",
+      "B": "Correct. Inspiratory infant stridor from laryngeal cartilage collapse is laryngomalacia.",
+      "C": "Tracheoesophageal fistula causes aspiration, suffocation, and pneumonia.",
+      "D": "Pulmonary sequestration causes recurrent pneumonia or persistent cough due to accessory lung tissue."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "An infant has expiratory stridor and recurrent respiratory infections due to poor secretion clearance. Which congenital airway defect is most likely",
+    "topic": "Tracheomalacia",
+    "options": {
+      "A": "Laryngomalacia",
+      "B": "Pulmonary hypoplasia",
+      "C": "Tracheomalacia",
+      "D": "Congenital diaphragmatic hernia"
+    },
+    "correct": "C",
+    "explanation": "Tracheomalacia is caused by weak distal tracheal cartilage rings causing airway collapse. It causes expiratory stridor and poor secretion clearance, increasing infection risk.",
+    "optionExplanations": {
+      "A": "Laryngomalacia causes inspiratory stridor.",
+      "B": "Pulmonary hypoplasia is small/defective lung development.",
+      "C": "Correct. Expiratory stridor with recurrent infections points to tracheomalacia.",
+      "D": "Congenital diaphragmatic hernia allows abdominal contents into the thorax and can cause pulmonary hypoplasia."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A newborn coughs and becomes cyanotic with feeds. Imaging suggests a blind upper esophageal pouch with a fistula between the distal esophagus and trachea. Which complication is most likely",
+    "topic": "Tracheoesophageal fistula",
+    "options": {
+      "A": "Male infertility",
+      "B": "Air trapping from bronchial foreign body",
+      "C": "Supravalvular aortic stenosis",
+      "D": "Aspiration, suffocation, and pneumonia"
+    },
+    "correct": "D",
+    "explanation": "The most common tracheoesophageal fistula pattern is a blind upper esophageal pouch with a fistula between the distal esophagus and trachea. It causes aspiration, suffocation, and pneumonia.",
+    "optionExplanations": {
+      "A": "Male infertility is associated with Kartagener syndrome or cystic fibrosis.",
+      "B": "Air trapping is seen with foreign body aspiration.",
+      "C": "Supravalvular aortic stenosis is associated with Williams syndrome, not TE fistula.",
+      "D": "Correct. TE fistula causes aspiration-related complications."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A neonate has severe respiratory distress. Imaging shows abdominal contents in the thorax through an incompletely formed diaphragm, most prominent on the left. What is the major lung complication",
+    "topic": "Congenital diaphragmatic hernia",
+    "options": {
+      "A": "Fatal pulmonary hypoplasia in severe cases",
+      "B": "Pancreatic insufficiency",
+      "C": "Vertical supranuclear gaze palsy",
+      "D": "Right bronchial air trapping"
+    },
+    "correct": "A",
+    "explanation": "Congenital diaphragmatic hernia is incomplete diaphragm formation allowing abdominal contents into the thorax. It is usually left-sided and severe cases can cause fatal pulmonary hypoplasia.",
+    "optionExplanations": {
+      "A": "Correct. Severe CDH can cause pulmonary hypoplasia.",
+      "B": "Pancreatic insufficiency is typical of cystic fibrosis.",
+      "C": "Vertical supranuclear gaze palsy is unrelated to this respiratory section.",
+      "D": "Right bronchial air trapping is a clue for foreign body aspiration."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A child has recurrent pneumonia localized to the same lung region. Imaging shows accessory lung tissue that is not connected to the bronchial tree and receives systemic blood supply. Which diagnosis is most likely",
+    "topic": "Pulmonary sequestration",
+    "options": {
+      "A": "CPAM",
+      "B": "Pulmonary sequestration",
+      "C": "Laryngomalacia",
+      "D": "Transient tachypnea of the newborn"
+    },
+    "correct": "B",
+    "explanation": "Pulmonary sequestration is accessory lung tissue that is not connected to the bronchial tree and has systemic blood supply. It can cause recurrent pneumonia or persistent cough in infants and may be asymptomatic in adults.",
+    "optionExplanations": {
+      "A": "CPAM is abnormal branching/growth of terminal respiratory structures with cystic lesions.",
+      "B": "Correct. Noncommunicating accessory lung tissue with systemic blood supply is sequestration.",
+      "C": "Laryngomalacia causes inspiratory stridor from laryngeal cartilage collapse.",
+      "D": "TTN is delayed fetal lung fluid clearance in newborns."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A neonate has increased respiratory effort and cyanosis. Imaging shows cystic lung lesions from abnormal branching and growth of terminal respiratory structures. Which diagnosis best fits",
+    "topic": "CPAM",
+    "options": {
+      "A": "Pulmonary hypoplasia",
+      "B": "Tracheomalacia",
+      "C": "CPAM",
+      "D": "Alpha-1 antitrypsin deficiency"
+    },
+    "correct": "C",
+    "explanation": "Congenital pulmonary airway malformation is abnormal branching and growth of terminal respiratory structures. It can cause increased respiratory effort and cyanosis, may have macro- or microcysts, and is treated with resection; rare malignant transformation is possible.",
+    "optionExplanations": {
+      "A": "Pulmonary hypoplasia is small/defective lung development, not cystic terminal airway branching.",
+      "B": "Tracheomalacia causes expiratory stridor.",
+      "C": "Correct. Abnormal terminal respiratory structure branching with cysts suggests CPAM.",
+      "D": "A1AT deficiency causes emphysema and liver disease."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A 3-year-old has chronic productive cough since infancy, recurrent respiratory infections, frequent otitis media, bronchiectasis, normal sweat chloride, and a DNAH5 mutation. Which diagnosis is most likely",
+    "topic": "Primary ciliary dyskinesia",
+    "options": {
+      "A": "Cystic fibrosis",
+      "B": "Neonatal respiratory distress syndrome",
+      "C": "Meconium aspiration syndrome",
+      "D": "Primary ciliary dyskinesia"
+    },
+    "correct": "D",
+    "explanation": "Primary ciliary dyskinesia is an autosomal recessive dynein-related disorder causing defective ciliary function, impaired mucociliary clearance, recurrent sinopulmonary infections, bronchiectasis, sinusitis, and otitis media. Normal sweat chloride argues against cystic fibrosis.",
+    "optionExplanations": {
+      "A": "CF can cause recurrent infections but typically has elevated sweat chloride and pancreatic insufficiency.",
+      "B": "NRDS is surfactant deficiency in premature infants.",
+      "C": "Meconium aspiration is a term/post-term neonatal disorder after fetal distress.",
+      "D": "Correct. DNAH5 mutation, otitis media, bronchiectasis, and normal sweat chloride point to PCD."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A boy has recurrent sinusitis, bronchiectasis, situs inversus, and later infertility due to sperm dysmotility. Which syndrome best fits",
+    "topic": "Kartagener syndrome",
+    "options": {
+      "A": "Kartagener syndrome",
+      "B": "Alpha-1 antitrypsin deficiency",
+      "C": "Transient tachypnea of the newborn",
+      "D": "Bronchopulmonary dysplasia"
+    },
+    "correct": "A",
+    "explanation": "Kartagener syndrome is the association of primary ciliary dyskinesia with situs inversus and male infertility from sperm dysmotility.",
+    "optionExplanations": {
+      "A": "Correct. PCD plus situs inversus plus male infertility is Kartagener syndrome.",
+      "B": "A1AT deficiency causes emphysema and liver disease.",
+      "C": "TTN causes newborn tachypnea from delayed fetal lung fluid clearance.",
+      "D": "Bronchopulmonary dysplasia is chronic lung injury from prematurity/oxygen/ventilation."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A child has recurrent respiratory infections and bronchiectasis. Which finding would favor primary ciliary dyskinesia over cystic fibrosis",
+    "topic": "PCD vs cystic fibrosis",
+    "options": {
+      "A": "Pancreatic insufficiency",
+      "B": "Elevated sweat chloride",
+      "C": "Phe508del mutation",
+      "D": "Frequent otitis media with normal sweat chloride"
+    },
+    "correct": "D",
+    "explanation": "PCD and CF can both cause recurrent respiratory infections, but PCD more classically has frequent otitis media, normal sweat chloride, possible situs inversus, and dynein gene mutations such as DNAH5. CF has elevated sweat chloride, CFTR mutation, and pancreatic insufficiency.",
+    "optionExplanations": {
+      "A": "Pancreatic insufficiency favors CF.",
+      "B": "Elevated sweat chloride favors CF.",
+      "C": "Phe508del is the common CFTR mutation in CF.",
+      "D": "Correct. Otitis media plus normal sweat chloride favors PCD."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A premature infant develops respiratory distress shortly after birth. CXR shows homogeneous ground-glass appearance with hypoinflation. Which mechanism is most likely",
+    "topic": "Neonatal respiratory distress syndrome",
+    "options": {
+      "A": "Surfactant deficiency from pulmonary immaturity",
+      "B": "Delayed fetal lung fluid clearance",
+      "C": "Meconium aspiration causing chemical pneumonitis",
+      "D": "Foreign body obstruction causing unilateral air trapping"
+    },
+    "correct": "A",
+    "explanation": "Neonatal respiratory distress syndrome affects premature infants and is caused by pulmonary immaturity leading to surfactant deficiency. Surfactant deficiency causes alveolar collapse, hypoxia, hyaline membranes, and impaired gas exchange.",
+    "optionExplanations": {
+      "A": "Correct. Prematurity plus ground-glass hypoinflation points to surfactant deficiency.",
+      "B": "Delayed fetal lung fluid clearance causes TTN, which resolves in 24 to 72 hours.",
+      "C": "Meconium aspiration affects term/post-term infants with fetal distress.",
+      "D": "Foreign body aspiration presents with cough, wheezing, asymmetric breath sounds, and air trapping."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A premature infant’s lung biopsy shows poorly developed alveoli and hyaline membranes lining alveoli and bronchioles. Which cell normally produces the deficient substance",
+    "topic": "Surfactant physiology",
+    "options": {
+      "A": "Type I pneumocyte",
+      "B": "Club cell",
+      "C": "Alveolar macrophage",
+      "D": "Type II pneumocyte"
+    },
+    "correct": "D",
+    "explanation": "Surfactant is produced by type II pneumocytes, contains lecithin and hydrophobic proteins, and decreases alveolar surface tension to keep alveoli open.",
+    "optionExplanations": {
+      "A": "Type I pneumocytes are involved in gas exchange, not surfactant production.",
+      "B": "Club cells are bronchiolar secretory cells, not the key surfactant source.",
+      "C": "Alveolar macrophages remove debris and pathogens.",
+      "D": "Correct. Type II pneumocytes produce surfactant."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A diabetic pregnant patient asks why her infant is at increased risk for neonatal respiratory distress syndrome. Which mechanism is most accurate",
+    "topic": "NRDS risk factors",
+    "options": {
+      "A": "Maternal diabetes increases fetal insulin, which decreases surfactant production",
+      "B": "Maternal diabetes causes dynein arm defects",
+      "C": "Maternal diabetes causes elevated sweat chloride",
+      "D": "Maternal diabetes directly causes left-sided diaphragmatic hernia"
+    },
+    "correct": "A",
+    "explanation": "Maternal diabetes increases fetal insulin, which suppresses surfactant production and increases risk of neonatal respiratory distress syndrome.",
+    "optionExplanations": {
+      "A": "Correct. Fetal insulin suppresses surfactant, increasing NRDS risk.",
+      "B": "Dynein arm defects cause primary ciliary dyskinesia.",
+      "C": "Elevated sweat chloride is seen in cystic fibrosis.",
+      "D": "Congenital diaphragmatic hernia is not caused by this mechanism."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A woman at risk of preterm labor receives medication to induce fetal lung maturation. Which intervention from the material is being used",
+    "topic": "NRDS prevention/treatment",
+    "options": {
+      "A": "Postnatal chest physiotherapy",
+      "B": "Antenatal steroids",
+      "C": "Pneumococcal vaccination",
+      "D": "Cystic fibrosis transmembrane conductance correction"
+    },
+    "correct": "B",
+    "explanation": "Antenatal steroids induce fetal lung maturation and help prevent NRDS. Postnatal exogenous surfactant and oxygen/ventilation may be used after birth if needed.",
+    "optionExplanations": {
+      "A": "Chest physiotherapy is used for airway clearance in PCD/CF-type disorders, not fetal lung maturation.",
+      "B": "Correct. Antenatal steroids promote fetal lung maturity.",
+      "C": "Pneumococcal vaccination prevents infection risk but does not induce lung maturation.",
+      "D": "CFTR correction is unrelated to surfactant maturation in NRDS."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A premature neonate receives prolonged oxygen and mechanical ventilation. Months later, pathology shows large simplified alveoli, malformed blood vessels, and smooth muscle hyperplasia. Which complication is most likely",
+    "topic": "Bronchopulmonary dysplasia",
+    "options": {
+      "A": "Retinopathy of prematurity",
+      "B": "Transient tachypnea of the newborn",
+      "C": "Bronchopulmonary dysplasia",
+      "D": "Pulmonary sequestration"
+    },
+    "correct": "C",
+    "explanation": "Bronchopulmonary dysplasia is chronic lung injury in neonates related to prematurity, immature lung development, oxygen exposure, and mechanical ventilation. Pathology includes large simplified alveoli, malformed blood vessels, smooth muscle hyperplasia, and arrested lung development from inflammatory cytokines.",
+    "optionExplanations": {
+      "A": "Retinopathy of prematurity involves abnormal retinal angiogenesis after oxygen exposure.",
+      "B": "TTN is delayed fetal lung fluid clearance that resolves in 24 to 72 hours.",
+      "C": "Correct. Prolonged oxygen/ventilation injury with simplified alveoli is bronchopulmonary dysplasia.",
+      "D": "Pulmonary sequestration is noncommunicating accessory lung tissue."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A premature infant receives supplemental oxygen. Retinal vessels constrict from oxygen exposure, then abnormal angiogenesis occurs after return to room air. Which mediator pattern best explains this",
+    "topic": "Retinopathy of prematurity",
+    "options": {
+      "A": "Increased alpha-1 antitrypsin followed by elastase suppression",
+      "B": "Decreased VEGF during oxygen exposure followed by VEGF rebound",
+      "C": "Increased fetal insulin followed by surfactant excess",
+      "D": "Decreased chloride secretion followed by pancreatic insufficiency"
+    },
+    "correct": "B",
+    "explanation": "Retinopathy of prematurity occurs when supplemental oxygen decreases VEGF, followed by VEGF rebound after return to room air, causing abnormal retinal angiogenesis.",
+    "optionExplanations": {
+      "A": "A1AT physiology relates to elastase inhibition, not retinal angiogenesis.",
+      "B": "Correct. Oxygen lowers VEGF, then rebound VEGF causes abnormal angiogenesis.",
+      "C": "Fetal insulin suppresses surfactant in NRDS risk.",
+      "D": "Decreased chloride secretion is cystic fibrosis pathophysiology."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A newborn has tachypnea with respiratory rate above 60 shortly after birth. Symptoms improve with oxygen and resolve within 24 to 72 hours. CXR shows increased pulmonary markings. Which diagnosis is most likely",
+    "topic": "Transient tachypnea of the newborn",
+    "options": {
+      "A": "Neonatal respiratory distress syndrome",
+      "B": "Meconium aspiration syndrome",
+      "C": "Transient tachypnea of the newborn",
+      "D": "Alpha-1 antitrypsin deficiency"
+    },
+    "correct": "C",
+    "explanation": "Transient tachypnea of the newborn is due to delayed fetal lung fluid clearance. It is the most common newborn tachypnea, improves with oxygen, resolves in 24 to 72 hours, and has increased pulmonary markings on CXR.",
+    "optionExplanations": {
+      "A": "NRDS is surfactant deficiency, usually in premature infants, with ground-glass CXR and hypoinflation.",
+      "B": "Meconium aspiration is linked to term/post-term infants with fetal distress and mixed atelectasis/local emphysema.",
+      "C": "Correct. Rapid resolution with increased pulmonary markings fits TTN.",
+      "D": "A1AT deficiency causes emphysema and liver disease, not transient neonatal tachypnea."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A premature infant has worsening respiratory distress with homogeneous ground-glass opacities and hypoinflation. Which feature helps distinguish NRDS from TTN",
+    "topic": "TTN vs NRDS",
+    "options": {
+      "A": "Rapid recovery in 24 to 72 hours",
+      "B": "Increased pulmonary markings",
+      "C": "Surfactant deficiency with more severe/prolonged course",
+      "D": "Normal sweat chloride"
+    },
+    "correct": "C",
+    "explanation": "NRDS is due to surfactant deficiency and tends to be more severe/prolonged, with homogeneous ground-glass appearance and hypoinflation. TTN is delayed fluid clearance with rapid 24 to 72 hour recovery and increased pulmonary markings.",
+    "optionExplanations": {
+      "A": "Rapid recovery in 24 to 72 hours favors TTN.",
+      "B": "Increased pulmonary markings favor TTN.",
+      "C": "Correct. Surfactant deficiency with a more severe course favors NRDS.",
+      "D": "Normal sweat chloride helps distinguish PCD from CF, not TTN from NRDS."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A term infant born after fetal distress develops respiratory distress. CXR shows mixed atelectasis and local emphysema. Which mechanism best explains the disease",
+    "topic": "Meconium aspiration syndrome",
+    "options": {
+      "A": "Delayed fetal lung fluid clearance",
+      "B": "Pulmonary immaturity causing surfactant deficiency",
+      "C": "Abnormal dynein arms causing ciliary immotility",
+      "D": "Meconium aspiration causing airway obstruction, chemical pneumonitis, and surfactant dysfunction"
+    },
+    "correct": "D",
+    "explanation": "Meconium aspiration syndrome occurs in term or post-term infants after fetal distress/hypoxia. Meconium causes airway obstruction, chemical pneumonitis, surfactant dysfunction, and inflammation; it can contribute to persistent pulmonary hypertension of the newborn.",
+    "optionExplanations": {
+      "A": "Delayed fetal lung fluid clearance causes TTN.",
+      "B": "Surfactant deficiency from immaturity causes NRDS in premature infants.",
+      "C": "Dynein defects cause primary ciliary dyskinesia.",
+      "D": "Correct. Meconium aspiration causes obstruction, pneumonitis, surfactant dysfunction, and inflammation."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A neonate develops pneumonia after maternal fever and prolonged rupture of membranes. Which pathogens were listed as common causes in the material",
+    "topic": "Neonatal pneumonia",
+    "options": {
+      "A": "Group B streptococcus and E coli/Gram-negative rods",
+      "B": "RSV and rhinovirus",
+      "C": "Pseudomonas and Burkholderia",
+      "D": "Mycoplasma and Chlamydophila"
+    },
+    "correct": "A",
+    "explanation": "Neonatal pneumonia is usually aspiration or infection. The material lists group B streptococcus as common and E coli/Gram-negative rods as additional causes. Risks include maternal fever, prolonged rupture of membranes, and maternal GBS colonization.",
+    "optionExplanations": {
+      "A": "Correct. GBS and E coli/Gram-negative rods are listed neonatal pneumonia causes.",
+      "B": "RSV causes bronchiolitis in children, not the listed neonatal pneumonia pattern.",
+      "C": "Pseudomonas is important in CF colonization but not the listed neonatal pneumonia causes here.",
+      "D": "Mycoplasma/Chlamydophila are atypical pneumonia organisms, not emphasized here."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A toddler acutely develops cough, wheezing, and asymmetric breath sounds while eating peanuts. Expiration causes obstruction and air trapping. Where are most aspirated foreign bodies found",
+    "topic": "Foreign body aspiration",
+    "options": {
+      "A": "Left upper lobe alveoli",
+      "B": "Pleural cavity",
+      "C": "Bronchus, more often right than left",
+      "D": "Upper esophageal pouch"
+    },
+    "correct": "C",
+    "explanation": "Foreign body aspiration most often lodges in a bronchus, right more than left. Symptoms include cough, wheezing, asymmetric breath sounds, and expiratory air trapping; atelectasis is a late finding.",
+    "optionExplanations": {
+      "A": "Foreign bodies typically lodge in bronchi, not alveoli.",
+      "B": "Pleural cavity localization would suggest pneumothorax/effusion, not aspiration.",
+      "C": "Correct. Most foreign bodies are in the bronchus, commonly the right.",
+      "D": "A blind upper pouch is part of common tracheoesophageal fistula anatomy."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A 1-year-old with bronchiolitis was infected by respiratory droplets. The causative virus is a Paramyxoviridae member and infects most children by age 2. Which pathogen is most likely",
+    "topic": "RSV",
+    "options": {
+      "A": "Adenovirus",
+      "B": "Influenza virus",
+      "C": "Respiratory syncytial virus",
+      "D": "Parainfluenza virus"
+    },
+    "correct": "C",
+    "explanation": "RSV is a Paramyxoviridae virus transmitted by respiratory droplets. It causes bronchiolitis in children, has an incubation period of about 4 to 6 days, and infects most children by age 2.",
+    "optionExplanations": {
+      "A": "Adenovirus can cause respiratory illness but is not the Paramyxoviridae bronchiolitis virus emphasized here.",
+      "B": "Influenza is not the bronchiolitis pathogen described.",
+      "C": "Correct. RSV causes pediatric bronchiolitis and is spread by respiratory droplets.",
+      "D": "Parainfluenza is a Paramyxoviridae virus but is classically associated with croup, not the RSV bronchiolitis clue here."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child has an anterior mediastinal mass. Using the lecture’s “4 Ts,” which cause is most common in children",
+    "topic": "Mediastinal masses",
+    "options": {
+      "A": "Thymoma",
+      "B": "Teratoma",
+      "C": "Thyroid lesion",
+      "D": "Terrible lymphoma"
+    },
+    "correct": "D",
+    "explanation": "The lecture lists the 4 Ts of mediastinal masses: thymoma, teratoma, terrible lymphoma, and thyroid lesions. Lymphoma is the most common mediastinal mass cause in children.",
+    "optionExplanations": {
+      "A": "Thymoma is uncommon in children.",
+      "B": "Teratoma can be found in children but is not listed as the most common cause.",
+      "C": "Thyroid lesions are part of the 4 Ts but not the most common pediatric cause.",
+      "D": "Correct. Lymphoma is the most common mediastinal mass cause in children."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A child has emphysema and liver disease from a protein-folding disorder. Testing shows a clinically significant PiZ mutation with PiZZ homozygosity. Which mechanism is responsible",
+    "topic": "Alpha-1 antitrypsin deficiency",
+    "options": {
+      "A": "CFTR mutation causing decreased chloride secretion",
+      "B": "Dynein mutation causing poor mucociliary clearance",
+      "C": "Surfactant deficiency causing alveolar collapse",
+      "D": "Low alpha-1 antitrypsin allowing uninhibited neutrophil elastase"
+    },
+    "correct": "D",
+    "explanation": "Alpha-1 antitrypsin deficiency is an autosomal recessive protein-folding disorder. Low A1AT fails to inhibit neutrophil elastase, causing pulmonary emphysema and liver disease such as hepatitis/cirrhosis. PiZ is clinically significant, and PiZZ homozygotes have about 10% normal A1AT level.",
+    "optionExplanations": {
+      "A": "CFTR mutation causes cystic fibrosis.",
+      "B": "Dynein mutation causes primary ciliary dyskinesia.",
+      "C": "Surfactant deficiency causes NRDS.",
+      "D": "Correct. Uninhibited neutrophil elastase causes emphysema in A1AT deficiency."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A child has chronic cough, recurrent sinopulmonary infections, elevated sweat chloride, foul-smelling stools, poor weight gain, and fat-soluble vitamin deficiency. Which gene is most likely mutated",
+    "topic": "Cystic fibrosis",
+    "options": {
+      "A": "CFTR",
+      "B": "DNAH5",
+      "C": "SFTPB",
+      "D": "PiZ alpha-1 antitrypsin"
+    },
+    "correct": "A",
+    "explanation": "Cystic fibrosis is an autosomal recessive CFTR mutation causing abnormal chloride transport. It produces elevated sodium chloride in sweat, thick airway secretions, chronic infections, pancreatic insufficiency, malabsorption, meconium ileus, and male infertility.",
+    "optionExplanations": {
+      "A": "Correct. CFTR mutation causes cystic fibrosis.",
+      "B": "DNAH5 mutation supports primary ciliary dyskinesia.",
+      "C": "SFTPB mutation can cause congenital surfactant deficiency.",
+      "D": "PiZ is associated with alpha-1 antitrypsin deficiency."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A genetic test in a child with cystic fibrosis shows the most common CFTR mutation. Which mutation is this",
+    "topic": "Cystic fibrosis genetics",
+    "options": {
+      "A": "DNAH5 deletion",
+      "B": "SFTPC mutation",
+      "C": "PiZZ genotype",
+      "D": "Phe508del or ΔF508"
+    },
+    "correct": "D",
+    "explanation": "The most common CFTR mutation in cystic fibrosis is Phe508del, also called ΔF508. Class 1 to 3 mutations produce less than 10% CFTR activity and severe disease.",
+    "optionExplanations": {
+      "A": "DNAH5 is associated with primary ciliary dyskinesia.",
+      "B": "SFTPC mutation is associated with congenital surfactant deficiency.",
+      "C": "PiZZ is alpha-1 antitrypsin deficiency.",
+      "D": "Correct. ΔF508/Phe508del is the most common CFTR mutation."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A child with cystic fibrosis has poor weight gain, abdominal distension, and foul-smelling stools. Which mechanism best explains these GI findings",
+    "topic": "CF pancreatic insufficiency",
+    "options": {
+      "A": "Exocrine pancreatic insufficiency causing protein and fat malabsorption",
+      "B": "Absent ganglion cells in the rectosigmoid colon",
+      "C": "A blind upper esophageal pouch with distal tracheal fistula",
+      "D": "Delayed fetal lung fluid clearance"
+    },
+    "correct": "A",
+    "explanation": "Most patients with severe CFTR mutations develop exocrine pancreatic insufficiency, causing protein/fat malabsorption, foul-smelling stools, abdominal distension, poor weight gain, and fat-soluble vitamin deficiencies.",
+    "optionExplanations": {
+      "A": "Correct. Pancreatic insufficiency explains malabsorption and foul-smelling stools in CF.",
+      "B": "Absent ganglion cells suggests Hirschsprung disease.",
+      "C": "TE fistula causes aspiration with feeds, not pancreatic malabsorption.",
+      "D": "Delayed fetal lung fluid clearance causes TTN."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A male with cystic fibrosis is evaluated for infertility. Which reproductive abnormality is most likely",
+    "topic": "CF male infertility",
+    "options": {
+      "A": "Sperm dysmotility from dynein defect only",
+      "B": "Congenital bilateral absence of the vas deferens",
+      "C": "Hypogonadism from Prader-Willi syndrome",
+      "D": "Failure of testicular descent from androgen receptor resistance"
+    },
+    "correct": "B",
+    "explanation": "Approximately 95% of adult males with cystic fibrosis are infertile. Biallelic CFTR mutations can cause congenital bilateral absence of the vas deferens.",
+    "optionExplanations": {
+      "A": "Sperm dysmotility due to dynein defects occurs in Kartagener syndrome/PCD.",
+      "B": "Correct. CF is associated with congenital bilateral absence of the vas deferens.",
+      "C": "Prader-Willi is unrelated to CF infertility.",
+      "D": "Androgen receptor resistance is not the CF mechanism."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "An infant has intestinal obstruction from mucus plugs and is later diagnosed with cystic fibrosis. Which neonatal GI manifestation is this",
+    "topic": "CF meconium ileus",
+    "options": {
+      "A": "Pyloric stenosis",
+      "B": "Hirschsprung-associated enterocolitis",
+      "C": "Meconium ileus",
+      "D": "Biliary atresia"
+    },
+    "correct": "C",
+    "explanation": "Infants with cystic fibrosis can develop mucus plugs causing meconium ileus. This is a classic neonatal GI manifestation of CF.",
+    "optionExplanations": {
+      "A": "Pyloric stenosis causes post-feed vomiting at 3 to 6 weeks, not mucus plug ileal obstruction.",
+      "B": "HAEC is a complication of Hirschsprung disease.",
+      "C": "Correct. CF can cause meconium ileus from thick mucus plugs.",
+      "D": "Biliary atresia causes jaundice, dark urine, and pale stools."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A child with primary ciliary dyskinesia has frequent exacerbations. Which management strategy is listed in the material",
+    "topic": "Primary ciliary dyskinesia management",
+    "options": {
+      "A": "Avoid all vaccines because ciliary function is abnormal",
+      "B": "Use only exogenous surfactant long-term",
+      "C": "Perform prophylactic colectomy",
+      "D": "Airway clearance with chest physiotherapy/postural drainage plus culture-targeted antibiotics during exacerbations"
+    },
+    "correct": "D",
+    "explanation": "PCD management includes airway clearance with chest physiotherapy, postural drainage, and oscillatory PEP devices; antibiotics targeted to sputum cultures during exacerbations; prophylaxis in frequent exacerbators; bronchodilators if reversible obstruction; and annual influenza plus pneumococcal vaccination.",
+    "optionExplanations": {
+      "A": "Vaccines are recommended, including annual influenza and pneumococcal vaccination.",
+      "B": "Exogenous surfactant is used for NRDS, not chronic PCD management.",
+      "C": "Prophylactic colectomy is for FAP, not PCD.",
+      "D": "Correct. Airway clearance and culture-targeted antibiotics are key PCD management strategies."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abuse and Neglect Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A clinician is evaluating possible abuse versus neglect. Which framing is most useful clinically for healthcare workers",
+    "topic": "Core concept",
+    "options": {
+      "A": "Abuse must be reported, but neglect is only a social issue",
+      "B": "Neglect is only reportable if physical violence is seen",
+      "C": "Both abuse and neglect fall under child maltreatment and require evaluation, documentation, and reporting when suspected",
+      "D": "Clinicians should wait for legal classification before acting"
+    },
+    "correct": "C",
+    "explanation": "The notes emphasize that abuse vs neglect is a legal distinction that is not very useful clinically. For healthcare workers, both are child maltreatment with the same responsibilities: evaluate, document, and report.",
+    "optionExplanations": {
+      "A": "Neglect can be just as dangerous or worse and still requires reporting when suspected.",
+      "B": "Withholding food or medical care can cause severe harm without active violence.",
+      "C": "Correct. The notes emphasize that abuse vs neglect is a legal distinction that is not very useful clinically. For healthcare workers, both are child maltreatment with the same responsibilities: evaluate, document, and report.",
+      "D": "Clinicians report reasonable suspicion; legal systems determine classification."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "Which example best fits negligent treatment/maltreatment in the lecture framework",
+    "topic": "Neglect",
+    "options": {
+      "A": "Toddler bruises shins while learning to walk",
+      "B": "Normal genital exam after alleged sexual abuse",
+      "C": "Symmetric circular marks from documented cupping done safely",
+      "D": "Caregiver withholds food or necessary medical care, causing severe harm"
+    },
+    "correct": "D",
+    "explanation": "Neglect can include withholding food or medical care, causing severe harm even without active violence.",
+    "optionExplanations": {
+      "A": "Shin bruises over bony prominences are common accidental bruises in toddlers.",
+      "B": "A normal exam does not rule out sexual abuse.",
+      "C": "Folk practices can mimic abuse; context, harm, and consistency matter.",
+      "D": "Correct. Neglect can include withholding food or medical care, causing severe harm even without active violence."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A physician suspects abuse because the injury pattern does not fit the story. What threshold is required to report",
+    "topic": "Mandatory reporting threshold",
+    "options": {
+      "A": "Reasonable cause to believe abuse or neglect occurred",
+      "B": "Proof beyond reasonable doubt",
+      "C": "Confession from caregiver",
+      "D": "Radiographic confirmation of fracture"
+    },
+    "correct": "A",
+    "explanation": "The reporting threshold is low: report when there is reasonable cause to believe abuse or neglect occurred. Proof, certainty, and evidence are not required.",
+    "optionExplanations": {
+      "A": "Correct. The reporting threshold is low: report when there is reasonable cause to believe abuse or neglect occurred. Proof, certainty, and evidence are not required.",
+      "B": "This is a legal trial standard, not the reporting threshold.",
+      "C": "A confession is not required.",
+      "D": "Fractures/bruises alone are not required, and suspicion can be based on mismatch."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A physician in Nevada has reasonable suspicion of child abuse. When should the report be made according to the notes",
+    "topic": "Reporting timeline",
+    "options": {
+      "A": "Only after the next clinic visit",
+      "B": "As soon as practicable and within 24 hours",
+      "C": "Within 7 business days",
+      "D": "Only after law enforcement requests it"
+    },
+    "correct": "B",
+    "explanation": "The notes state that in Nevada, suspected child abuse/neglect should be reported as soon as practicable and within 24 hours.",
+    "optionExplanations": {
+      "A": "Reporting should not be delayed.",
+      "B": "Correct. The notes state that in Nevada, suspected child abuse/neglect should be reported as soon as practicable and within 24 hours.",
+      "C": "The listed Nevada timeline is ≤24 hours.",
+      "D": "Mandated reporters initiate reporting when they have reasonable suspicion."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "Where should suspected child abuse or neglect be reported",
+    "topic": "Reporting destination",
+    "options": {
+      "A": "Only to the school principal",
+      "B": "Only to the alleged perpetrator",
+      "C": "Only to the patient portal messaging system",
+      "D": "Child welfare agency/CPS or law enforcement"
+    },
+    "correct": "D",
+    "explanation": "Reports go to a child welfare agency/CPS or law enforcement. The notes also say phone calls are preferred for healthcare workers because they allow back-and-forth details.",
+    "optionExplanations": {
+      "A": "School personnel may be mandated reporters, but reporting should go to CPS/child welfare or law enforcement.",
+      "B": "This could endanger the child and is not the report destination.",
+      "C": "The notes prefer a phone call over email/indirect messaging.",
+      "D": "Correct. Reports go to a child welfare agency/CPS or law enforcement. The notes also say phone calls are preferred for healthcare workers because they allow back-and-forth details."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A clinician makes a good-faith report of suspected abuse that later turns out to be wrong. What protection is noted",
+    "topic": "Good-faith immunity",
+    "options": {
+      "A": "Automatic malpractice liability",
+      "B": "Mandatory criminal conviction",
+      "C": "Immunity from civil/criminal liability unless professional negligence",
+      "D": "Loss of license in all cases"
+    },
+    "correct": "C",
+    "explanation": "Good-faith reports have immunity from civil/criminal liability unless there is professional negligence.",
+    "optionExplanations": {
+      "A": "Good-faith reporting is protected.",
+      "B": "The protection is the opposite.",
+      "C": "Correct. Good-faith reports have immunity from civil/criminal liability unless there is professional negligence.",
+      "D": "Failure to report knowingly/willfully can carry penalties; good-faith reporting is protected."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A mandated reporter knowingly and willfully fails to report suspected child abuse. What consequence is listed for a first violation",
+    "topic": "Failure to report",
+    "options": {
+      "A": "No penalty",
+      "B": "Misdemeanor",
+      "C": "Gross misdemeanor as the first violation only",
+      "D": "Automatic felony in every case"
+    },
+    "correct": "B",
+    "explanation": "Failure to report knowingly/willfully is a misdemeanor for the first violation, with subsequent violations listed as gross misdemeanors and possible licensing consequences.",
+    "optionExplanations": {
+      "A": "The notes list legal consequences.",
+      "B": "Correct. Failure to report knowingly/willfully is a misdemeanor for the first violation, with subsequent violations listed as gross misdemeanors and possible licensing consequences.",
+      "C": "Subsequent violations are gross misdemeanors; first is misdemeanor.",
+      "D": "That is not the listed first-violation consequence."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A child has an injury. The clinician asks, “Could this child developmentally do what the story claims?” Which part of the diagnostic triad is being assessed",
+    "topic": "Diagnostic triad",
+    "options": {
+      "A": "Child/developmental capability",
+      "B": "Story specificity only",
+      "C": "Injury pattern only",
+      "D": "Legal proof"
+    },
+    "correct": "A",
+    "explanation": "The triad asks whether the child could developmentally do what the story claims, whether the story is consistent/specific/plausible, and whether the injury fits the mechanism.",
+    "optionExplanations": {
+      "A": "Correct. The triad asks whether the child could developmentally do what the story claims, whether the story is consistent/specific/plausible, and whether the injury fits the mechanism.",
+      "B": "Story assessment asks whether the history is consistent, specific, and plausible.",
+      "C": "Injury assessment asks whether the injury pattern fits the mechanism.",
+      "D": "The triad guides suspicion; proof is not required to report."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "Which scenario most strongly increases suspicion for maltreatment",
+    "topic": "Red flags",
+    "options": {
+      "A": "A consistent story with injury fitting mechanism",
+      "B": "Single anterior shin bruise in an ambulatory toddler",
+      "C": "Immediate care-seeking after witnessed fall with matching injury",
+      "D": "Changing history, delayed care, vague mechanism, developmental mismatch, and multiple injuries at different healing stages"
+    },
+    "correct": "D",
+    "explanation": "Classic red flags include changing story, delay in seeking care, vague mechanism such as “not acting right,” injury incompatible with developmental age, injury severity disproportionate to mechanism, and multiple injuries at different healing stages.",
+    "optionExplanations": {
+      "A": "This lowers suspicion compared with a mismatch.",
+      "B": "This is commonly accidental.",
+      "C": "This is less concerning than delay/changing story/mismatch.",
+      "D": "Correct. Classic red flags include changing story, delay in seeking care, vague mechanism such as “not acting right,” injury incompatible with developmental age, injury severity disproportionate to mechanism, and multiple injuries at different healing stages."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "When documenting a caregiver’s explanation for an injury, what is best practice",
+    "topic": "Documentation",
+    "options": {
+      "A": "Summarize vaguely to avoid legal issues",
+      "B": "Document the caregiver’s exact words in quotes when possible",
+      "C": "Avoid documenting details until abuse is proven",
+      "D": "Only document the final diagnosis"
+    },
+    "correct": "B",
+    "explanation": "The notes emphasize getting exact details and documenting caregiver words in quotes when possible.",
+    "optionExplanations": {
+      "A": "Clear, specific documentation supports child safety and prevents court issues.",
+      "B": "Correct. The notes emphasize getting exact details and documenting caregiver words in quotes when possible.",
+      "C": "Proof is not required for careful documentation or reporting.",
+      "D": "History details, injuries, measurements, and photos are important."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "Which physical exam/documentation approach is best when maltreatment is possible",
+    "topic": "Physical exam documentation",
+    "options": {
+      "A": "Examine only the reported injury site",
+      "B": "Avoid photos because they are never useful",
+      "C": "Fully expose and examine the child; document measurements, clear anatomic locations, and photos with ruler/color standard if possible",
+      "D": "Do not measure bruises because dating is exact"
+    },
+    "correct": "C",
+    "explanation": "The exam should fully expose/examine the child and look for extent, associated injuries, old injuries, and patterned injuries. Documentation should include measurements, clear location, and photos if possible.",
+    "optionExplanations": {
+      "A": "Associated and old injuries may be missed.",
+      "B": "Photos are recommended if possible with ruler/color standard.",
+      "C": "Correct. The exam should fully expose/examine the child and look for extent, associated injuries, old injuries, and patterned injuries. Documentation should include measurements, clear location, and photos if possible.",
+      "D": "Bruise dating is unreliable, but measurements and location are still important."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "Which bruising pattern is most typical of accidental bruising in an ambulatory toddler",
+    "topic": "Accidental bruising",
+    "options": {
+      "A": "Bruises over shins, knees, elbows/forearms, forehead, and other bony prominences, often anterior",
+      "B": "Bruises on genitals and inner thighs",
+      "C": "Handprint and belt-buckle marks",
+      "D": "Bruises on ears, neck, back, abdomen, and buttocks"
+    },
+    "correct": "A",
+    "explanation": "Common accidental bruises in toddlers occur over bony prominences such as shins, knees, elbows/forearms, and forehead, often on anterior surfaces.",
+    "optionExplanations": {
+      "A": "Correct. Common accidental bruises in toddlers occur over bony prominences such as shins, knees, elbows/forearms, and forehead, often on anterior surfaces.",
+      "B": "These soft tissue locations are concerning.",
+      "C": "Patterned bruising is concerning.",
+      "D": "These soft tissue areas are concerning."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "Which bruise location is concerning for abuse rather than typical accidental toddler bruising",
+    "topic": "Concerning bruises",
+    "options": {
+      "A": "Anterior shin over bone",
+      "B": "Knee over a bony prominence",
+      "C": "Forehead in an ambulatory toddler",
+      "D": "Ears, face/neck, abdomen, back, buttocks, inner thighs, or genitals"
+    },
+    "correct": "D",
+    "explanation": "Concerning bruises include soft tissue areas such as abdomen, back, buttocks, inner thighs, ears/face/neck, and genitals.",
+    "optionExplanations": {
+      "A": "This is a common accidental location in ambulatory toddlers.",
+      "B": "This is commonly accidental.",
+      "C": "Forehead bruises can occur accidentally in toddlers.",
+      "D": "Correct. Concerning bruises include soft tissue areas such as abdomen, back, buttocks, inner thighs, ears/face/neck, and genitals."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A child has bruises in the shape of a handprint and belt buckle. What does this suggest",
+    "topic": "Patterned bruising",
+    "options": {
+      "A": "Normal toddler play injury",
+      "B": "Bruise dating is exact enough to clear abuse",
+      "C": "Patterned bruising concerning for inflicted injury",
+      "D": "No need to report if there is no fracture"
+    },
+    "correct": "C",
+    "explanation": "Patterned bruises such as handprint, belt buckle, cord/loop mark, or object outline are concerning for inflicted injury.",
+    "optionExplanations": {
+      "A": "Patterned object/hand marks are not typical accidental toddler bruises.",
+      "B": "Exact bruise dating is unreliable.",
+      "C": "Correct. Patterned bruises such as handprint, belt buckle, cord/loop mark, or object outline are concerning for inflicted injury.",
+      "D": "Reasonable suspicion is enough to report."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A clinician sees bruises of different colors and ages. Which statement is most accurate",
+    "topic": "Bruise dating",
+    "options": {
+      "A": "Bruise color can precisely identify the day of injury",
+      "B": "Different colors/ages suggest recurrent injury, but exact bruise dating is unreliable",
+      "C": "Different colors always prove accidental injury",
+      "D": "Bruise color eliminates the need for history"
+    },
+    "correct": "B",
+    "explanation": "Bruises of different colors/ages can suggest recurrent injury, but exact bruise dating is unreliable.",
+    "optionExplanations": {
+      "A": "The notes explicitly caution that exact dating is unreliable.",
+      "B": "Correct. Bruises of different colors/ages can suggest recurrent injury, but exact bruise dating is unreliable.",
+      "C": "Multiple stages can raise concern for recurrent injury.",
+      "D": "History and injury mechanism remain essential."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A nonambulatory infant presents with a fracture and no plausible explanation. Which takeaway best applies",
+    "topic": "Fractures in nonambulatory infants",
+    "options": {
+      "A": "Usually a normal developmental injury",
+      "B": "Report only after a confession",
+      "C": "Ignore if the infant is not crying",
+      "D": "Concerning for abuse until explained"
+    },
+    "correct": "D",
+    "explanation": "The board takeaway states: nonambulatory infant + fracture is concerning until explained.",
+    "optionExplanations": {
+      "A": "A nonambulatory infant cannot generate many injury mechanisms independently.",
+      "B": "Reasonable suspicion is enough.",
+      "C": "Symptoms can be nonspecific; injury mechanism matters.",
+      "D": "Correct. The board takeaway states: nonambulatory infant + fracture is concerning until explained."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "An infant is “not acting right” and has retinal hemorrhages, subdural hemorrhage, cerebral edema, and no adequate trauma history. Which diagnosis is most concerning",
+    "topic": "Abusive head trauma",
+    "options": {
+      "A": "Abusive head trauma / shaken baby syndrome",
+      "B": "Pseudostrabismus",
+      "C": "Roseola",
+      "D": "Growing pains"
+    },
+    "correct": "A",
+    "explanation": "Abusive head trauma is suggested by retinal hemorrhages, subdural/epidural hemorrhage, cerebral edema, axonal shearing injury, and severe intracranial injury without a plausible mechanism.",
+    "optionExplanations": {
+      "A": "Correct. Abusive head trauma is suggested by retinal hemorrhages, subdural/epidural hemorrhage, cerebral edema, axonal shearing injury, and severe intracranial injury without a plausible mechanism.",
+      "B": "This is false appearance of crossed eyes with symmetric corneal reflex.",
+      "C": "Roseola causes high fever and trunk-first rash.",
+      "D": "Growing pains are benign limb pains with normal exam/growth."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A CT in suspected abusive head trauma shows loss of gray-white differentiation. What does this indicate",
+    "topic": "Abusive head trauma imaging",
+    "options": {
+      "A": "Normal infant CT finding",
+      "B": "Rachitic rosary",
+      "C": "Cerebral edema",
+      "D": "PDA closure"
+    },
+    "correct": "C",
+    "explanation": "Loss of gray-white differentiation on CT indicates cerebral edema, which is a key finding in abusive head trauma.",
+    "optionExplanations": {
+      "A": "It is concerning for edema.",
+      "B": "Rachitic rosary is costochondral beading in rickets.",
+      "C": "Correct. Loss of gray-white differentiation on CT indicates cerebral edema, which is a key finding in abusive head trauma.",
+      "D": "Ductus closure is unrelated to brain CT findings."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "Which statement about shaken baby syndrome is most accurate",
+    "topic": "Shaken baby syndrome clarification",
+    "options": {
+      "A": "It is caused by normal gentle bouncing",
+      "B": "It requires an external skull fracture in every case",
+      "C": "It is ruled out by retinal hemorrhages of different ages",
+      "D": "It is violent shaking, often followed by impact; it is not gentle bouncing or normal play"
+    },
+    "correct": "D",
+    "explanation": "The notes emphasize that shaken baby is violent shaking, often followed by impact against a wall/floor/table, not gentle bouncing or playing.",
+    "optionExplanations": {
+      "A": "The notes explicitly say it is not gentle bouncing/playing.",
+      "B": "Severe intracranial injury can occur without this requirement.",
+      "C": "Retinal hemorrhages of different ages suggest repeated trauma.",
+      "D": "Correct. The notes emphasize that shaken baby is violent shaking, often followed by impact against a wall/floor/table, not gentle bouncing or playing."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A child has a scald burn with a sharp line of demarcation and stocking/glove distribution. Which mechanism is most concerning",
+    "topic": "Burn patterns",
+    "options": {
+      "A": "Accidental splash burn",
+      "B": "Forced immersion or held-in-place injury",
+      "C": "Normal sunburn",
+      "D": "Friction burn from crawling"
+    },
+    "correct": "B",
+    "explanation": "Sharp demarcation, stocking/glove distribution, and sparing patterns suggest immersion or held-in-place injury.",
+    "optionExplanations": {
+      "A": "Accidental splashes usually have irregular margins and a gradient.",
+      "B": "Correct. Sharp demarcation, stocking/glove distribution, and sparing patterns suggest immersion or held-in-place injury.",
+      "C": "Sunburn does not produce classic stocking/glove immersion patterns.",
+      "D": "This does not explain sharp demarcation scald patterns."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "Which burn pattern is most consistent with accidental splash injury rather than forced immersion",
+    "topic": "Accidental vs forced scalds",
+    "options": {
+      "A": "Irregular margins with a gradient",
+      "B": "Clear line of demarcation",
+      "C": "Stocking/glove distribution",
+      "D": "Sparing of soles/palms from being pressed against tub surface"
+    },
+    "correct": "A",
+    "explanation": "Accidental splash burns usually have irregular margins and a gradient. Forced immersion tends to have a clear demarcation line.",
+    "optionExplanations": {
+      "A": "Correct. Accidental splash burns usually have irregular margins and a gradient. Forced immersion tends to have a clear demarcation line.",
+      "B": "This suggests forced immersion/held contact.",
+      "C": "This is concerning for immersion.",
+      "D": "This is a concerning pattern."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A child has cigarette-shaped and object-shaped burns. Which interpretation is most appropriate",
+    "topic": "Patterned burns",
+    "options": {
+      "A": "Always accidental splash injury",
+      "B": "Always normal folk practice",
+      "C": "Never reportable unless the child confirms abuse",
+      "D": "Patterned burns are concerning for inflicted injury"
+    },
+    "correct": "D",
+    "explanation": "Patterned burns such as cigarette, lighter, or object-shaped burns are concerning for abuse.",
+    "optionExplanations": {
+      "A": "Splash burns usually have irregular margins/gradient, not object-shaped patterns.",
+      "B": "Folk practices may mimic bruising/marks but object-shaped burns are concerning.",
+      "C": "Reasonable suspicion is enough to report.",
+      "D": "Correct. Patterned burns such as cigarette, lighter, or object-shaped burns are concerning for abuse."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "Which statement about sexual abuse exams is most important",
+    "topic": "Sexual abuse exam",
+    "options": {
+      "A": "Normal genital exam excludes sexual abuse",
+      "B": "Hymen must be absent after vaginal penetration",
+      "C": "The most common physical finding is a normal exam, and normal exam does not rule out sexual abuse",
+      "D": "Sexual abuse always requires physical touching"
+    },
+    "correct": "C",
+    "explanation": "The most important exam fact is that the most common physical finding is a normal exam. Even with vaginal penetration, the hymen may be intact; normal exam does not rule out sexual abuse.",
+    "optionExplanations": {
+      "A": "This is explicitly false.",
+      "B": "The hymen may remain intact.",
+      "C": "Correct. The most important exam fact is that the most common physical finding is a normal exam. Even with vaginal penetration, the hymen may be intact; normal exam does not rule out sexual abuse.",
+      "D": "The definition includes non-touching exploitation such as pornography exposure or explicit filming."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "Which example can meet the definition of sexual abuse/exploitation even without touching",
+    "topic": "Sexual abuse definition",
+    "options": {
+      "A": "Toddler shin bruising",
+      "B": "Showing pornography or filming/photographing sexually explicit poses",
+      "C": "Cupping marks with consistent story and no harm",
+      "D": "Accidental splash burn with irregular gradient"
+    },
+    "correct": "B",
+    "explanation": "Sexual abuse/exploitation does not require touching. Examples include showing pornography, filming/photographing sexually explicit poses, or forcing one child to perform sexual acts on another.",
+    "optionExplanations": {
+      "A": "This is a common accidental bruising location.",
+      "B": "Correct. Sexual abuse/exploitation does not require touching. Examples include showing pornography, filming/photographing sexually explicit poses, or forcing one child to perform sexual acts on another.",
+      "C": "This may represent a cultural/folk practice rather than abuse.",
+      "D": "This is more consistent with accidental scald pattern."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "Which perpetrator pattern is most accurate for child sexual abuse teaching",
+    "topic": "Sexual abuse perpetrator pattern",
+    "options": {
+      "A": "Usually a stranger only",
+      "B": "Usually another toddler only",
+      "C": "Usually someone known to the child, such as a household member, relative, trusted adult, coach, clergy, or scout leader",
+      "D": "Usually only someone with no access to the child"
+    },
+    "correct": "C",
+    "explanation": "Perpetrators are usually known to the child. Teaching should focus less on stranger danger and more on correct anatomy terms, appropriate vs inappropriate touch, and telling a trusted adult.",
+    "optionExplanations": {
+      "A": "The notes emphasize known/trusted people more than stranger danger.",
+      "B": "Perpetrators can be household members, relatives, trusted adults, coaches, clergy, etc.",
+      "C": "Correct. Perpetrators are usually known to the child. Teaching should focus less on stranger danger and more on correct anatomy terms, appropriate vs inappropriate touch, and telling a trusted adult.",
+      "D": "Access and trust are common patterns."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "Which prevention/education point is recommended over focusing only on stranger danger",
+    "topic": "Sexual abuse prevention teaching",
+    "options": {
+      "A": "Teach correct anatomy terms, appropriate vs inappropriate touch, and telling a trusted adult",
+      "B": "Teach children that strangers are the only danger",
+      "C": "Avoid naming body parts to prevent anxiety",
+      "D": "Tell children to keep uncomfortable interactions secret"
+    },
+    "correct": "A",
+    "explanation": "Because perpetrators are usually known to the child, teaching should focus on correct anatomy terms, appropriate vs inappropriate touch, and telling a trusted adult.",
+    "optionExplanations": {
+      "A": "Correct. Because perpetrators are usually known to the child, teaching should focus on correct anatomy terms, appropriate vs inappropriate touch, and telling a trusted adult.",
+      "B": "This misses the common known-perpetrator pattern.",
+      "C": "Correct anatomy terms are recommended.",
+      "D": "Children should be encouraged to tell a trusted adult."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A child has circular marks after cupping performed by family as alternative treatment. What is the most appropriate interpretation",
+    "topic": "Folk practices vs abuse",
+    "options": {
+      "A": "Always abuse regardless of context",
+      "B": "Never document because it is cultural",
+      "C": "Automatically exclude abuse without assessing injury",
+      "D": "Not automatically abuse; ask, document, and assess harm and story consistency"
+    },
+    "correct": "D",
+    "explanation": "Cupping can cause circular bruising/marks and may mimic abuse. It is not automatically abuse if done in good faith, but clinicians should ask, document, and assess harm/story consistency.",
+    "optionExplanations": {
+      "A": "The notes caution against assuming automatically.",
+      "B": "Documentation remains important.",
+      "C": "Clinicians still assess harm and consistency.",
+      "D": "Correct. Cupping can cause circular bruising/marks and may mimic abuse. It is not automatically abuse if done in good faith, but clinicians should ask, document, and assess harm/story consistency."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "Coin rubbing/coining most commonly produces which pattern that may mimic abuse",
+    "topic": "Coining",
+    "options": {
+      "A": "Continuous machinery murmur",
+      "B": "Linear erythematous or bruised streaks, often on back/chest",
+      "C": "Slapped-cheek rash",
+      "D": "Boot-shaped heart"
+    },
+    "correct": "B",
+    "explanation": "Coin rubbing/coining can produce linear erythematous or bruised streaks, often on the back/chest.",
+    "optionExplanations": {
+      "A": "This is PDA.",
+      "B": "Correct. Coin rubbing/coining can produce linear erythematous or bruised streaks, often on the back/chest.",
+      "C": "This is parvovirus B19/fifth disease.",
+      "D": "This is tetralogy of Fallot."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "Which board-style takeaway is most accurate",
+    "topic": "Board takeaways",
+    "options": {
+      "A": "Report suspicion, not proof",
+      "B": "Report only after proof",
+      "C": "Normal genital exam rules out sexual abuse",
+      "D": "Sharp scald demarcation is typical accidental splash"
+    },
+    "correct": "A",
+    "explanation": "A key board takeaway is to report suspicion, not proof.",
+    "optionExplanations": {
+      "A": "Correct. A key board takeaway is to report suspicion, not proof.",
+      "B": "Proof is not required.",
+      "C": "Normal genital exam does not rule out sexual abuse.",
+      "D": "Sharp demarcation suggests forced immersion/held contact."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "Which finding most strongly supports abusive head trauma in a poor-story infant presentation",
+    "topic": "Abusive head trauma board clue",
+    "options": {
+      "A": "Symmetric corneal light reflex",
+      "B": "Nagayama spots with fever",
+      "C": "Retinal hemorrhage plus intracranial injury without plausible mechanism",
+      "D": "Anterior shin bruise in a walking toddler"
+    },
+    "correct": "C",
+    "explanation": "The board takeaway: retinal hemorrhage plus intracranial injury plus poor story is abusive head trauma until explained.",
+    "optionExplanations": {
+      "A": "This suggests normal alignment/pseudostrabismus evaluation, not abusive head trauma.",
+      "B": "This suggests roseola.",
+      "C": "Correct. The board takeaway: retinal hemorrhage plus intracranial injury plus poor story is abusive head trauma until explained.",
+      "D": "This is common accidental bruising."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

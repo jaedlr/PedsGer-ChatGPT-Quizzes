@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juvenile Arthritis Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 9-year-old has bilateral shin and calf pain late in the day and at night. Exam is normal, growth is normal, and symptoms improve with heat, massage, and analgesics. Which diagnosis is most likely",
+    "topic": "Growing pains vs inflammatory arthritis",
+    "options": {
+      "A": "Systemic-onset JIA",
+      "B": "ANA-positive oligoarticular JIA",
+      "C": "Growing pains",
+      "D": "Juvenile spondyloarthropathy"
+    },
+    "correct": "C",
+    "explanation": "Growing pains typically occur in children age 6–13, involve thighs/calves/shins rather than joints, occur late day or at night, have a normal exam and normal growth/development, and improve with heat, massage, and analgesics.",
+    "optionExplanations": {
+      "A": "Systemic JIA causes arthritis with systemic inflammation such as spiking fever, salmon rash, LAD/HSM, and inflammatory labs.",
+      "B": "ANA+ oligoarticular JIA involves ≤4 joints, often in young girls, and has arthritis findings such as swelling or decreased ROM.",
+      "C": "Correct. Growing pains typically occur in children age 6–13, involve thighs/calves/shins rather than joints, occur late day or at night, have a normal exam and normal growth/development, and improve with heat, massage, and analgesics.",
+      "D": "This typically affects older boys with morning low back stiffness, sacroiliitis, enthesitis, and HLA-B27 positivity."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A child has morning stiffness, swollen warm joints, decreased range of motion, limp, and possible limb growth abnormalities. Which category is more likely than growing pains",
+    "topic": "Inflammatory arthritis clues",
+    "options": {
+      "A": "Inflammatory arthritis/JIA",
+      "B": "Growing pains",
+      "C": "Benign nocturnal limb pain only",
+      "D": "Normal developmental pain"
+    },
+    "correct": "A",
+    "explanation": "Inflammatory arthritis/JIA is suggested by joint pain, morning stiffness, abnormal exam with swelling/warmth/decreased ROM, limp or refusal to walk, and possible limb growth abnormalities.",
+    "optionExplanations": {
+      "A": "Correct. Inflammatory arthritis/JIA is suggested by joint pain, morning stiffness, abnormal exam with swelling/warmth/decreased ROM, limp or refusal to walk, and possible limb growth abnormalities.",
+      "B": "Growing pains involve thighs/calves/shins, occur late day/night, have a normal exam, and normal growth/development.",
+      "C": "Morning stiffness and objective joint swelling are not benign growing pain findings.",
+      "D": "Objective inflammatory joint findings are not normal developmental pain."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A 7-year-old has arthritis with high spiking fevers, salmon-pink evanescent rash on the chest and thighs, lymphadenopathy, hepatosplenomegaly, malaise, and serositis. Which JIA subtype is most likely",
+    "topic": "Systemic-onset JIA",
+    "options": {
+      "A": "ANA-positive oligoarticular JIA",
+      "B": "RF-positive polyarticular JIA",
+      "C": "Juvenile psoriatic arthritis",
+      "D": "Systemic-onset JIA"
+    },
+    "correct": "D",
+    "explanation": "Systemic-onset JIA presents with arthritis plus systemic inflammation, high spiking fever curve, salmon-pink evanescent rash, LAD, hepatosplenomegaly, myalgia, malaise, arthralgias, serositis, and hepatitis.",
+    "optionExplanations": {
+      "A": "This is usually young girls with ≤4 joints and high chronic asymptomatic uveitis risk, not spiking fever and systemic inflammation.",
+      "B": "This is adult RA-like disease in older girls with >5 joints, nodules, erosions, strong RF positivity, and HLA-DR4.",
+      "C": "This features asymmetric peripheral arthritis, dactylitis, flexor tenosynovitis, and psoriasis/nail changes.",
+      "D": "Correct. Systemic-onset JIA presents with arthritis plus systemic inflammation, high spiking fever curve, salmon-pink evanescent rash, LAD, hepatosplenomegaly, myalgia, malaise, arthralgias, serositis, and hepatitis."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A child has systemic-onset JIA. Labs show anemia, leukocytosis, thrombocytosis, negative ANA, negative RF, and a very high ferritin. Which severe complication should be considered with very high ferritin and systemic inflammation",
+    "topic": "Systemic-onset JIA complications",
+    "options": {
+      "A": "Asymptomatic chronic uveitis",
+      "B": "Macrophage activation syndrome / HLH",
+      "C": "C1-C2 subluxation",
+      "D": "Acute iritis from HLA-B27 disease"
+    },
+    "correct": "B",
+    "explanation": "Systemic-onset JIA can cause severe complications including DIC, macrophage activation syndrome/HLH, and amyloidosis if persistent disease activity. Very high ferritin is a key clue.",
+    "optionExplanations": {
+      "A": "This is the major complication of ANA-positive oligoarticular JIA.",
+      "B": "Correct. Systemic-onset JIA can cause severe complications including DIC, macrophage activation syndrome/HLH, and amyloidosis if persistent disease activity. Very high ferritin is a key clue.",
+      "C": "This is a complication of RF-positive polyarticular JIA.",
+      "D": "Acute iritis is associated with juvenile spondyloarthropathy."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A patient with systemic-onset JIA has initial pain and inflammation without severe systemic complications. Which first-line medication is emphasized",
+    "topic": "Systemic-onset JIA treatment",
+    "options": {
+      "A": "Methotrexate as most effective first-line for systemic symptoms",
+      "B": "TNF inhibitor monotherapy as the preferred initial treatment",
+      "C": "Immediate hip arthroplasty",
+      "D": "NSAIDs such as ibuprofen"
+    },
+    "correct": "D",
+    "explanation": "For systemic-onset JIA, first-line treatment is NSAIDs such as ibuprofen. Severe disease may require corticosteroids and IL-1/IL-6 biologics.",
+    "optionExplanations": {
+      "A": "Methotrexate is less effective in systemic-onset disease.",
+      "B": "TNF inhibitors are less effective in systemic-onset disease than IL-1/IL-6 biologics for severe disease.",
+      "C": "Hip arthroplasty is reserved for severe hip disease, especially in spondyloarthropathy contexts.",
+      "D": "Correct. For systemic-onset JIA, first-line treatment is NSAIDs such as ibuprofen. Severe disease may require corticosteroids and IL-1/IL-6 biologics."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A child with severe systemic-onset JIA has persistent fever, systemic inflammation, and concern for MAS. Which biologic class is most emphasized for severe disease",
+    "topic": "Systemic-onset JIA biologics",
+    "options": {
+      "A": "Only local corticosteroid injection",
+      "B": "Antibiotics only",
+      "C": "IL-1 or IL-6 biologics such as anakinra, canakinumab, tocilizumab, or rilonacept",
+      "D": "Leukotriene receptor antagonists"
+    },
+    "correct": "C",
+    "explanation": "Severe systemic-onset JIA is treated with corticosteroids and IL-1/IL-6 biologics, including anakinra, canakinumab, tocilizumab, and rilonacept.",
+    "optionExplanations": {
+      "A": "Local injections are useful in limited oligoarticular disease but are insufficient for severe systemic disease.",
+      "B": "Systemic JIA is inflammatory/autoimmune, not primarily bacterial infection.",
+      "C": "Correct. Severe systemic-onset JIA is treated with corticosteroids and IL-1/IL-6 biologics, including anakinra, canakinumab, tocilizumab, and rilonacept.",
+      "D": "These are not emphasized for systemic JIA."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A 4-year-old girl has arthritis of the knee and ankle only. She is ANA positive, RF negative, CBC is normal, and ESR is mildly elevated. Which JIA subtype is most likely",
+    "topic": "ANA-positive oligoarticular JIA",
+    "options": {
+      "A": "ANA-positive oligoarticular JIA",
+      "B": "RF-positive polyarticular JIA",
+      "C": "Systemic-onset JIA",
+      "D": "Juvenile psoriatic arthritis"
+    },
+    "correct": "A",
+    "explanation": "ANA-positive oligoarticular JIA is the most common JIA subtype, usually occurs before age 6, is more common in females, involves ≤4 joints, and is ANA positive/RF negative.",
+    "optionExplanations": {
+      "A": "Correct. ANA-positive oligoarticular JIA is the most common JIA subtype, usually occurs before age 6, is more common in females, involves ≤4 joints, and is ANA positive/RF negative.",
+      "B": "RF+ polyarticular JIA usually occurs in girls >8 years with >5 joints, adult RA-like disease, nodules, erosions, and strong RF positivity.",
+      "C": "Systemic JIA has spiking fever, salmon rash, LAD/HSM, and prominent inflammatory labs.",
+      "D": "Psoriatic JIA has asymmetric peripheral arthritis, dactylitis, flexor tenosynovitis, and psoriasis/nail changes."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A child with ANA-positive oligoarticular JIA has no eye symptoms. What follow-up is still essential",
+    "topic": "Oligoarticular JIA uveitis",
+    "options": {
+      "A": "No eye screening unless pain is present",
+      "B": "Routine dental prophylaxis only",
+      "C": "Screening only for acute iritis in teenage boys",
+      "D": "Frequent ophthalmology screening for asymptomatic chronic uveitis/iridocyclitis"
+    },
+    "correct": "D",
+    "explanation": "ANA-positive oligoarticular JIA has the highest risk of asymptomatic chronic uveitis/iridocyclitis, which can cause synechiae, irregular/scalloped iris, and cataracts. Ophthalmology consult and frequent reassessment are required even without symptoms.",
+    "optionExplanations": {
+      "A": "The uveitis can be asymptomatic.",
+      "B": "Dental prophylaxis does not address chronic uveitis risk.",
+      "C": "Acute iritis is more associated with HLA-B27 juvenile spondyloarthropathy; ANA+ oligoarticular JIA needs chronic uveitis screening.",
+      "D": "Correct. ANA-positive oligoarticular JIA has the highest risk of asymptomatic chronic uveitis/iridocyclitis, which can cause synechiae, irregular/scalloped iris, and cataracts. Ophthalmology consult and frequent reassessment are required even without symptoms."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A child with limited oligoarticular JIA has persistent knee inflammation. Which local treatment is emphasized",
+    "topic": "Oligoarticular JIA treatment",
+    "options": {
+      "A": "IL-1 biologic as mandatory first-line for all cases",
+      "B": "Local corticosteroid injection",
+      "C": "No NSAIDs or DMARDs can be used",
+      "D": "Immediate total joint replacement"
+    },
+    "correct": "B",
+    "explanation": "Limited oligoarticular disease may be treated with local corticosteroid injections. NSAIDs, methotrexate/biologics, PT/OT, splinting, and ophthalmology follow-up are also used depending on severity and complications.",
+    "optionExplanations": {
+      "A": "IL-1/IL-6 biologics are emphasized for severe systemic-onset JIA, not mandatory for all oligoarticular cases.",
+      "B": "Correct. Limited oligoarticular disease may be treated with local corticosteroid injections. NSAIDs, methotrexate/biologics, PT/OT, splinting, and ophthalmology follow-up are also used depending on severity and complications.",
+      "C": "NSAIDs and methotrexate/biologics can be part of treatment.",
+      "D": "This is not initial management of limited oligoarticular disease."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A teenage boy has morning low back stiffness, sacroiliitis, axial spondylitis, lower-extremity arthritis, Achilles tendon enthesitis, and acute iritis. Which JIA category is most likely",
+    "topic": "Juvenile spondyloarthropathy",
+    "options": {
+      "A": "ANA-positive oligoarticular JIA",
+      "B": "Systemic-onset JIA",
+      "C": "Juvenile spondyloarthropathy / HLA-B27-positive pauciarticular JIA",
+      "D": "RF-positive polyarticular JIA"
+    },
+    "correct": "C",
+    "explanation": "Juvenile spondyloarthropathy typically affects males older than 9, often teenagers, with morning stiffness, morning low back pain from sacroiliitis, axial spondylitis, lower-extremity peripheral arthritis, enthesopathy, and acute iritis.",
+    "optionExplanations": {
+      "A": "This usually affects young girls <6 with ≤4 joints and asymptomatic chronic uveitis risk.",
+      "B": "Systemic JIA presents with spiking fever, salmon rash, LAD/HSM, and systemic inflammation.",
+      "C": "Correct. Juvenile spondyloarthropathy typically affects males older than 9, often teenagers, with morning stiffness, morning low back pain from sacroiliitis, axial spondylitis, lower-extremity peripheral arthritis, enthesopathy, and acute iritis.",
+      "D": "RF+ polyarticular JIA is adult RA-like with >5 joints, nodules, erosive disease, and RF positivity."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A teen boy with JIA has enthesopathy. Which description best defines enthesopathy",
+    "topic": "Enthesopathy",
+    "options": {
+      "A": "Inflammation where a tendon or ligament inserts on bone",
+      "B": "Inflammation of the synovial membrane only",
+      "C": "Asymptomatic inflammation of the iris only",
+      "D": "Rheumatoid nodules over extensor surfaces"
+    },
+    "correct": "A",
+    "explanation": "Enthesopathy is inflammation where a tendon or ligament inserts on bone; Achilles tendon and plantar fascia are examples.",
+    "optionExplanations": {
+      "A": "Correct. Enthesopathy is inflammation where a tendon or ligament inserts on bone; Achilles tendon and plantar fascia are examples.",
+      "B": "This describes synovitis rather than enthesopathy.",
+      "C": "This describes uveitis/iridocyclitis, not enthesopathy.",
+      "D": "Nodules are associated with RF-positive polyarticular disease, not the definition of enthesopathy."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A teenage boy with sacroiliitis and enthesitis has JIA. Which lab association is expected",
+    "topic": "Juvenile spondyloarthropathy labs",
+    "options": {
+      "A": "Strong RF positive with HLA-DR4",
+      "B": "ANA positive with normal CBC and HLA-A2/DR5",
+      "C": "ANA negative and RF negative with very high ferritin",
+      "D": "HLA-B27 positive with RF negative"
+    },
+    "correct": "D",
+    "explanation": "Juvenile spondyloarthropathy is associated with HLA-B27 positivity, RF negativity, ESR normal to increased, and usually normal CBC.",
+    "optionExplanations": {
+      "A": "This fits RF-positive polyarticular JIA.",
+      "B": "This fits ANA-positive oligoarticular JIA.",
+      "C": "This fits systemic-onset JIA.",
+      "D": "Correct. Juvenile spondyloarthropathy is associated with HLA-B27 positivity, RF negativity, ESR normal to increased, and usually normal CBC."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A teenage boy has juvenile spondyloarthropathy. Which treatment plan best matches the summary",
+    "topic": "Juvenile spondyloarthropathy treatment",
+    "options": {
+      "A": "No PT because posture worsens symptoms",
+      "B": "Methotrexate and TNF inhibitors are always less effective than IL-1 biologics",
+      "C": "NSAIDs, biologic DMARDs, PT/OT, posture training, local steroid injections, ophthalmology follow-up; hip arthroplasty if severe",
+      "D": "Observation only because two-thirds do well"
+    },
+    "correct": "C",
+    "explanation": "Juvenile spondyloarthropathy treatment includes NSAIDs, biologic DMARDs such as etanercept or tofacitinib listed in slides, PT/OT, posture training, local steroid injections, ophthalmology follow-up, and hip arthroplasty if severe.",
+    "optionExplanations": {
+      "A": "PT/OT and posture training are specifically recommended.",
+      "B": "That point is emphasized for systemic-onset JIA, not juvenile spondyloarthropathy.",
+      "C": "Correct. Juvenile spondyloarthropathy treatment includes NSAIDs, biologic DMARDs such as etanercept or tofacitinib listed in slides, PT/OT, posture training, local steroid injections, ophthalmology follow-up, and hip arthroplasty if severe.",
+      "D": "Although about two-thirds have good functional outcomes, active treatment and monitoring are still needed."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A 13-year-old girl has symmetric arthritis involving more than 5 joints, rheumatoid nodules, early erosive changes, strong RF positivity, ANA positivity, anemia, and HLA-DR4 positivity. Which subtype is most likely",
+    "topic": "RF-positive polyarticular JIA",
+    "options": {
+      "A": "RF-negative polyarticular JIA",
+      "B": "RF-positive polyarticular JIA",
+      "C": "ANA-positive oligoarticular JIA",
+      "D": "Systemic-onset JIA"
+    },
+    "correct": "B",
+    "explanation": "RF-positive polyarticular JIA usually affects girls >8, involves >5 joints, resembles adult RA, and has rheumatoid nodules, erosive disease, increased ESR, anemia, strong RF positivity, ANA may be positive, and HLA-DR4 association.",
+    "optionExplanations": {
+      "A": "RF-negative disease has >5 joints but RF is negative and features may include decreased neck/TMJ ROM and flexor tenosynovitis.",
+      "B": "Correct. RF-positive polyarticular JIA usually affects girls >8, involves >5 joints, resembles adult RA, and has rheumatoid nodules, erosive disease, increased ESR, anemia, strong RF positivity, ANA may be positive, and HLA-DR4 association.",
+      "C": "This involves ≤4 joints in younger girls and RF is negative.",
+      "D": "Systemic JIA is RF/ANA negative with fever, salmon rash, LAD/HSM, thrombocytosis, leukocytosis, and very high ferritin."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A patient with RF-positive polyarticular JIA has chronic severe disease. Which complication is most associated with this subtype",
+    "topic": "RF-positive polyarticular complications",
+    "options": {
+      "A": "C1-C2 subluxation, aortic insufficiency, and amyloidosis",
+      "B": "Asymptomatic chronic uveitis with synechiae as the main complication",
+      "C": "Acute iritis from HLA-B27 disease",
+      "D": "Dactylitis with nail pitting and onycholysis"
+    },
+    "correct": "A",
+    "explanation": "RF-positive polyarticular JIA can cause persistent disease with joint destruction, decreased function, C1-C2 subluxation, aortic insufficiency, and amyloidosis.",
+    "optionExplanations": {
+      "A": "Correct. RF-positive polyarticular JIA can cause persistent disease with joint destruction, decreased function, C1-C2 subluxation, aortic insufficiency, and amyloidosis.",
+      "B": "This is most associated with ANA-positive oligoarticular JIA.",
+      "C": "This is associated with juvenile spondyloarthropathy.",
+      "D": "This is associated with juvenile psoriatic arthritis."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A child has polyarticular JIA with more than 5 joints, RF negativity, decreased neck and TMJ range of motion, and flexor tenosynovitis. Which subtype is most likely",
+    "topic": "RF-negative polyarticular JIA",
+    "options": {
+      "A": "RF-positive polyarticular JIA",
+      "B": "Systemic-onset JIA",
+      "C": "Juvenile psoriatic arthritis",
+      "D": "RF-negative polyarticular JIA"
+    },
+    "correct": "D",
+    "explanation": "RF-negative polyarticular JIA can occur at any age, is more common in females, affects >5 joints, and may show decreased neck/TMJ ROM and flexor tenosynovitis. RF is negative and ANA may be positive.",
+    "optionExplanations": {
+      "A": "RF-positive disease is adult RA-like with strong RF positivity, nodules, erosive disease, and HLA-DR4.",
+      "B": "Systemic JIA has spiking fever, salmon rash, LAD/HSM, and very high ferritin.",
+      "C": "Psoriatic JIA has asymmetric peripheral arthritis, dactylitis, and psoriasis/nail changes.",
+      "D": "Correct. RF-negative polyarticular JIA can occur at any age, is more common in females, affects >5 joints, and may show decreased neck/TMJ ROM and flexor tenosynovitis. RF is negative and ANA may be positive."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A child with persistent polyarticular JIA has recurrent disease and risk of deformity. Which treatment overview is most appropriate",
+    "topic": "Polyarticular JIA treatment",
+    "options": {
+      "A": "NSAIDs only regardless of severity",
+      "B": "Ophthalmology alone without arthritis therapy",
+      "C": "NSAIDs plus methotrexate or other DMARDs/anti-TNF, with PT/OT and splinting",
+      "D": "Antibiotics plus bronchodilators"
+    },
+    "correct": "C",
+    "explanation": "Persistent/polyarticular disease is treated with NSAIDs, methotrexate or other DMARDs, biologics/anti-TNF when appropriate, PT/OT, and splinting to prevent deformity.",
+    "optionExplanations": {
+      "A": "Persistent/polyarticular disease often needs DMARDs or biologics in addition to NSAIDs.",
+      "B": "Ophthalmology is crucial in uveitis-risk subtypes but does not treat polyarticular joint disease alone.",
+      "C": "Correct. Persistent/polyarticular disease is treated with NSAIDs, methotrexate or other DMARDs, biologics/anti-TNF when appropriate, PT/OT, and splinting to prevent deformity.",
+      "D": "This is unrelated to JIA management."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "An 8-year-old has asymmetric peripheral arthritis, swollen sausage-like digits, flexor tenosynovitis, psoriasis, nail pitting, nail splitting, and onycholysis. Which diagnosis is most likely",
+    "topic": "Juvenile psoriatic arthritis",
+    "options": {
+      "A": "Juvenile psoriatic arthritis",
+      "B": "Systemic-onset JIA",
+      "C": "ANA-positive oligoarticular JIA",
+      "D": "RF-positive polyarticular JIA"
+    },
+    "correct": "A",
+    "explanation": "Juvenile psoriatic arthritis classically occurs around age 8 with asymmetric peripheral arthritis, dactylitis, flexor tenosynovitis, possible destructive disease, rare systemic features, and psoriasis clues including nail pitting, splitting, and onycholysis.",
+    "optionExplanations": {
+      "A": "Correct. Juvenile psoriatic arthritis classically occurs around age 8 with asymmetric peripheral arthritis, dactylitis, flexor tenosynovitis, possible destructive disease, rare systemic features, and psoriasis clues including nail pitting, splitting, and onycholysis.",
+      "B": "Systemic JIA has spiking fever, salmon rash, LAD/HSM, and systemic inflammation.",
+      "C": "Oligoarticular JIA is ≤4 joints in younger girls and is notable for chronic asymptomatic uveitis.",
+      "D": "RF-positive polyarticular JIA is adult RA-like with RF positivity, nodules, and erosions."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A child has dactylitis in the setting of juvenile psoriatic arthritis. What does dactylitis mean",
+    "topic": "Dactylitis",
+    "options": {
+      "A": "Inflammation of tendon insertion into bone",
+      "B": "Swollen digits",
+      "C": "Asymptomatic iris inflammation",
+      "D": "Premature fusion of cranial sutures"
+    },
+    "correct": "B",
+    "explanation": "Dactylitis means swollen digits and is a key clue for juvenile psoriatic arthritis.",
+    "optionExplanations": {
+      "A": "This is enthesopathy, seen in juvenile spondyloarthropathy.",
+      "B": "Correct. Dactylitis means swollen digits and is a key clue for juvenile psoriatic arthritis.",
+      "C": "This describes chronic uveitis/iridocyclitis.",
+      "D": "This is craniosynostosis."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "Which clue most strongly points to juvenile psoriatic arthritis rather than other JIA subtypes",
+    "topic": "Psoriatic arthritis clues",
+    "options": {
+      "A": "Very high ferritin with spiking fever",
+      "B": "HLA-B27 positivity with sacroiliitis",
+      "C": "Strong RF positivity with erosions and nodules",
+      "D": "Dactylitis plus nail pitting/splitting or onycholysis with asymmetric arthritis"
+    },
+    "correct": "D",
+    "explanation": "Juvenile psoriatic arthritis is suggested by asymmetric peripheral arthritis with dactylitis, flexor tenosynovitis, psoriasis, nail pitting, nail splitting, and onycholysis.",
+    "optionExplanations": {
+      "A": "This points to systemic-onset JIA.",
+      "B": "This points to juvenile spondyloarthropathy.",
+      "C": "This points to RF-positive polyarticular JIA.",
+      "D": "Correct. Juvenile psoriatic arthritis is suggested by asymmetric peripheral arthritis with dactylitis, flexor tenosynovitis, psoriasis, nail pitting, nail splitting, and onycholysis."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A child has fever, arthritis, salmon rash, LAD/HSM, anemia, leukocytosis, and thrombocytosis. Which professor-style test clue does this pattern match",
+    "topic": "Professor-style test clues",
+    "options": {
+      "A": "ANA-positive pauciarticular JIA",
+      "B": "Systemic-onset JIA",
+      "C": "Juvenile spondyloarthropathy",
+      "D": "Growing pains"
+    },
+    "correct": "B",
+    "explanation": "The summary’s test clue for fever plus arthritis plus salmon rash plus LAD/HSM plus anemia/leukocytosis/thrombocytosis is systemic-onset JIA.",
+    "optionExplanations": {
+      "A": "The clue for this is a young girl with ≤4 joints and ANA positivity, especially with chronic uveitis risk.",
+      "B": "Correct. The summary’s test clue for fever plus arthritis plus salmon rash plus LAD/HSM plus anemia/leukocytosis/thrombocytosis is systemic-onset JIA.",
+      "C": "The clue is teen boy with morning back stiffness, sacroiliitis, enthesitis, and HLA-B27 positivity.",
+      "D": "Growing pains are late day/night leg pain, not joints, with a normal exam."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A young girl has ≤4 joints involved, positive ANA, RF negativity, and no eye complaints. Which testable association is most important",
+    "topic": "Oligoarticular JIA association",
+    "options": {
+      "A": "HLA-B27-positive sacroiliitis",
+      "B": "Adult RA-like erosions and nodules",
+      "C": "Highest chronic uveitis risk",
+      "D": "Macrophage activation syndrome with very high ferritin"
+    },
+    "correct": "C",
+    "explanation": "ANA-positive oligoarticular JIA is the most common JIA subtype and carries the highest chronic uveitis risk, so ophthalmology follow-up is needed even if asymptomatic.",
+    "optionExplanations": {
+      "A": "This is juvenile spondyloarthropathy.",
+      "B": "This is RF-positive polyarticular JIA.",
+      "C": "Correct. ANA-positive oligoarticular JIA is the most common JIA subtype and carries the highest chronic uveitis risk, so ophthalmology follow-up is needed even if asymptomatic.",
+      "D": "This is a systemic-onset JIA concern."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A teen boy has morning back stiffness, sacroiliitis, enthesitis, and acute iritis. Which expected lab is most likely",
+    "topic": "Spondyloarthropathy test clue",
+    "options": {
+      "A": "Strong RF positive",
+      "B": "ANA positive in 40–75%",
+      "C": "Very high ferritin",
+      "D": "HLA-B27 positive"
+    },
+    "correct": "D",
+    "explanation": "The test clue for juvenile spondyloarthropathy is a teen boy with morning back stiffness, sacroiliitis, enthesitis, and expected HLA-B27 positivity.",
+    "optionExplanations": {
+      "A": "This points to RF-positive polyarticular JIA.",
+      "B": "This points to ANA-positive oligoarticular JIA.",
+      "C": "This points to systemic-onset JIA and possible MAS concern.",
+      "D": "Correct. The test clue for juvenile spondyloarthropathy is a teen boy with morning back stiffness, sacroiliitis, enthesitis, and expected HLA-B27 positivity."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "An adolescent girl has adult RA-like disease with erosions, rheumatoid nodules, and HLA-DR4 association. Which JIA subtype is most likely",
+    "topic": "RF-positive polyarticular test clue",
+    "options": {
+      "A": "RF-positive polyarticular JIA",
+      "B": "RF-negative polyarticular JIA",
+      "C": "Juvenile psoriatic arthritis",
+      "D": "ANA-positive oligoarticular JIA"
+    },
+    "correct": "A",
+    "explanation": "RF-positive polyarticular JIA is adult RA-like, usually in girls older than 8, and is associated with erosions, rheumatoid nodules, strong RF positivity, and HLA-DR4.",
+    "optionExplanations": {
+      "A": "Correct. RF-positive polyarticular JIA is adult RA-like, usually in girls older than 8, and is associated with erosions, rheumatoid nodules, strong RF positivity, and HLA-DR4.",
+      "B": "RF-negative disease may involve >5 joints and flexor tenosynovitis but lacks strong RF positivity and adult RA-like nodules/erosions.",
+      "C": "Psoriatic JIA is suggested by dactylitis and nail changes.",
+      "D": "This involves ≤4 joints in younger girls and chronic uveitis risk."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A child with JIA has progressive joint limitation. Which supportive therapy is emphasized across subtypes to prevent deformity",
+    "topic": "Deformity prevention",
+    "options": {
+      "A": "Strict bed rest without motion",
+      "B": "Avoid all NSAIDs",
+      "C": "PT/OT with splinting",
+      "D": "No physical interventions until adulthood"
+    },
+    "correct": "C",
+    "explanation": "PT/OT and splinting are emphasized to prevent deformity in JIA.",
+    "optionExplanations": {
+      "A": "This would worsen function and deformity risk.",
+      "B": "NSAIDs are first-line for initial pain/inflammation.",
+      "C": "Correct. PT/OT and splinting are emphasized to prevent deformity in JIA.",
+      "D": "PT/OT and splinting are used in childhood."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A child has initial JIA-related pain and inflammation. Which high-yield treatment overview applies broadly",
+    "topic": "Treatment overview",
+    "options": {
+      "A": "Methotrexate is never used in JIA",
+      "B": "NSAIDs are first-line for initial pain/inflammation",
+      "C": "IL-1/IL-6 biologics are first-line for every JIA presentation",
+      "D": "Ophthalmology screening replaces anti-inflammatory treatment"
+    },
+    "correct": "B",
+    "explanation": "The treatment overview lists NSAIDs as first-line for initial pain/inflammation.",
+    "optionExplanations": {
+      "A": "Methotrexate is used for persistent/polyarticular disease and can be used in oligoarticular disease when needed.",
+      "B": "Correct. The treatment overview lists NSAIDs as first-line for initial pain/inflammation.",
+      "C": "They are emphasized for severe systemic-onset JIA.",
+      "D": "Eye screening is essential in uveitis-risk cases but does not replace arthritis treatment."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A child has persistent polyarticular JIA despite NSAIDs. Which next medication class is most appropriate from the overview",
+    "topic": "Persistent/polyarticular treatment",
+    "options": {
+      "A": "Heat and massage only",
+      "B": "No treatment because course is always benign",
+      "C": "Desmopressin",
+      "D": "Methotrexate or other DMARDs"
+    },
+    "correct": "D",
+    "explanation": "Persistent/polyarticular disease is treated with methotrexate or other DMARDs, with biologics/anti-TNF as appropriate, plus PT/OT and splinting.",
+    "optionExplanations": {
+      "A": "That is appropriate for growing pains, not persistent inflammatory arthritis.",
+      "B": "Persistent disease can cause joint destruction and deformity.",
+      "C": "Desmopressin is used in enuresis, not JIA.",
+      "D": "Correct. Persistent/polyarticular disease is treated with methotrexate or other DMARDs, with biologics/anti-TNF as appropriate, plus PT/OT and splinting."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "Which JIA subtype is specifically described as most common in the summary",
+    "topic": "Most common JIA subtype",
+    "options": {
+      "A": "Systemic-onset JIA",
+      "B": "RF-positive polyarticular JIA",
+      "C": "ANA-positive oligoarticular JIA",
+      "D": "Juvenile psoriatic arthritis"
+    },
+    "correct": "C",
+    "explanation": "ANA-positive oligoarticular JIA is described as the most common JIA subtype.",
+    "optionExplanations": {
+      "A": "Systemic-onset JIA is high-yield due to fever/rash/systemic inflammation and MAS risk, but not the most common subtype in the summary.",
+      "B": "This is an adult RA-like subtype, not the most common.",
+      "C": "Correct. ANA-positive oligoarticular JIA is described as the most common JIA subtype.",
+      "D": "This has dactylitis/nail clues but is not listed as the most common subtype."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A child has systemic-onset JIA with persistent disease activity. Which long-term complication was specifically listed",
+    "topic": "Systemic JIA course",
+    "options": {
+      "A": "Amyloidosis",
+      "B": "Congenital bilateral absence of vas deferens",
+      "C": "Biliary atresia",
+      "D": "Encephalocele"
+    },
+    "correct": "A",
+    "explanation": "Systemic-onset JIA can lead to amyloidosis if disease activity persists.",
+    "optionExplanations": {
+      "A": "Correct. Systemic-onset JIA can lead to amyloidosis if disease activity persists.",
+      "B": "This is associated with cystic fibrosis.",
+      "C": "This is a neonatal cholestatic disorder, not a JIA complication.",
+      "D": "This is a neural tube/skull defect, not a systemic JIA complication."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A child has late day/night leg pain, not joint pain, a normal exam, normal growth/development, and no morning stiffness. Which test-answer pairing is most appropriate",
+    "topic": "Growing pains test clue",
+    "options": {
+      "A": "Systemic-onset JIA",
+      "B": "Growing pains, not arthritis",
+      "C": "RF-positive polyarticular JIA",
+      "D": "Juvenile spondyloarthropathy"
+    },
+    "correct": "B",
+    "explanation": "The professor-style clue for growing pains is night leg pain that is not in joints with a normal exam and normal growth/development.",
+    "optionExplanations": {
+      "A": "Systemic JIA has arthritis with fever, salmon rash, LAD/HSM, and inflammatory labs.",
+      "B": "Correct. The professor-style clue for growing pains is night leg pain that is not in joints with a normal exam and normal growth/development.",
+      "C": "This involves >5 joints, erosions, nodules, and RF positivity.",
+      "D": "This involves morning back stiffness, sacroiliitis, enthesitis, and HLA-B27 positivity."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

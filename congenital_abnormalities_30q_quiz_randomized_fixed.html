@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Congenital Abnormalities Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A newborn has a cleft lip due to a primary error during embryologic development of the face. Which type of congenital abnormality is this",
+    "topic": "Types of congenital abnormalities",
+    "options": {
+      "A": "Malformation",
+      "B": "Disruption",
+      "C": "Deformation",
+      "D": "Sequence"
+    },
+    "correct": "A",
+    "explanation": "A malformation is a primary developmental error, such as cleft lip/palate, neural tube defects, or syndactyly.",
+    "optionExplanations": {
+      "A": "Correct. Primary developmental errors are malformations.",
+      "B": "Disruption is destruction of previously normal tissue, such as amniotic bands.",
+      "C": "Deformation is an extrinsic mechanical disturbance, such as clubfoot or congenital hip dislocation.",
+      "D": "A sequence is multiple anomalies resulting from one initiating factor, such as Potter sequence."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "An infant has limb constriction from amniotic bands that destroyed previously normal tissue. Which type of congenital abnormality is this",
+    "topic": "Types of congenital abnormalities",
+    "options": {
+      "A": "Malformation",
+      "B": "Disruption",
+      "C": "Deformation",
+      "D": "Sequence"
+    },
+    "correct": "B",
+    "explanation": "A disruption is destruction of previously normal tissue. Amniotic bands are the classic example provided in the material.",
+    "optionExplanations": {
+      "A": "Malformation is a primary developmental error.",
+      "B": "Correct. Amniotic bands disrupt previously normal tissue.",
+      "C": "Deformation is due to mechanical/extrinsic forces.",
+      "D": "Sequence refers to multiple anomalies from one initiating defect."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A fetus develops clubfoot because prolonged uterine constraint mechanically altered limb positioning. Which category best describes this abnormality",
+    "topic": "Types of congenital abnormalities",
+    "options": {
+      "A": "Malformation",
+      "B": "Disruption",
+      "C": "Deformation",
+      "D": "Dysplasia"
+    },
+    "correct": "C",
+    "explanation": "A deformation is a mechanical or extrinsic disturbance of development. Examples include congenital hip dislocation and clubfoot.",
+    "optionExplanations": {
+      "A": "Malformation is a primary intrinsic developmental error.",
+      "B": "Disruption destroys previously normal tissue.",
+      "C": "Correct. Clubfoot due to mechanical constraint is a deformation.",
+      "D": "Dysplasia was not the classification emphasized in this section."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A fetus with renal agenesis develops oligohydramnios, leading to flat face, clubfoot, dislocated hips, and pulmonary hypoplasia. Which concept best explains this pattern",
+    "topic": "Sequence",
+    "options": {
+      "A": "Deformation only",
+      "B": "Single isolated malformation",
+      "C": "Disruption",
+      "D": "Sequence"
+    },
+    "correct": "D",
+    "explanation": "A sequence is multiple anomalies arising from one initiating factor. Potter sequence occurs when oligohydramnios leads to fetal compression with flat face, clubfoot, dislocated hips, and pulmonary hypoplasia.",
+    "optionExplanations": {
+      "A": "Mechanical deformation contributes, but the overall pattern from one initiating defect is a sequence.",
+      "B": "This is not a single isolated abnormality.",
+      "C": "Disruption involves destruction of previously normal tissue, such as amniotic bands.",
+      "D": "Correct. Oligohydramnios causing multiple downstream abnormalities is a sequence."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A patient asks when folate supplementation must begin to reduce neural tube defect risk. Neural tube closure is normally complete by which time",
+    "topic": "Neural tube defects",
+    "options": {
+      "A": "Day 28",
+      "B": "Day 14",
+      "C": "Day 7",
+      "D": "Week 12"
+    },
+    "correct": "A",
+    "explanation": "Neural tube closure is complete by day 28, so folate must be given early, ideally preconception.",
+    "optionExplanations": {
+      "A": "Correct. Neural tube closure is complete by day 28.",
+      "B": "Day 14 is too early for complete closure.",
+      "C": "Day 7 is too early for complete neural tube closure.",
+      "D": "Week 12 is too late for neural tube closure prevention."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A newborn has absence of the forebrain and overlying meninges. Which neural tube defect is most likely",
+    "topic": "Neural tube defects",
+    "options": {
+      "A": "Spina bifida occulta",
+      "B": "Anencephaly",
+      "C": "Meningocele",
+      "D": "Encephalocele"
+    },
+    "correct": "B",
+    "explanation": "Anencephaly is absence of the forebrain and overlying meninges.",
+    "optionExplanations": {
+      "A": "Spina bifida occulta is a defect limited to the bony vertebral arch.",
+      "B": "Correct. Absence of the forebrain and meninges is anencephaly.",
+      "C": "Meningocele is protrusion of meninges through a spinal defect.",
+      "D": "Encephalocele is brain protrusion through a midline skull defect."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A newborn has a lumbar spinal defect through which meninges and spinal cord protrude. The child has lower-extremity motor/sensory deficits and poor bowel/bladder control. Which diagnosis is most likely",
+    "topic": "Neural tube defects",
+    "options": {
+      "A": "Spina bifida occulta",
+      "B": "Meningocele",
+      "C": "Myelomeningocele",
+      "D": "Anencephaly"
+    },
+    "correct": "C",
+    "explanation": "Myelomeningocele is protrusion of meninges plus spinal cord through a spinal defect. It causes lower-extremity motor/sensory deficits, poor bowel/bladder control, and infection risk.",
+    "optionExplanations": {
+      "A": "Spina bifida occulta is limited to the bony arch and lacks protruding spinal cord.",
+      "B": "Meningocele involves protrusion of meninges only.",
+      "C": "Correct. Meninges plus spinal cord protrusion is myelomeningocele.",
+      "D": "Anencephaly is absence of forebrain and overlying meninges."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "An infant has brain tissue protruding through a midline skull defect. Which diagnosis best fits",
+    "topic": "Neural tube defects",
+    "options": {
+      "A": "Chiari I malformation",
+      "B": "Meningocele",
+      "C": "Spina bifida occulta",
+      "D": "Encephalocele"
+    },
+    "correct": "D",
+    "explanation": "Encephalocele is protrusion of brain through a midline skull defect.",
+    "optionExplanations": {
+      "A": "Chiari I involves cerebellar tonsils extending into the vertebral canal.",
+      "B": "Meningocele is meningeal protrusion through a spinal defect.",
+      "C": "Spina bifida occulta is a vertebral arch fusion defect.",
+      "D": "Correct. Brain protrusion through a skull defect is encephalocele."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A newborn has a small brain and head. The differential includes chromosomal abnormalities, fetal alcohol syndrome, Zika, and HIV-1. Which malformation is being described",
+    "topic": "Brain malformations",
+    "options": {
+      "A": "Microencephaly",
+      "B": "Holoprosencephaly",
+      "C": "Dandy-Walker malformation",
+      "D": "Joubert syndrome"
+    },
+    "correct": "A",
+    "explanation": "Microencephaly is a small brain/head and can be associated with chromosomal abnormalities, fetal alcohol syndrome, Zika, and HIV-1.",
+    "optionExplanations": {
+      "A": "Correct. Small brain/head is microencephaly.",
+      "B": "Holoprosencephaly is midline fusion of brain/facial structures.",
+      "C": "Dandy-Walker involves vermis hypoplasia and a large posterior fossa cyst continuous with the 4th ventricle.",
+      "D": "Joubert syndrome involves altered brainstem shape and vermis abnormality."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A child has severe intellectual disability, seizures, poor feeding, and a smooth brain with absent or decreased gyri. Which developmental process is abnormal",
+    "topic": "Lissencephaly",
+    "options": {
+      "A": "Limb angiogenesis",
+      "B": "Neuronal migration",
+      "C": "Bile duct remodeling",
+      "D": "Renal ascent"
+    },
+    "correct": "B",
+    "explanation": "Lissencephaly is a smooth brain with decreased or absent gyri due to a neuronal migration defect. It is associated with intellectual disability, seizures, and poor feeding.",
+    "optionExplanations": {
+      "A": "Impaired limb angiogenesis is associated with thalidomide-induced phocomelia.",
+      "B": "Correct. Lissencephaly is a neuronal migration defect.",
+      "C": "Bile duct remodeling is not the mechanism of lissencephaly.",
+      "D": "Renal ascent abnormalities cause ectopic kidneys."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A fetus has cyclopia and proboscis with failure of midline separation of brain and facial structures. The condition is associated with trisomy 13 and SHH mutations. Which diagnosis is most likely",
+    "topic": "Holoprosencephaly",
+    "options": {
+      "A": "Chiari II malformation",
+      "B": "Dandy-Walker malformation",
+      "C": "Holoprosencephaly",
+      "D": "Craniosynostosis"
+    },
+    "correct": "C",
+    "explanation": "Holoprosencephaly is midline fusion of brain and facial structures. It is associated with trisomy 13 and SHH mutations and has a spectrum from cyclopia/proboscis to milder findings.",
+    "optionExplanations": {
+      "A": "Chiari II involves hindbrain herniation and is classically associated with myelomeningocele.",
+      "B": "Dandy-Walker involves cerebellar vermis hypoplasia and posterior fossa cyst.",
+      "C": "Correct. Midline fusion with trisomy 13/SHH association is holoprosencephaly.",
+      "D": "Craniosynostosis is premature suture fusion."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "An infant with myelomeningocele develops hydrocephalus. Imaging shows cerebellar tonsils, 4th ventricle, and brainstem herniating through the foramen magnum. Which malformation is most likely",
+    "topic": "Chiari malformations",
+    "options": {
+      "A": "Chiari I malformation",
+      "B": "Joubert syndrome",
+      "C": "Dandy-Walker malformation",
+      "D": "Chiari II malformation"
+    },
+    "correct": "D",
+    "explanation": "Chiari II, also called Arnold-Chiari malformation, involves herniation of the cerebellar tonsils, 4th ventricle, and brainstem through the foramen magnum. It is classically associated with myelomeningocele and hydrocephalus.",
+    "optionExplanations": {
+      "A": "Chiari I involves cerebellar tonsils extending into the vertebral canal and may present with cough in children.",
+      "B": "Joubert syndrome involves brainstem shape and vermis abnormalities.",
+      "C": "Dandy-Walker involves vermis hypoplasia and a posterior fossa cyst.",
+      "D": "Correct. Hindbrain herniation with myelomeningocele is Chiari II."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A child has cerebellar tonsils extending into the vertebral canal and presents with cough. Which diagnosis best fits",
+    "topic": "Chiari malformations",
+    "options": {
+      "A": "Chiari I malformation",
+      "B": "Dandy-Walker malformation",
+      "C": "Joubert syndrome",
+      "D": "Chiari II malformation"
+    },
+    "correct": "A",
+    "explanation": "Chiari I malformation involves cerebellar tonsils extending into the vertebral canal. Children may present with cough.",
+    "optionExplanations": {
+      "A": "Correct. Tonsillar extension into the vertebral canal with cough fits Chiari I.",
+      "B": "Dandy-Walker involves cerebellar vermis hypoplasia and a posterior fossa cyst.",
+      "C": "Joubert syndrome involves altered brainstem shape and vermis abnormality.",
+      "D": "Chiari II includes brainstem/4th ventricle herniation and myelomeningocele association."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "An infant has cerebellar vermis hypoplasia and a large posterior fossa cyst continuous with the 4th ventricle. Which complication is a major concern",
+    "topic": "Dandy-Walker malformation",
+    "options": {
+      "A": "Adenocarcinoma of exposed bladder mucosa",
+      "B": "Hydrocephalus",
+      "C": "Kernicterus",
+      "D": "Pyloric outlet obstruction"
+    },
+    "correct": "B",
+    "explanation": "Dandy-Walker malformation involves cerebellar vermis hypoplasia and a large posterior fossa cyst continuous with the 4th ventricle. Hydrocephalus is a key risk.",
+    "optionExplanations": {
+      "A": "Adenocarcinoma risk is associated with bladder exstrophy.",
+      "B": "Correct. Hydrocephalus is a major concern in Dandy-Walker malformation.",
+      "C": "Kernicterus is bilirubin deposition in the brain, unrelated here.",
+      "D": "Pyloric outlet obstruction occurs in hypertrophic pyloric stenosis."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A child has premature fusion of cranial sutures, preventing normal brain growth and causing increased intracranial pressure. Which condition is this",
+    "topic": "Craniosynostosis",
+    "options": {
+      "A": "Microencephaly",
+      "B": "Lissencephaly",
+      "C": "Craniosynostosis",
+      "D": "Holoprosencephaly"
+    },
+    "correct": "C",
+    "explanation": "Craniosynostosis is premature fusion of one or more sutures that prevents brain growth and can cause increased intracranial pressure. Syndromic causes include Crouzon and Apert; early cases may need surgery.",
+    "optionExplanations": {
+      "A": "Microencephaly is small brain/head.",
+      "B": "Lissencephaly is a smooth brain from neuronal migration defect.",
+      "C": "Correct. Premature suture fusion is craniosynostosis.",
+      "D": "Holoprosencephaly is midline fusion of brain/facial structures."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A fetus exposed to valproic acid develops congenital abnormalities. Which developmental gene family is disrupted according to the material",
+    "topic": "Teratogens and limb development",
+    "options": {
+      "A": "RET proto-oncogene",
+      "B": "CFTR genes",
+      "C": "Mismatch repair genes",
+      "D": "HOX genes"
+    },
+    "correct": "D",
+    "explanation": "HOX genes establish body plan and limb placement. Valproic acid disrupts HOX genes and is a teratogen.",
+    "optionExplanations": {
+      "A": "RET mutations are not the teratogenic mechanism emphasized here.",
+      "B": "CFTR mutations cause cystic fibrosis.",
+      "C": "Mismatch repair genes are associated with Lynch syndrome.",
+      "D": "Correct. Valproic acid disrupts HOX genes."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A newborn has very short, malformed limbs described as flipper-like after in utero exposure to a drug that impairs angiogenesis. Which exposure is most likely",
+    "topic": "Thalidomide and phocomelia",
+    "options": {
+      "A": "Thalidomide",
+      "B": "Valproic acid",
+      "C": "Warfarin",
+      "D": "Isotretinoin"
+    },
+    "correct": "A",
+    "explanation": "Thalidomide impairs angiogenesis and causes phocomelia, described as short, malformed limb flippers.",
+    "optionExplanations": {
+      "A": "Correct. Thalidomide causes phocomelia via impaired angiogenesis.",
+      "B": "Valproic acid disrupts HOX genes.",
+      "C": "Warfarin was not the limb teratogen emphasized in this section.",
+      "D": "Isotretinoin was not the specific exposure highlighted here."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A newborn has extra digits. Loss-of-function mutation in which gene was listed as a possible cause",
+    "topic": "Polydactyly",
+    "options": {
+      "A": "PAH",
+      "B": "GLI3",
+      "C": "GALT",
+      "D": "HPRT1"
+    },
+    "correct": "B",
+    "explanation": "Polydactyly means extra digits and can involve loss-of-function mutation in GLI3.",
+    "optionExplanations": {
+      "A": "PAH deficiency causes PKU.",
+      "B": "Correct. GLI3 loss-of-function can be involved in polydactyly.",
+      "C": "GALT deficiency causes galactosemia.",
+      "D": "HPRT1 mutation causes Lesch-Nyhan syndrome."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A child has fusion of digits. Which term describes this abnormality",
+    "topic": "Syndactyly",
+    "options": {
+      "A": "Polydactyly",
+      "B": "Phocomelia",
+      "C": "Syndactyly",
+      "D": "Craniosynostosis"
+    },
+    "correct": "C",
+    "explanation": "Syndactyly is fusion of digits. Polydactyly means extra digits.",
+    "optionExplanations": {
+      "A": "Polydactyly is extra digits.",
+      "B": "Phocomelia is short malformed limb flippers associated with thalidomide.",
+      "C": "Correct. Fusion of digits is syndactyly.",
+      "D": "Craniosynostosis is premature fusion of cranial sutures."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A newborn has cleft lip and palate. Which associations were emphasized in the material",
+    "topic": "Cleft lip and palate",
+    "options": {
+      "A": "GALT deficiency and PAH deficiency",
+      "B": "Trisomy 21 and 22q11 deletion only",
+      "C": "CFTR mutation and DNAH5 mutation",
+      "D": "Trisomy 13 and 4p deletion"
+    },
+    "correct": "D",
+    "explanation": "Cleft lip/palate is multifactorial and associated with trisomy 13 and 4p deletion. Recurrence risk increases with more or more severely affected relatives.",
+    "optionExplanations": {
+      "A": "GALT and PAH deficiencies cause metabolic disorders.",
+      "B": "These were not the cleft lip/palate associations emphasized here.",
+      "C": "CFTR and DNAH5 relate to respiratory disorders, not cleft lip/palate.",
+      "D": "Correct. Trisomy 13 and 4p deletion are listed associations."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A child has a lateral neck cyst. Histology shows lymphoid tissue in the cyst wall. Which embryologic remnant is most likely",
+    "topic": "Congenital neck cysts",
+    "options": {
+      "A": "Branchial arch remnant",
+      "B": "Thyroid descent tract",
+      "C": "Urachal remnant",
+      "D": "Vitelline duct remnant"
+    },
+    "correct": "A",
+    "explanation": "A branchial cyst is a lateral neck cyst arising from a branchial arch remnant. Histology shows lymphoid tissue in the cyst wall.",
+    "optionExplanations": {
+      "A": "Correct. Lateral neck cyst with lymphoid tissue is branchial cyst.",
+      "B": "A thyroglossal duct cyst is midline and arises from the thyroid descent tract.",
+      "C": "Urachal remnants involve the bladder/umbilicus, not lateral neck.",
+      "D": "Vitelline duct remnants can cause Meckel diverticulum, not lateral neck cysts."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A child has a midline neck cyst along the thyroid descent tract. Histology may show thyroid follicles or lymphoid tissue. Which diagnosis is most likely",
+    "topic": "Congenital neck cysts",
+    "options": {
+      "A": "Branchial cyst",
+      "B": "Thyroglossal duct cyst",
+      "C": "Cystic hygroma",
+      "D": "Encephalocele"
+    },
+    "correct": "B",
+    "explanation": "A thyroglossal duct cyst is a midline neck cyst arising from the thyroid descent tract. Histology can show thyroid follicles or lymphoid tissue.",
+    "optionExplanations": {
+      "A": "Branchial cysts are lateral neck cysts from branchial arch remnants.",
+      "B": "Correct. Midline neck cyst from thyroid descent tract is a thyroglossal duct cyst.",
+      "C": "Cystic hygroma is fluid accumulation in neck soft tissue, associated with nonimmune hydrops.",
+      "D": "Encephalocele is brain protrusion through a skull defect."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child has hydronephrosis. Which defect is listed as the most common cause of hydronephrosis in children",
+    "topic": "Renal and urinary anomalies",
+    "options": {
+      "A": "Double ureters",
+      "B": "Bifid ureters",
+      "C": "UPJ obstruction",
+      "D": "Bladder diverticula"
+    },
+    "correct": "C",
+    "explanation": "Ureteropelvic junction obstruction is listed as the most common cause of hydronephrosis in children.",
+    "optionExplanations": {
+      "A": "Double ureters are two separate ureters from one kidney to the bladder.",
+      "B": "Bifid ureters join before the bladder.",
+      "C": "Correct. UPJ obstruction is the most common pediatric hydronephrosis cause listed.",
+      "D": "Bladder diverticula are pouch-like bladder wall invaginations."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A child has recurrent pyelonephritis from ascending infection. Which urinary tract defect best explains this risk",
+    "topic": "Renal and urinary anomalies",
+    "options": {
+      "A": "Horseshoe kidney",
+      "B": "Ectopic kidney",
+      "C": "Bladder exstrophy",
+      "D": "Vesicoureteral reflux"
+    },
+    "correct": "D",
+    "explanation": "Vesicoureteral reflux increases risk of ascending infection and pyelonephritis.",
+    "optionExplanations": {
+      "A": "Horseshoe kidney has fused lower poles crossing midline anterior to great vessels.",
+      "B": "Ectopic kidney is usually pelvic.",
+      "C": "Bladder exstrophy causes exposed bladder and chronic infection/adenocarcinoma risk.",
+      "D": "Correct. Vesicoureteral reflux predisposes to ascending infection/pyelonephritis."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A newborn has exposed bladder mucosa due to anterior abdominal and bladder wall failure. Which long-term risk is increased",
+    "topic": "Bladder exstrophy",
+    "options": {
+      "A": "Adenocarcinoma",
+      "B": "Medulloblastoma",
+      "C": "Basal ganglia bilirubin deposition",
+      "D": "E coli sepsis from galactosemia only"
+    },
+    "correct": "A",
+    "explanation": "Bladder exstrophy is failure of the anterior abdominal and bladder wall, leading to an exposed bladder. It causes chronic infection and increased adenocarcinoma risk.",
+    "optionExplanations": {
+      "A": "Correct. Bladder exstrophy increases adenocarcinoma risk.",
+      "B": "Medulloblastoma is associated with Turcot syndrome or other CNS tumor contexts, not bladder exstrophy.",
+      "C": "Basal ganglia bilirubin deposition is kernicterus.",
+      "D": "E coli sepsis is emphasized in galactosemia, not bladder exstrophy."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A 4-week-old male infant has post-feed regurgitation/vomiting. Pathology would show hyperplasia of the muscularis propria causing narrowed pyloric outflow. Which diagnosis is most likely",
+    "topic": "Pyloric stenosis",
+    "options": {
+      "A": "Hirschsprung disease",
+      "B": "Pyloric stenosis",
+      "C": "Meconium ileus",
+      "D": "Biliary atresia"
+    },
+    "correct": "B",
+    "explanation": "Congenital hypertrophic pyloric stenosis is more common in males and presents at 3 to 6 weeks with post-feed regurgitation/vomiting. It is due to hyperplasia of the muscularis propria narrowing pyloric outflow.",
+    "optionExplanations": {
+      "A": "Hirschsprung disease causes delayed meconium, abdominal distension, and bilious vomiting.",
+      "B": "Correct. A 3 to 6 week male infant with post-feed vomiting suggests pyloric stenosis.",
+      "C": "Meconium ileus is neonatal obstruction from thick meconium, usually in cystic fibrosis.",
+      "D": "Biliary atresia causes jaundice, dark urine, and acholic stools."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A newborn has flat face, clubfoot, dislocated hips, and respiratory distress from pulmonary hypoplasia. Which initiating problem best explains the entire pattern",
+    "topic": "Oligohydramnios/Potter sequence",
+    "options": {
+      "A": "Maternal diabetes only",
+      "B": "Polyhydramnios",
+      "C": "Oligohydramnios",
+      "D": "Excess fetal lung fluid clearance"
+    },
+    "correct": "C",
+    "explanation": "Oligohydramnios causes fetal compression leading to Potter sequence findings: flat face, clubfoot, dislocated hips, and pulmonary hypoplasia. Causes include rupture/leak of amniotic sac, renal agenesis, and urinary tract obstruction.",
+    "optionExplanations": {
+      "A": "Maternal diabetes is associated with NRDS risk, not Potter sequence.",
+      "B": "Polyhydramnios is not the initiating factor here.",
+      "C": "Correct. Oligohydramnios initiates Potter sequence.",
+      "D": "Delayed, not excess, fetal lung fluid clearance causes TTN."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "Small nodules are found on the amniotic sac and are composed of fetal skin cells, hair, and debris. They are associated with oligohydramnios, preterm birth, placental insufficiency, prolonged rupture of membranes, and pulmonary hypoplasia. What are these nodules called",
+    "topic": "Amnion nodosum",
+    "options": {
+      "A": "Choristomas",
+      "B": "Hamartomas",
+      "C": "Ductular proliferation",
+      "D": "Amnion nodosum"
+    },
+    "correct": "D",
+    "explanation": "Amnion nodosum consists of small nodules on the amniotic sac made of fetal skin cells, hair, and debris. It is associated with oligohydramnios, preterm birth, placental insufficiency, prolonged rupture of membranes, and pulmonary hypoplasia.",
+    "optionExplanations": {
+      "A": "Choristoma is normal tissue in an abnormal location; this is not the described lesion.",
+      "B": "Hamartoma is disorganized benign overgrowth of native tissue.",
+      "C": "Ductular proliferation is a hallmark of biliary atresia histology.",
+      "D": "Correct. These amniotic nodules are amnion nodosum."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A fetus has generalized fluid accumulation not due to Rh or ABO antibodies. Associated conditions include Turner syndrome, trisomy 21, and trisomy 18. Which diagnosis best fits",
+    "topic": "Nonimmune hydrops",
+    "options": {
+      "A": "Nonimmune hydrops",
+      "B": "Immune hydrops",
+      "C": "Potter sequence",
+      "D": "VACTERL association"
+    },
+    "correct": "A",
+    "explanation": "Nonimmune hydrops is generalized fetal fluid accumulation not due to Rh/ABO antibodies. It is associated with Turner syndrome, trisomy 21, and trisomy 18, and may involve delayed lymphatic maturation.",
+    "optionExplanations": {
+      "A": "Correct. Generalized fetal fluid accumulation not due to antibodies is nonimmune hydrops.",
+      "B": "Immune hydrops is due to blood group antigen incompatibility, such as Rh/ABO.",
+      "C": "Potter sequence results from oligohydramnios and fetal compression.",
+      "D": "VACTERL is a group of vertebral, anal, cardiac, TE, renal, and limb defects."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A newborn has vertebral defects, anal atresia, tracheoesophageal fistula, renal abnormalities, cardiac defects, and limb defects. Which association is most likely",
+    "topic": "VACTERL association",
+    "options": {
+      "A": "Potter sequence",
+      "B": "VACTERL association",
+      "C": "Dandy-Walker malformation",
+      "D": "Joubert syndrome"
+    },
+    "correct": "B",
+    "explanation": "VACTERL includes vertebral defects, anal atresia, tracheoesophageal fistula, renal abnormalities, cardiac defects, and limb defects. VATER includes vertebral, anal, TE, and renal; VACTERL adds cardiac and limb defects.",
+    "optionExplanations": {
+      "A": "Potter sequence is oligohydramnios causing flat face, limb deformities, and pulmonary hypoplasia.",
+      "B": "Correct. The listed anomalies are VACTERL.",
+      "C": "Dandy-Walker is cerebellar vermis hypoplasia with posterior fossa cyst.",
+      "D": "Joubert syndrome is altered brainstem shape with vermis abnormality."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pediatric Exanthems Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "An unvaccinated 6-year-old has fever, cough, coryza, conjunctivitis, and Koplik spots. A coalescent rash begins on the face and spreads to the trunk and limbs, sparing palms and soles. Which diagnosis is most likely",
+    "topic": "Measles",
+    "options": {
+      "A": "Rubella",
+      "B": "Roseola",
+      "C": "Hand-foot-mouth disease",
+      "D": "Measles"
+    },
+    "correct": "D",
+    "explanation": "Measles classically causes fever, Koplik spots on buccal mucosa, cough/coryza/conjunctivitis, and a coalescent rash that spreads face → trunk/limbs while sparing palms/soles.",
+    "optionExplanations": {
+      "A": "Rubella has Forchheimer spots, URI/headache/LAD, and a macular rash that starts on the head.",
+      "B": "Roseola causes high fever followed by a trunk-first macular rash after fever pattern, not Koplik spots and 3 C’s.",
+      "C": "HFMD causes oral enanthem and vesicles involving palms/soles.",
+      "D": "Correct. Measles classically causes fever, Koplik spots on buccal mucosa, cough/coryza/conjunctivitis, and a coalescent rash that spreads face → trunk/limbs while sparing palms/soles."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A child with measles is being discussed for public health planning. During which period is measles contagious according to the notes",
+    "topic": "Measles contagious period",
+    "options": {
+      "A": "Only after rash crusts",
+      "B": "4 days before and 4 days after rash",
+      "C": "7 days before and 7 days after rash",
+      "D": "Only while Koplik spots are visible"
+    },
+    "correct": "B",
+    "explanation": "Measles is contagious from 4 days before to 4 days after the rash appears.",
+    "optionExplanations": {
+      "A": "Crusting is a varicella-type concept, not the measles contagious period given.",
+      "B": "Correct. Measles is contagious from 4 days before to 4 days after the rash appears.",
+      "C": "This is the rubella contagious window in the notes.",
+      "D": "The notes use a 4-day before/after rash window."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A patient had measles in childhood and years later develops progressive neurologic decline. Which delayed complication is specifically associated with measles",
+    "topic": "Measles complications",
+    "options": {
+      "A": "Subacute sclerosing panencephalitis",
+      "B": "Hydrops fetalis",
+      "C": "Congenital cataracts and deafness",
+      "D": "Rare meningoencephalitis from enterovirus 71"
+    },
+    "correct": "A",
+    "explanation": "Measles is associated with subacute sclerosing panencephalitis more than 7 years later. Other complications include otitis media, pneumonia, and diarrhea.",
+    "optionExplanations": {
+      "A": "Correct. Measles is associated with subacute sclerosing panencephalitis more than 7 years later. Other complications include otitis media, pneumonia, and diarrhea.",
+      "B": "Hydrops fetalis is a risk of parvovirus B19 infection.",
+      "C": "These are congenital rubella findings.",
+      "D": "This is associated with HFMD."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A child has measles. Which management/prevention pairing is emphasized in the notes",
+    "topic": "Measles treatment/prevention",
+    "options": {
+      "A": "Acyclovir for all routine cases",
+      "B": "Varivax at age 1 and Shingrix at 50",
+      "C": "MMR vaccine/immune globulin for prevention or post-exposure context plus vitamin A",
+      "D": "Stop amoxicillin only"
+    },
+    "correct": "C",
+    "explanation": "For measles, the notes list MMR vaccine/immune globulin and vitamin A. The case notes also emphasize supportive care, isolation/reporting, and vitamin A as board-relevant.",
+    "optionExplanations": {
+      "A": "Acyclovir is listed for high-risk varicella, not routine measles.",
+      "B": "These are varicella/zoster vaccines.",
+      "C": "Correct. For measles, the notes list MMR vaccine/immune globulin and vitamin A. The case notes also emphasize supportive care, isolation/reporting, and vitamin A as board-relevant.",
+      "D": "Stopping amoxicillin applies to EBV-associated amoxicillin rash."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A child has fever, Forchheimer spots on the palate, URI symptoms, headache, lymphadenopathy, and a macular rash spreading from the head to trunk and limbs, sparing palms and soles. Which virus is most likely",
+    "topic": "Rubella",
+    "options": {
+      "A": "Morbillivirus, a Paramyxovirus with negative-sense ssRNA",
+      "B": "HHV-6/7, dsDNA viruses",
+      "C": "Parvovirus B19, ssDNA virus",
+      "D": "Rubella virus, a Togavirus with positive-sense ssRNA"
+    },
+    "correct": "D",
+    "explanation": "Rubella virus is a Togavirus with positive-sense ssRNA. It causes fever, Forchheimer spots, URI symptoms, headache, LAD, arthralgia in adults, and a head-first macular rash.",
+    "optionExplanations": {
+      "A": "This describes measles.",
+      "B": "These cause roseola.",
+      "C": "This causes erythema infectiosum/fifth disease.",
+      "D": "Correct. Rubella virus is a Togavirus with positive-sense ssRNA. It causes fever, Forchheimer spots, URI symptoms, headache, LAD, arthralgia in adults, and a head-first macular rash."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A pregnant patient is exposed to rubella. Which congenital syndrome findings are most associated with fetal infection",
+    "topic": "Congenital rubella",
+    "options": {
+      "A": "Cataracts, deafness, heart defects, and blueberry muffin lesions",
+      "B": "Aplastic crisis and hydrops fetalis",
+      "C": "Subacute sclerosing panencephalitis",
+      "D": "Secondary Staph infection and encephalitis"
+    },
+    "correct": "A",
+    "explanation": "Congenital rubella is associated with cataracts, deafness, heart defects, and blueberry muffin lesions.",
+    "optionExplanations": {
+      "A": "Correct. Congenital rubella is associated with cataracts, deafness, heart defects, and blueberry muffin lesions.",
+      "B": "These are parvovirus B19 complications.",
+      "C": "This is a delayed measles complication.",
+      "D": "These are listed varicella complications."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A child has high fever followed by a macular rash that begins on the trunk and spreads to the face and limbs, sparing palms and soles. Nagayama spots are noted on the palate. Which diagnosis is most likely",
+    "topic": "Roseola",
+    "options": {
+      "A": "Measles",
+      "B": "Rubella",
+      "C": "Roseola infantum / sixth disease",
+      "D": "Varicella"
+    },
+    "correct": "C",
+    "explanation": "Roseola, or sixth disease, is caused by HHV-6/7 and presents with high fever, Nagayama spots, URI/headache/LAD, and a macular rash that spreads trunk → face/limbs while sparing palms/soles.",
+    "optionExplanations": {
+      "A": "Measles has Koplik spots and a coalescent face-first rash with cough/coryza/conjunctivitis.",
+      "B": "Rubella has Forchheimer spots and a head-first macular rash.",
+      "C": "Correct. Roseola, or sixth disease, is caused by HHV-6/7 and presents with high fever, Nagayama spots, URI/headache/LAD, and a macular rash that spreads trunk → face/limbs while sparing palms/soles.",
+      "D": "Varicella causes pruritic vesicles that crust/scar."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A toddler has several days of high fever and then develops a trunk-first rash. Which complication is most classically associated with this illness in the notes",
+    "topic": "Roseola complications",
+    "options": {
+      "A": "Subacute sclerosing panencephalitis",
+      "B": "Febrile seizures",
+      "C": "Aplastic crisis",
+      "D": "Coronary artery aneurysm"
+    },
+    "correct": "B",
+    "explanation": "Roseola is associated with febrile seizures.",
+    "optionExplanations": {
+      "A": "This is associated with measles.",
+      "B": "Correct. Roseola is associated with febrile seizures.",
+      "C": "This is associated with parvovirus B19.",
+      "D": "This is a Kawasaki disease complication."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A school-aged child develops fever, headache, rhinorrhea, and a slapped-cheek rash followed by a lacy rash on the trunk and limbs, sparing palms and soles. Which virus is most likely",
+    "topic": "Erythema infectiosum",
+    "options": {
+      "A": "HHV-6",
+      "B": "Rubella virus",
+      "C": "Coxsackie A16",
+      "D": "Parvovirus B19"
+    },
+    "correct": "D",
+    "explanation": "Erythema infectiosum/fifth disease is caused by Parvovirus B19, an ssDNA virus, and causes slapped-cheek rash followed by a lacy trunk/limb rash.",
+    "optionExplanations": {
+      "A": "HHV-6 causes roseola with high fever and trunk-first rash.",
+      "B": "Rubella causes Forchheimer spots and head-first macular rash.",
+      "C": "Coxsackie A16 causes hand-foot-mouth disease with oral enanthem and palm/sole vesicles.",
+      "D": "Correct. Erythema infectiosum/fifth disease is caused by Parvovirus B19, an ssDNA virus, and causes slapped-cheek rash followed by a lacy trunk/limb rash."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A child with sickle cell disease is exposed to parvovirus B19. Which complication is most important to monitor for",
+    "topic": "Parvovirus B19 complications",
+    "options": {
+      "A": "Otitis media and pneumonia",
+      "B": "Cataracts and deafness",
+      "C": "Aplastic crisis",
+      "D": "Secondary Staph skin infection"
+    },
+    "correct": "C",
+    "explanation": "Parvovirus B19 can cause aplastic crisis and hydrops fetalis. This is especially important in patients with chronic hemolytic anemia.",
+    "optionExplanations": {
+      "A": "These are listed measles complications.",
+      "B": "These are congenital rubella findings.",
+      "C": "Correct. Parvovirus B19 can cause aplastic crisis and hydrops fetalis. This is especially important in patients with chronic hemolytic anemia.",
+      "D": "This is a varicella or molluscum complication/risk."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A pregnant patient has parvovirus B19 infection. Which fetal complication is highlighted in the notes",
+    "topic": "Parvovirus pregnancy risk",
+    "options": {
+      "A": "Hydrops fetalis",
+      "B": "Subacute sclerosing panencephalitis",
+      "C": "Meningoencephalitis from enterovirus 71",
+      "D": "Congenital cataracts, deafness, and heart defects"
+    },
+    "correct": "A",
+    "explanation": "Parvovirus B19 can be vertically transmitted and is associated with hydrops fetalis.",
+    "optionExplanations": {
+      "A": "Correct. Parvovirus B19 can be vertically transmitted and is associated with hydrops fetalis.",
+      "B": "This is a delayed measles complication.",
+      "C": "This is a rare HFMD complication.",
+      "D": "These are congenital rubella findings."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A young child has low fever, oral enanthem on the tongue and gums, and vesicles on the hands and feet that heal without crusting or scarring. Which diagnosis is most likely",
+    "topic": "Hand-foot-mouth disease",
+    "options": {
+      "A": "Varicella",
+      "B": "Molluscum contagiosum",
+      "C": "EBV-associated amoxicillin rash",
+      "D": "Hand-foot-mouth disease"
+    },
+    "correct": "D",
+    "explanation": "HFMD causes low fever, oral enanthem involving tongue/gums, and vesicles involving palms/soles that heal without crusting or scarring.",
+    "optionExplanations": {
+      "A": "Varicella has pruritic vesicles that spread face/trunk → limbs and heal with crusting/scarring, usually sparing palms/soles.",
+      "B": "Molluscum causes waxy dome-shaped papules with central umbilication.",
+      "C": "This is a diffuse pruritic maculopapular rash after amoxicillin exposure.",
+      "D": "Correct. HFMD causes low fever, oral enanthem involving tongue/gums, and vesicles involving palms/soles that heal without crusting or scarring."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "Which pathogen is classically associated with hand-foot-mouth disease in the notes",
+    "topic": "HFMD pathogen",
+    "options": {
+      "A": "VZV, HHV-3 dsDNA",
+      "B": "Coxsackie A16, a Picornavirus with positive-sense ssRNA",
+      "C": "Poxvirus dsDNA",
+      "D": "EBV, HHV-4 dsDNA"
+    },
+    "correct": "B",
+    "explanation": "HFMD is associated with Coxsackie A16, a Picornavirus with positive-sense ssRNA; Enterovirus 71 is also noted.",
+    "optionExplanations": {
+      "A": "This causes varicella.",
+      "B": "Correct. HFMD is associated with Coxsackie A16, a Picornavirus with positive-sense ssRNA; Enterovirus 71 is also noted.",
+      "C": "This causes molluscum contagiosum.",
+      "D": "This is associated with amoxicillin rash."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A child with hand-foot-mouth disease is infected with Enterovirus 71. Which rare complication is listed",
+    "topic": "HFMD complications",
+    "options": {
+      "A": "SSPE",
+      "B": "Aplastic crisis",
+      "C": "Meningoencephalitis",
+      "D": "Coronary artery aneurysm"
+    },
+    "correct": "C",
+    "explanation": "HFMD is usually supportive care, but rare meningoencephalitis is listed, especially in association with Enterovirus 71.",
+    "optionExplanations": {
+      "A": "SSPE is associated with measles.",
+      "B": "Aplastic crisis is associated with parvovirus B19.",
+      "C": "Correct. HFMD is usually supportive care, but rare meningoencephalitis is listed, especially in association with Enterovirus 71.",
+      "D": "This is associated with Kawasaki disease."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A child has low fever, oral enanthem, and pruritic vesicles beginning on the face/trunk then spreading to limbs. Lesions heal with crusting/scarring and generally spare palms/soles. Which diagnosis is most likely",
+    "topic": "Varicella",
+    "options": {
+      "A": "HFMD",
+      "B": "Roseola",
+      "C": "Molluscum contagiosum",
+      "D": "Varicella"
+    },
+    "correct": "D",
+    "explanation": "Varicella is caused by VZV/HHV-3 and causes low fever, oral enanthem, pruritic vesicles spreading face/trunk → limbs, healing with crusting/scarring, and sparing palms/soles.",
+    "optionExplanations": {
+      "A": "HFMD has palm/sole vesicles that heal without crusting/scarring.",
+      "B": "Roseola has high fever and trunk-first macular rash.",
+      "C": "Molluscum causes waxy dome-shaped umbilicated papules.",
+      "D": "Correct. Varicella is caused by VZV/HHV-3 and causes low fever, oral enanthem, pruritic vesicles spreading face/trunk → limbs, healing with crusting/scarring, and sparing palms/soles."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "Which complication/risk is listed for varicella",
+    "topic": "Varicella complications",
+    "options": {
+      "A": "Secondary Staph infection and encephalitis",
+      "B": "Hydrops fetalis and aplastic crisis",
+      "C": "Congenital cataracts/deafness/heart defects",
+      "D": "Febrile seizures only"
+    },
+    "correct": "A",
+    "explanation": "Varicella complications listed include secondary Staph infection and encephalitis.",
+    "optionExplanations": {
+      "A": "Correct. Varicella complications listed include secondary Staph infection and encephalitis.",
+      "B": "These are Parvovirus B19 complications.",
+      "C": "These are congenital rubella findings.",
+      "D": "Febrile seizures are associated with roseola."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A high-risk child with varicella needs antiviral therapy. Which treatment is listed for high-risk cases",
+    "topic": "Varicella treatment",
+    "options": {
+      "A": "Vitamin A",
+      "B": "Acyclovir",
+      "C": "Stop amoxicillin only",
+      "D": "IVIG and aspirin"
+    },
+    "correct": "B",
+    "explanation": "Acyclovir is listed for high-risk varicella. Vaccines listed include Varivax at 1 year and Shingrix at 50 years.",
+    "optionExplanations": {
+      "A": "Vitamin A is emphasized for measles.",
+      "B": "Correct. Acyclovir is listed for high-risk varicella. Vaccines listed include Varivax at 1 year and Shingrix at 50 years.",
+      "C": "This applies to EBV-associated amoxicillin rash.",
+      "D": "This is Kawasaki disease treatment."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "Which vaccine pairing is listed under varicella/zoster prevention",
+    "topic": "Varicella vaccines",
+    "options": {
+      "A": "MMR vaccine only",
+      "B": "No vaccine available",
+      "C": "DTaP at birth only",
+      "D": "Varivax at 1 year and Shingrix at 50 years"
+    },
+    "correct": "D",
+    "explanation": "The notes list Varivax at 1 year and Shingrix at 50 years under varicella/zoster vaccines.",
+    "optionExplanations": {
+      "A": "MMR is listed under measles/rubella prevention.",
+      "B": "Vaccines are listed for varicella/zoster.",
+      "C": "This is not the vaccine pairing in the notes.",
+      "D": "Correct. The notes list Varivax at 1 year and Shingrix at 50 years under varicella/zoster vaccines."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A child with atopic dermatitis has multiple waxy dome-shaped papules with central umbilication. Lesions are worse because the child is immunocompromised. Which diagnosis is most likely",
+    "topic": "Molluscum contagiosum",
+    "options": {
+      "A": "Varicella",
+      "B": "HFMD",
+      "C": "Molluscum contagiosum",
+      "D": "Rubella"
+    },
+    "correct": "C",
+    "explanation": "Molluscum contagiosum is caused by a dsDNA poxvirus and presents with waxy dome-shaped papules with central umbilication. It is associated with atopic dermatitis and worse in immunocompromised patients.",
+    "optionExplanations": {
+      "A": "Varicella causes pruritic vesicles that crust/scar.",
+      "B": "HFMD causes oral enanthem and palm/sole vesicles.",
+      "C": "Correct. Molluscum contagiosum is caused by a dsDNA poxvirus and presents with waxy dome-shaped papules with central umbilication. It is associated with atopic dermatitis and worse in immunocompromised patients.",
+      "D": "Rubella causes a macular head-first rash with Forchheimer spots."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "Which management is listed for molluscum contagiosum in the section",
+    "topic": "Molluscum management",
+    "options": {
+      "A": "Observe",
+      "B": "Vitamin A",
+      "C": "Acyclovir for all patients",
+      "D": "Stop antibiotic"
+    },
+    "correct": "A",
+    "explanation": "Molluscum contagiosum is generally observed. Secondary Staph infection is listed as a risk.",
+    "optionExplanations": {
+      "A": "Correct. Molluscum contagiosum is generally observed. Secondary Staph infection is listed as a risk.",
+      "B": "Vitamin A is measles management.",
+      "C": "Acyclovir is listed for high-risk varicella, not molluscum.",
+      "D": "Stopping antibiotic applies to EBV-associated amoxicillin rash."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A teenager with EBV is given amoxicillin and then develops a diffuse pruritic maculopapular rash. Which management is listed",
+    "topic": "EBV + amoxicillin rash",
+    "options": {
+      "A": "Give vitamin A",
+      "B": "Start Shingrix",
+      "C": "Treat with IL-1 blockade",
+      "D": "Stop amoxicillin"
+    },
+    "correct": "D",
+    "explanation": "EBV-associated amoxicillin rash is a diffuse pruritic maculopapular rash after amoxicillin. The listed management is to stop the antibiotic.",
+    "optionExplanations": {
+      "A": "Vitamin A is used in measles.",
+      "B": "Shingrix is a zoster vaccine for older adults.",
+      "C": "IL-1 blockade is relevant to severe systemic-onset JIA, not EBV-amoxicillin rash.",
+      "D": "Correct. EBV-associated amoxicillin rash is a diffuse pruritic maculopapular rash after amoxicillin. The listed management is to stop the antibiotic."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "Which virus is associated with the amoxicillin-triggered diffuse pruritic maculopapular rash in the notes",
+    "topic": "EBV virology",
+    "options": {
+      "A": "Parvovirus B19, ssDNA virus",
+      "B": "EBV / HHV-4, a dsDNA virus",
+      "C": "Rubella virus, positive-sense ssRNA",
+      "D": "Morbillivirus, negative-sense ssRNA"
+    },
+    "correct": "B",
+    "explanation": "The notes list EBV/HHV-4, a dsDNA virus, as associated with amoxicillin rash.",
+    "optionExplanations": {
+      "A": "This causes erythema infectiosum/fifth disease.",
+      "B": "Correct. The notes list EBV/HHV-4, a dsDNA virus, as associated with amoxicillin rash.",
+      "C": "This causes rubella.",
+      "D": "This causes measles."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A 2-year-old has fever for more than 5 days, bilateral conjunctival injection without purulent drainage, strawberry tongue, diffuse rash, and bilateral swelling of hands/feet with erythema of palms/soles. Which diagnosis is most likely",
+    "topic": "Kawasaki disease",
+    "options": {
+      "A": "Measles",
+      "B": "Rubella",
+      "C": "Kawasaki disease",
+      "D": "Roseola"
+    },
+    "correct": "C",
+    "explanation": "Kawasaki disease should be suspected with fever >5 days plus conjunctival injection, strawberry tongue/oral changes, diffuse rash, and swelling/erythema of hands and feet.",
+    "optionExplanations": {
+      "A": "Measles has Koplik spots, 3 C’s, and a face-first coalescent rash.",
+      "B": "Rubella has Forchheimer spots and a head-first macular rash.",
+      "C": "Correct. Kawasaki disease should be suspected with fever >5 days plus conjunctival injection, strawberry tongue/oral changes, diffuse rash, and swelling/erythema of hands and feet.",
+      "D": "Roseola has high fever and trunk-first macular rash."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "Which major complication drives treatment urgency in Kawasaki disease",
+    "topic": "Kawasaki complications",
+    "options": {
+      "A": "Coronary artery aneurysm",
+      "B": "Aplastic crisis",
+      "C": "SSPE",
+      "D": "Hydrops fetalis"
+    },
+    "correct": "A",
+    "explanation": "Kawasaki disease is a medium-size artery disease with risk of coronary artery aneurysm. Other listed complications include myocarditis, pericarditis, and valvular dysfunction.",
+    "optionExplanations": {
+      "A": "Correct. Kawasaki disease is a medium-size artery disease with risk of coronary artery aneurysm. Other listed complications include myocarditis, pericarditis, and valvular dysfunction.",
+      "B": "This is associated with Parvovirus B19.",
+      "C": "This is associated with measles.",
+      "D": "This is associated with Parvovirus B19 fetal infection."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A child is diagnosed with Kawasaki disease. Which imaging test is required according to the case notes",
+    "topic": "Kawasaki workup",
+    "options": {
+      "A": "Head CT",
+      "B": "Echocardiography",
+      "C": "Sweat chloride test",
+      "D": "Bone marrow biopsy"
+    },
+    "correct": "B",
+    "explanation": "The case notes state that echocardiography is required in Kawasaki disease to assess cardiac/coronary complications.",
+    "optionExplanations": {
+      "A": "Head CT is not the required Kawasaki imaging test in the notes.",
+      "B": "Correct. The case notes state that echocardiography is required in Kawasaki disease to assess cardiac/coronary complications.",
+      "C": "This evaluates cystic fibrosis, not Kawasaki disease.",
+      "D": "This is not used for routine Kawasaki cardiac assessment."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A child with Kawasaki disease is being treated to reduce inflammation and lower coronary aneurysm risk. Which treatment is listed",
+    "topic": "Kawasaki treatment",
+    "options": {
+      "A": "Vitamin A only",
+      "B": "Acyclovir if high-risk",
+      "C": "Stop amoxicillin",
+      "D": "IVIG plus aspirin"
+    },
+    "correct": "D",
+    "explanation": "Kawasaki first-line treatment in the case notes includes aspirin and IVIG. IVIG reduces inflammation and lowers coronary artery aneurysm risk.",
+    "optionExplanations": {
+      "A": "Vitamin A is associated with measles treatment.",
+      "B": "This is for high-risk varicella.",
+      "C": "This is for EBV-associated amoxicillin rash.",
+      "D": "Correct. Kawasaki first-line treatment in the case notes includes aspirin and IVIG. IVIG reduces inflammation and lowers coronary artery aneurysm risk."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A child has oral enanthem plus vesicular lesions involving palms and soles. Which rash distribution most strongly points to HFMD rather than measles, rubella, roseola, fifth disease, or varicella in this table",
+    "topic": "Palm/sole involvement",
+    "options": {
+      "A": "Face-to-trunk spread with palm/sole sparing",
+      "B": "Trunk-to-face spread with palm/sole sparing",
+      "C": "Palm and sole involvement",
+      "D": "Head-to-trunk macular rash with palm/sole sparing"
+    },
+    "correct": "C",
+    "explanation": "HFMD is the exanthem in the table specifically marked as involving palms/soles. Measles, rubella, roseola, fifth disease, and varicella are marked as sparing palms/soles.",
+    "optionExplanations": {
+      "A": "This fits measles/varicella patterns, not HFMD.",
+      "B": "This fits roseola.",
+      "C": "Correct. HFMD is the exanthem in the table specifically marked as involving palms/soles. Measles, rubella, roseola, fifth disease, and varicella are marked as sparing palms/soles.",
+      "D": "This fits rubella."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A child has a macular rash that starts on the trunk and moves to the face and limbs. Which exanthem pattern is this",
+    "topic": "Rash direction",
+    "options": {
+      "A": "Measles",
+      "B": "Roseola",
+      "C": "Rubella",
+      "D": "Varicella"
+    },
+    "correct": "B",
+    "explanation": "Roseola has a macular rash spreading trunk → face/limbs.",
+    "optionExplanations": {
+      "A": "Measles has a coalescent rash spreading face → trunk/limbs.",
+      "B": "Correct. Roseola has a macular rash spreading trunk → face/limbs.",
+      "C": "Rubella has a macular rash spreading head → trunk/limbs.",
+      "D": "Varicella has pruritic vesicles spreading face/trunk → limbs."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A child has a head-first macular rash plus Forchheimer spots. Which exanthem best fits",
+    "topic": "Forchheimer spots",
+    "options": {
+      "A": "Rubella",
+      "B": "Measles",
+      "C": "Roseola",
+      "D": "Fifth disease"
+    },
+    "correct": "A",
+    "explanation": "Forchheimer spots on the palate plus a head-first macular rash point to rubella.",
+    "optionExplanations": {
+      "A": "Correct. Forchheimer spots on the palate plus a head-first macular rash point to rubella.",
+      "B": "Measles has Koplik spots on buccal mucosa and 3 C’s.",
+      "C": "Roseola has Nagayama spots and trunk-first rash.",
+      "D": "Fifth disease has slapped cheek and lacy rash."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A child has buccal mucosal spots, fever, cough, coryza, conjunctivitis, and a coalescent rash. Which mucosal finding is being described",
+    "topic": "Koplik spots",
+    "options": {
+      "A": "Forchheimer spots",
+      "B": "Nagayama spots",
+      "C": "Palatal scratches",
+      "D": "Koplik spots"
+    },
+    "correct": "D",
+    "explanation": "Koplik spots on the buccal mucosa are a classic measles finding.",
+    "optionExplanations": {
+      "A": "Forchheimer spots are associated with rubella.",
+      "B": "Nagayama spots are associated with roseola.",
+      "C": "Palatal scratches are associated with vomiting/purging in eating disorders, not pediatric exanthems.",
+      "D": "Correct. Koplik spots on the buccal mucosa are a classic measles finding."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

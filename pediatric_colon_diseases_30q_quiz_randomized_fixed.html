@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pediatric Colon Diseases Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A term newborn develops abdominal distension, bilious vomiting, and feeding intolerance. The infant has not passed meconium more than 24 hours after birth. Which embryologic problem best explains the most likely diagnosis",
+    "topic": "Hirschsprung disease pathogenesis",
+    "options": {
+      "A": "Failure of neural crest-derived ganglion cells to populate the distal bowel",
+      "B": "Thick meconium obstructing the terminal ileum due to cystic fibrosis",
+      "C": "Failure of the midgut to return to the abdominal cavity",
+      "D": "Incomplete obliteration of the vitelline duct"
+    },
+    "correct": "A",
+    "explanation": "Hirschsprung disease is caused by failure of neural crest-derived ganglion cells to populate the distal bowel, producing aganglionosis of the myenteric and submucosal plexuses. The aganglionic segment cannot relax, causing functional obstruction with proximal dilation.",
+    "optionExplanations": {
+      "A": "Correct. Distal bowel aganglionosis from neural crest migration/survival failure is the key defect in Hirschsprung disease.",
+      "B": "This describes meconium ileus, a cystic fibrosis-associated obstruction that can mimic neonatal obstruction.",
+      "C": "This describes omphalocele physiology, not distal functional obstruction.",
+      "D": "Persistent vitelline duct can cause Meckel diverticulum, not absent ganglion cells."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A 6-week-old infant has chronic constipation and abdominal distension. Contrast enema shows a narrow distal rectosigmoid segment with proximal colonic dilation. Which diagnostic test is the gold standard",
+    "topic": "Hirschsprung diagnosis",
+    "options": {
+      "A": "Sweat chloride testing",
+      "B": "Rectal biopsy showing absent ganglion cells",
+      "C": "Serum anti-endomysial antibodies",
+      "D": "Upper GI series showing malrotation"
+    },
+    "correct": "B",
+    "explanation": "Rectal biopsy is the gold standard for Hirschsprung disease. The biopsy shows absent ganglion cells and hypertrophied nerve trunks; acetylcholinesterase and calretinin staining can support the diagnosis.",
+    "optionExplanations": {
+      "A": "Sweat chloride testing evaluates cystic fibrosis, which is associated with meconium ileus rather than Hirschsprung disease.",
+      "B": "Correct. Rectal biopsy demonstrating aganglionosis confirms Hirschsprung disease.",
+      "C": "Anti-endomysial antibodies are used for celiac disease evaluation.",
+      "D": "Upper GI series may help assess malrotation but does not confirm Hirschsprung disease."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A child with severe constipation undergoes anorectal manometry. Rectal distension fails to relax the internal anal sphincter. Which reflex is absent",
+    "topic": "Recto-anal inhibitory reflex",
+    "options": {
+      "A": "Gastrocolic reflex",
+      "B": "Anal wink reflex",
+      "C": "Recto-anal inhibitory reflex",
+      "D": "Vasovagal reflex"
+    },
+    "correct": "C",
+    "explanation": "Anorectal manometry in Hirschsprung disease shows absence of the recto-anal inhibitory reflex. Normally, rectal distension causes relaxation of the internal anal sphincter.",
+    "optionExplanations": {
+      "A": "The gastrocolic reflex increases colonic motility after meals and is not the manometry finding tested here.",
+      "B": "The anal wink tests sacral reflex integrity and is not the internal sphincter relaxation response.",
+      "C": "Correct. Absent RAIR is characteristic of Hirschsprung disease.",
+      "D": "A vasovagal reflex involves autonomic bradycardia/hypotension, not anorectal sphincter physiology."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A neonate has abdominal distension at birth. Imaging shows a soap-bubble or ground-glass appearance in the right lower quadrant with few air-fluid levels. Digital rectal exam is unremarkable. Which associated disorder should be strongly considered",
+    "topic": "Meconium ileus",
+    "options": {
+      "A": "Down syndrome",
+      "B": "Lynch syndrome",
+      "C": "Familial adenomatous polyposis",
+      "D": "Cystic fibrosis"
+    },
+    "correct": "D",
+    "explanation": "Meconium ileus is neonatal obstruction caused by thick, sticky meconium obstructing the ileum and is strongly associated with cystic fibrosis. Its imaging clue is a soap-bubble or ground-glass appearance, often in the right lower quadrant.",
+    "optionExplanations": {
+      "A": "Down syndrome is associated with Hirschsprung disease, not classically meconium ileus.",
+      "B": "Lynch syndrome causes hereditary colorectal cancer without diffuse polyposis, not neonatal ileal obstruction.",
+      "C": "FAP is an inherited adenomatous polyposis syndrome, not a neonatal obstruction cause.",
+      "D": "Correct. Meconium ileus is a classic cystic fibrosis clue."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A newborn with suspected Hirschsprung disease has explosive stool after digital rectal stimulation. Which mechanism best explains the obstruction",
+    "topic": "Hirschsprung functional obstruction",
+    "options": {
+      "A": "Loss of intrinsic excitatory and inhibitory innervation causing a spastically contracted aganglionic segment",
+      "B": "Autoimmune destruction of villi causing malabsorption",
+      "C": "Bacterial invasion of Peyer patches causing terminal ileitis",
+      "D": "Hypertrophy of the pyloric muscularis propria causing gastric outlet obstruction"
+    },
+    "correct": "A",
+    "explanation": "In Hirschsprung disease, the aganglionic segment lacks normal intrinsic innervation and remains spastically contracted. This causes distal functional obstruction and proximal bowel dilation.",
+    "optionExplanations": {
+      "A": "Correct. The distal aganglionic segment cannot relax, so stool accumulates proximally.",
+      "B": "This describes celiac-type malabsorption, not congenital megacolon.",
+      "C": "Terminal ileitis is not the mechanism of Hirschsprung obstruction.",
+      "D": "Pyloric stenosis causes nonbilious vomiting in early infancy, not distal colonic obstruction."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A child with Hirschsprung disease develops fever, abdominal distension, diarrhea, and intermittent obstruction. Which complication is most likely",
+    "topic": "Hirschsprung-associated enterocolitis",
+    "options": {
+      "A": "Intussusception from a Peyer patch lead point",
+      "B": "Hirschsprung-associated enterocolitis",
+      "C": "Volvulus from malrotation",
+      "D": "Pseudomembranous colitis from FAP"
+    },
+    "correct": "B",
+    "explanation": "Hirschsprung-associated enterocolitis presents with fever, abdominal distension, diarrhea, and intermittent obstruction. It is a major cause of morbidity and death in Hirschsprung disease and is related to stasis, bacterial overgrowth, and barrier dysfunction.",
+    "optionExplanations": {
+      "A": "Intussusception can cause colicky pain and currant jelly stool, but it is not the classic Hirschsprung complication here.",
+      "B": "Correct. Fever, distension, diarrhea despite obstruction, and Hirschsprung history point to HAEC.",
+      "C": "Volvulus causes acute obstruction and ischemia but does not explain the classic HAEC pattern.",
+      "D": "FAP does not cause pseudomembranous colitis; C. difficile can be a secondary infection in HAEC."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A rectal biopsy from an infant with delayed meconium passage shows absent ganglion cells. Which additional finding would support Hirschsprung disease",
+    "topic": "Hirschsprung histology",
+    "options": {
+      "A": "Villous blunting with crypt hyperplasia",
+      "B": "Noncaseating granulomas in the terminal ileum",
+      "C": "Hypertrophied nerve trunks with increased acetylcholinesterase staining",
+      "D": "Crypt abscesses beginning in the rectum"
+    },
+    "correct": "C",
+    "explanation": "Hirschsprung rectal biopsy shows absent ganglion cells and hypertrophied nerve trunks. Increased acetylcholinesterase staining reflects compensatory cholinergic nerve fibers.",
+    "optionExplanations": {
+      "A": "Villous blunting with crypt hyperplasia is more consistent with celiac disease.",
+      "B": "Noncaseating granulomas suggest Crohn disease.",
+      "C": "Correct. Absent ganglion cells plus hypertrophied nerve trunks supports Hirschsprung disease.",
+      "D": "Crypt abscesses beginning in the rectum suggest ulcerative colitis."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A baby with Hirschsprung disease is found to have aganglionosis limited to the rectosigmoid region. Which disease extent category does this represent",
+    "topic": "Hirschsprung extent",
+    "options": {
+      "A": "Total colonic aganglionosis",
+      "B": "Long-segment disease",
+      "C": "Skip lesion disease",
+      "D": "Short-segment disease"
+    },
+    "correct": "D",
+    "explanation": "Short-segment Hirschsprung disease is limited to the rectosigmoid region and is the most common disease extent.",
+    "optionExplanations": {
+      "A": "Total colonic aganglionosis involves the entire colon.",
+      "B": "Long-segment disease extends proximal to the sigmoid and may involve small bowel.",
+      "C": "A skip lesion is an aganglionic segment interrupted by ganglionic bowel.",
+      "D": "Correct. Rectosigmoid-limited disease is short-segment Hirschsprung disease."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A 13-year-old has hundreds of adenomatous colonic polyps on colonoscopy. His father required colectomy for a similar disorder. Which gene is most likely mutated",
+    "topic": "Familial adenomatous polyposis",
+    "options": {
+      "A": "APC",
+      "B": "MSH2",
+      "C": "STK11",
+      "D": "PTEN"
+    },
+    "correct": "A",
+    "explanation": "Familial adenomatous polyposis is an autosomal dominant hereditary polyposis syndrome caused by APC mutation on chromosome 5q21. It produces hundreds to thousands of adenomatous polyps beginning in adolescence.",
+    "optionExplanations": {
+      "A": "Correct. APC mutation causes classic FAP.",
+      "B": "MSH2 is a mismatch repair gene associated with Lynch syndrome.",
+      "C": "STK11 is associated with Peutz-Jeghers syndrome, not classic FAP in the provided material.",
+      "D": "PTEN is associated with Cowden and Bannayan-Riley-Ruvalcaba syndromes."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A patient with FAP has an APC mutation. Which downstream molecular event drives epithelial proliferation",
+    "topic": "APC and beta-catenin",
+    "options": {
+      "A": "Failure of mismatch repair causing microsatellite instability",
+      "B": "Failure to downregulate beta-catenin, allowing nuclear transcription of growth genes",
+      "C": "Activation of chloride secretion causing thick intestinal mucus",
+      "D": "Overproduction of bile pigment causing cholestatic injury"
+    },
+    "correct": "B",
+    "explanation": "APC normally binds and downregulates beta-catenin. Mutant APC allows beta-catenin accumulation and nuclear entry, increasing transcription of growth and cell-cycle genes.",
+    "optionExplanations": {
+      "A": "Mismatch repair failure is the core mechanism of Lynch syndrome.",
+      "B": "Correct. APC loss disinhibits beta-catenin signaling.",
+      "C": "Abnormal chloride transport is relevant to cystic fibrosis, not FAP.",
+      "D": "Cholestatic injury is relevant to biliary disease, not APC-driven polyposis."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A teenager is diagnosed with FAP. Without prophylactic colectomy, which outcome is expected",
+    "topic": "FAP cancer risk",
+    "options": {
+      "A": "Only extracolonic tumors develop",
+      "B": "Disease remains benign because polyps are hamartomatous",
+      "C": "Colon cancer risk approaches 100 percent",
+      "D": "Cancer risk is limited to the stomach and duodenum"
+    },
+    "correct": "C",
+    "explanation": "Classic FAP causes hundreds to thousands of adenomatous polyps. Without prophylactic colectomy, colorectal cancer risk approaches 100 percent, often by around age 40 if untreated.",
+    "optionExplanations": {
+      "A": "Extracolonic manifestations occur, but colorectal cancer risk is the central threat.",
+      "B": "FAP polyps are adenomatous, not hamartomatous.",
+      "C": "Correct. Untreated FAP essentially progresses to colorectal cancer.",
+      "D": "Duodenal adenomas and periampullary cancer risk occur, but colon cancer risk is dominant."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A patient with an APC mutation has fewer than 50 colonic polyps, later diagnosis, rectal sparing, and fewer extracolonic findings. Which diagnosis best fits",
+    "topic": "Attenuated FAP",
+    "options": {
+      "A": "Gardner syndrome",
+      "B": "Lynch syndrome",
+      "C": "Classic familial adenomatous polyposis",
+      "D": "Attenuated familial adenomatous polyposis"
+    },
+    "correct": "D",
+    "explanation": "Attenuated FAP has a lower polyp burden, approximately 1 to 50 polyps, later age at diagnosis, tendency to spare the rectum, and fewer extracolonic manifestations.",
+    "optionExplanations": {
+      "A": "Gardner syndrome is an FAP subtype with prominent osteomas and soft tissue tumors.",
+      "B": "Lynch syndrome lacks diffuse polyposis and is due to mismatch repair defects.",
+      "C": "Classic FAP has hundreds to thousands of polyps beginning in adolescence.",
+      "D": "Correct. Low polyp number with later onset and rectal sparing fits AFAP."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A patient with adenomatous polyposis has osteomas of the mandible and skull plus epidermoid cysts and desmoid tumors. Which syndrome is most likely",
+    "topic": "Gardner syndrome",
+    "options": {
+      "A": "Gardner syndrome",
+      "B": "Cronkhite-Canada syndrome",
+      "C": "Peutz-Jeghers syndrome",
+      "D": "Juvenile polyposis syndrome"
+    },
+    "correct": "A",
+    "explanation": "Gardner syndrome is a subtype of FAP with colonic adenomatous polyposis plus extracolonic findings, especially osteomas of the skull, mandible, or tibia and soft tissue tumors such as epidermoid cysts, fibromas, and desmoid tumors.",
+    "optionExplanations": {
+      "A": "Correct. FAP plus osteomas and soft tissue tumors is Gardner syndrome.",
+      "B": "Cronkhite-Canada is acquired and causes adult-onset intestinal polyps with ectodermal changes.",
+      "C": "Peutz-Jeghers has hamartomatous polyps and mucocutaneous pigmentation.",
+      "D": "Juvenile polyposis features multiple inflammatory polyps with painless rectal bleeding and prolapse."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A patient with Gardner syndrome develops a retroperitoneal desmoid tumor. Why can this lesion be dangerous despite rarely metastasizing",
+    "topic": "Desmoid tumors",
+    "options": {
+      "A": "It secretes insulin-like growth factor causing hypoglycemia",
+      "B": "It can locally invade mesenteric vessels, ureters, or bowel wall",
+      "C": "It rapidly transforms into medulloblastoma",
+      "D": "It causes cholestasis by replacing extrahepatic bile ducts"
+    },
+    "correct": "B",
+    "explanation": "Desmoid tumors rarely metastasize but can be locally invasive. In Gardner syndrome, they can occur in the retroperitoneum or abdominal wall and may cause death by invading mesenteric vessels, ureters, or bowel wall.",
+    "optionExplanations": {
+      "A": "Hypoglycemia from IGF secretion is not the listed concern for desmoid tumors.",
+      "B": "Correct. Local invasion is the key danger of desmoid tumors.",
+      "C": "Turcot syndrome links polyposis with CNS tumors; desmoids do not transform into medulloblastoma.",
+      "D": "Biliary atresia causes fibro-obliteration of bile ducts, not desmoid tumors."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A young patient has colonic polyps and a CNS tumor. The syndrome is listed in the slides as autosomal recessive and can be associated with glioblastoma multiforme or medulloblastoma. Which syndrome is most likely",
+    "topic": "Turcot syndrome",
+    "options": {
+      "A": "Bannayan-Riley-Ruvalcaba syndrome",
+      "B": "Cowden syndrome",
+      "C": "Turcot syndrome",
+      "D": "Peutz-Jeghers syndrome"
+    },
+    "correct": "C",
+    "explanation": "Turcot syndrome is a polyposis syndrome associated with CNS tumors, especially glioblastoma multiforme and medulloblastoma. The slides list it as autosomal recessive and note malignant transformation often before age 30.",
+    "optionExplanations": {
+      "A": "Bannayan-Riley-Ruvalcaba has hamartomatous polyps, macrocephaly, lipomas, and hemangiomas.",
+      "B": "Cowden syndrome is PTEN-associated with hamartomatous GI polyps and breast/thyroid neoplasia.",
+      "C": "Correct. Colon polyps plus CNS tumor is Turcot syndrome.",
+      "D": "Peutz-Jeghers has hamartomatous polyps with mucocutaneous pigmentation."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A family has early-onset colorectal cancers, most in the proximal colon. Tumors are mucinous or poorly differentiated, and several relatives have endometrial cancer. There is no diffuse polyposis. Which type of gene is most likely mutated",
+    "topic": "Lynch syndrome genetics",
+    "options": {
+      "A": "RET proto-oncogene",
+      "B": "APC tumor suppressor gene",
+      "C": "CFTR chloride channel gene",
+      "D": "Mismatch repair gene"
+    },
+    "correct": "D",
+    "explanation": "Lynch syndrome is the most common hereditary colorectal cancer syndrome and is caused by DNA mismatch repair gene mutations such as MLH1, MSH2, MSH6, PMS1/PMS2, or MLH3. It causes early-onset, predominantly right-sided colorectal cancer without diffuse polyposis.",
+    "optionExplanations": {
+      "A": "RET mutations are not the Lynch mechanism in this material.",
+      "B": "APC mutation causes FAP with numerous adenomatous polyps.",
+      "C": "CFTR mutation causes cystic fibrosis and can cause meconium ileus.",
+      "D": "Correct. Mismatch repair defects are the core genetic cause of Lynch syndrome."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "Which statement best explains why the term hereditary nonpolyposis colorectal cancer is considered a misnomer",
+    "topic": "Lynch syndrome terminology",
+    "options": {
+      "A": "Cancers arise from polyps, but diffuse polyposis is absent",
+      "B": "The disease causes thousands of polyps like classic FAP",
+      "C": "The syndrome is not hereditary",
+      "D": "The tumors occur only outside the colon"
+    },
+    "correct": "A",
+    "explanation": "HNPCC is a misnomer because Lynch-associated cancers still arise from polyps, but the diffuse polyposis seen in FAP is absent.",
+    "optionExplanations": {
+      "A": "Correct. Lynch cancers arise from polyps without diffuse polyposis.",
+      "B": "Thousands of adenomatous polyps suggest FAP, not Lynch syndrome.",
+      "C": "Lynch syndrome is hereditary and autosomal dominant.",
+      "D": "Lynch syndrome prominently affects the colon, especially the right/proximal colon."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A patient with Lynch syndrome asks about extracolonic cancer risks. Which cancer is especially associated with this syndrome",
+    "topic": "Lynch syndrome cancer risks",
+    "options": {
+      "A": "Medullary thyroid carcinoma",
+      "B": "Endometrial cancer",
+      "C": "Retinoblastoma",
+      "D": "Hepatoblastoma from Gardner syndrome only"
+    },
+    "correct": "B",
+    "explanation": "Lynch syndrome is associated with increased endometrial cancer risk, as well as ovarian, stomach, small bowel, hepatobiliary, upper urinary tract, brain, and skin cancers.",
+    "optionExplanations": {
+      "A": "Medullary thyroid carcinoma is classically associated with MEN2A, not Lynch syndrome.",
+      "B": "Correct. Endometrial cancer is a classic Lynch-associated extracolonic malignancy.",
+      "C": "Retinoblastoma is related to RB1 mutation, not Lynch syndrome.",
+      "D": "Hepatoblastoma may be listed among possible Gardner-associated tumors, but endometrial cancer is the classic Lynch association."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A teenager with a strong family history of FAP asks about screening. According to the provided material, when should annual colonoscopy begin",
+    "topic": "FAP surveillance",
+    "options": {
+      "A": "At age 40 years",
+      "B": "At age 25 years",
+      "C": "At age 10 to 12 years",
+      "D": "Only after symptoms develop"
+    },
+    "correct": "C",
+    "explanation": "FAP surveillance includes annual colonoscopy starting around age 10 to 12 years. Flexible proctosigmoidoscopy also begins around age 10 to 12 and is repeated every 1 to 2 years.",
+    "optionExplanations": {
+      "A": "Colon cancer may occur by around 40 if untreated, so this is far too late.",
+      "B": "Age 25 would be too late for classic FAP surveillance.",
+      "C": "Correct. FAP screening begins early because polyps often start in the second decade.",
+      "D": "Waiting for symptoms is inappropriate because prophylactic management prevents cancer."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A patient with FAP has severe symptomatic polyposis. Which management goal best addresses the major cancer risk",
+    "topic": "FAP management",
+    "options": {
+      "A": "Lifelong antibiotics to prevent bacterial overgrowth",
+      "B": "No intervention because APC mutations have incomplete expression",
+      "C": "Avoid all upper GI endoscopy because lesions are only colonic",
+      "D": "Prophylactic colectomy after diagnosis"
+    },
+    "correct": "D",
+    "explanation": "The management goal in FAP is prophylactic colectomy after diagnosis. Severe or symptomatic polyposis requires surgery soon, while milder disease may be delayed with annual colonoscopy.",
+    "optionExplanations": {
+      "A": "Antibiotics are not the preventive treatment for FAP cancer risk.",
+      "B": "The provided material states APC expression is essentially 100 percent in patients with the mutation.",
+      "C": "Upper GI endoscopy is recommended because duodenal adenomas and periampullary risks can occur.",
+      "D": "Correct. Colectomy prevents the near-inevitable colorectal cancer risk in classic FAP."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A patient with FAP is treated with sulindac and celecoxib. What is the expected role of these medications",
+    "topic": "FAP chemoprevention",
+    "options": {
+      "A": "They reduce adenoma number and size but do not replace definitive surveillance or surgery",
+      "B": "They restore normal APC function",
+      "C": "They eliminate the need for upper GI surveillance",
+      "D": "They prevent Hirschsprung-associated enterocolitis"
+    },
+    "correct": "A",
+    "explanation": "Sulindac and celecoxib are listed as chemoprevention options that can reduce adenoma number and size. They do not replace surveillance or colectomy when indicated.",
+    "optionExplanations": {
+      "A": "Correct. They can reduce polyp burden as chemoprevention.",
+      "B": "They do not reverse the underlying APC mutation.",
+      "C": "Upper GI endoscopy remains part of FAP surveillance once indicated.",
+      "D": "HAEC is a Hirschsprung complication unrelated to FAP chemoprevention."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A child has hamartomatous polyps throughout the GI tract, especially in the jejunum, with melanin spots on the lips and digits. Which syndrome best fits",
+    "topic": "Peutz-Jeghers syndrome",
+    "options": {
+      "A": "Classic FAP",
+      "B": "Peutz-Jeghers syndrome",
+      "C": "Lynch syndrome",
+      "D": "Cronkhite-Canada syndrome"
+    },
+    "correct": "B",
+    "explanation": "Peutz-Jeghers syndrome is characterized by hamartomatous polyps throughout the GI tract, especially in the jejunum, with mucocutaneous melanin spots on the lips and digits.",
+    "optionExplanations": {
+      "A": "Classic FAP has numerous adenomatous colonic polyps from APC mutation.",
+      "B": "Correct. Hamartomatous GI polyps plus lip/digit pigmentation is Peutz-Jeghers.",
+      "C": "Lynch syndrome causes hereditary colorectal cancer without diffuse polyposis.",
+      "D": "Cronkhite-Canada is acquired, adult-onset, and includes ectodermal findings such as alopecia and hyperpigmentation."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A patient has hamartomatous GI polyps, orocutaneous hamartomas, and increased risk of breast and thyroid neoplasia. Which gene-associated syndrome is most likely",
+    "topic": "Cowden syndrome",
+    "options": {
+      "A": "APC-associated FAP",
+      "B": "Mismatch repair-associated Lynch syndrome",
+      "C": "PTEN-associated Cowden syndrome",
+      "D": "Acquired Cronkhite-Canada syndrome"
+    },
+    "correct": "C",
+    "explanation": "Cowden syndrome is PTEN-associated and autosomal dominant. It features hamartomatous GI polyps, orocutaneous hamartomas, and breast/thyroid neoplasia.",
+    "optionExplanations": {
+      "A": "APC mutation causes adenomatous polyposis, not this PTEN hamartoma syndrome pattern.",
+      "B": "Lynch syndrome is due to mismatch repair defects and lacks diffuse polyposis.",
+      "C": "Correct. PTEN-associated Cowden syndrome fits hamartomas plus breast/thyroid neoplasia.",
+      "D": "Cronkhite-Canada is acquired and adult-onset with ectodermal changes."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A child has colon and tongue hamartomatous polyps, macrocephaly, lipomas, and hemangiomas. Which syndrome is most likely",
+    "topic": "Bannayan-Riley-Ruvalcaba syndrome",
+    "options": {
+      "A": "Attenuated FAP",
+      "B": "Gardner syndrome",
+      "C": "Turcot syndrome",
+      "D": "Bannayan-Riley-Ruvalcaba syndrome"
+    },
+    "correct": "D",
+    "explanation": "Bannayan-Riley-Ruvalcaba syndrome is PTEN-associated and features colon/tongue hamartomatous polyps, macrocephaly, lipomas, and hemangiomas.",
+    "optionExplanations": {
+      "A": "AFAP has fewer adenomatous polyps with later diagnosis and rectal sparing.",
+      "B": "Gardner syndrome has adenomatous polyposis with osteomas and soft tissue tumors.",
+      "C": "Turcot syndrome combines colon polyps with CNS tumors.",
+      "D": "Correct. This is the pediatric PTEN-associated hamartoma syndrome clue."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A child has multiple inflammatory polyps, painless rectal bleeding, rectal prolapse, and failure to thrive. Which polyposis syndrome from the provided material best matches",
+    "topic": "Familial juvenile polyposis",
+    "options": {
+      "A": "Familial juvenile polyposis",
+      "B": "Peutz-Jeghers syndrome",
+      "C": "Lynch syndrome",
+      "D": "Biliary atresia"
+    },
+    "correct": "A",
+    "explanation": "Familial juvenile polyposis is described as multiple inflammatory polyps with painless rectal bleeding, rectal prolapse, and failure to thrive.",
+    "optionExplanations": {
+      "A": "Correct. Painless rectal bleeding and prolapse with inflammatory polyps suggests familial juvenile polyposis.",
+      "B": "Peutz-Jeghers features hamartomatous polyps and melanin spots on lips/digits.",
+      "C": "Lynch syndrome is a mismatch repair cancer syndrome without diffuse polyposis.",
+      "D": "Biliary atresia causes neonatal cholestasis, not inflammatory colonic polyps."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "An older adult develops multiple intestinal polyps with alopecia and skin hyperpigmentation. The syndrome is acquired rather than inherited. Which diagnosis is most likely",
+    "topic": "Cronkhite-Canada syndrome",
+    "options": {
+      "A": "FAP",
+      "B": "Cronkhite-Canada syndrome",
+      "C": "Peutz-Jeghers syndrome",
+      "D": "Bannayan-Riley-Ruvalcaba syndrome"
+    },
+    "correct": "B",
+    "explanation": "Cronkhite-Canada syndrome is acquired, not inherited, and presents in adults with intestinal polyps plus ectodermal findings such as hyperpigmentation and alopecia. The provided material notes high mortality.",
+    "optionExplanations": {
+      "A": "FAP is inherited and caused by APC mutation.",
+      "B": "Correct. Adult-onset polyps with ectodermal changes and acquired pattern fit Cronkhite-Canada.",
+      "C": "Peutz-Jeghers is inherited and has hamartomatous polyps with melanin spots.",
+      "D": "Bannayan-Riley-Ruvalcaba is PTEN-associated with macrocephaly, lipomas, and hemangiomas."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A 5-week-old infant has jaundice persisting beyond 2 weeks, dark urine, and pale acholic stools. Which diagnosis is most likely",
+    "topic": "Biliary atresia presentation",
+    "options": {
+      "A": "Meconium ileus",
+      "B": "Hirschsprung disease",
+      "C": "Biliary atresia",
+      "D": "Familial adenomatous polyposis"
+    },
+    "correct": "C",
+    "explanation": "Biliary atresia presents with neonatal cholestasis: jaundice lasting more than 2 weeks, dark urine, and pale or acholic stools. It results from progressive fibro-obliteration of extrahepatic bile ducts.",
+    "optionExplanations": {
+      "A": "Meconium ileus causes neonatal intestinal obstruction, not cholestatic jaundice with acholic stools.",
+      "B": "Hirschsprung disease causes delayed meconium, abdominal distension, and bilious vomiting.",
+      "C": "Correct. Persistent jaundice with dark urine and acholic stools is classic biliary atresia.",
+      "D": "FAP causes adolescent adenomatous polyposis, not neonatal cholestasis."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A liver biopsy from an infant with biliary atresia shows portal edema and inflammation, bile duct injury, and a hallmark finding. Which finding is the hallmark listed in the material",
+    "topic": "Biliary atresia histology",
+    "options": {
+      "A": "Crypt abscesses",
+      "B": "Absent ganglion cells",
+      "C": "Villous atrophy",
+      "D": "Ductular proliferation"
+    },
+    "correct": "D",
+    "explanation": "Early biliary atresia histology shows portal edema/inflammation, bile duct injury, and ductular proliferation. The provided material identifies ductular proliferation as the hallmark.",
+    "optionExplanations": {
+      "A": "Crypt abscesses are associated with colitis patterns, not biliary atresia.",
+      "B": "Absent ganglion cells are seen in Hirschsprung disease.",
+      "C": "Villous atrophy suggests small bowel mucosal disease such as celiac disease.",
+      "D": "Correct. Ductular proliferation is the hallmark early histologic finding in biliary atresia."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "An infant with biliary atresia undergoes treatment. Which procedure can improve outcomes, although many patients still progress to transplant",
+    "topic": "Biliary atresia management",
+    "options": {
+      "A": "Kasai procedure",
+      "B": "Prophylactic colectomy",
+      "C": "Rectal pull-through after biopsy",
+      "D": "COX-2 inhibitor chemoprevention"
+    },
+    "correct": "A",
+    "explanation": "The Kasai procedure improves outcomes in biliary atresia, but many cases still progress to liver transplantation due to progressive biliary cirrhosis.",
+    "optionExplanations": {
+      "A": "Correct. Kasai portoenterostomy is the procedure highlighted for biliary atresia.",
+      "B": "Prophylactic colectomy is used for FAP, not biliary atresia.",
+      "C": "Pull-through surgery is used for Hirschsprung disease management, not biliary obstruction.",
+      "D": "Sulindac and celecoxib are FAP chemoprevention options."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A 2-month-old infant with biliary atresia develops progressive portal fibrosis, bridging fibrosis, and biliary cirrhosis. Which upstream process caused this progression",
+    "topic": "Biliary atresia pathophysiology",
+    "options": {
+      "A": "APC mutation with beta-catenin accumulation in colon epithelium",
+      "B": "Progressive fibro-obliteration of the extrahepatic biliary tree causing cholestasis",
+      "C": "Neural crest migration failure causing distal bowel aganglionosis",
+      "D": "Mismatch repair deficiency causing right-sided colon cancer"
+    },
+    "correct": "B",
+    "explanation": "Biliary atresia is progressive fibro-obliteration of the extrahepatic biliary tree within the first 3 months of life. Obstruction causes cholestasis with canalicular bile plugs, hepatocyte injury, portal fibrosis, bridging fibrosis, and biliary cirrhosis.",
+    "optionExplanations": {
+      "A": "This is the mechanism of FAP, not biliary atresia.",
+      "B": "Correct. Extrahepatic bile duct obliteration leads to cholestasis and progressive cirrhosis.",
+      "C": "This is Hirschsprung disease pathogenesis.",
+      "D": "This is Lynch syndrome pathogenesis."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cystic Fibrosis and Juvenile Sleep Disorders Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A child has recurrent respiratory infections, pancreatic insufficiency, and elevated sweat chloride. Which inheritance/gene pairing is most accurate",
+    "topic": "Cystic fibrosis genetics",
+    "options": {
+      "A": "X-linked recessive DMD mutation",
+      "B": "Autosomal recessive CFTR mutation on chromosome 7",
+      "C": "Autosomal dominant FBN1 mutation",
+      "D": "Mitochondrial DNA mutation"
+    },
+    "correct": "B",
+    "explanation": "Cystic fibrosis is autosomal recessive and caused by mutations in the CFTR gene on chromosome 7.",
+    "optionExplanations": {
+      "A": "DMD mutations cause Duchenne/Becker muscular dystrophy, not CF.",
+      "B": "Correct. Cystic fibrosis is autosomal recessive and caused by mutations in the CFTR gene on chromosome 7.",
+      "C": "FBN1 mutation causes Marfan syndrome.",
+      "D": "CF is not mitochondrial; it is autosomal recessive."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A patient with cystic fibrosis has thick mucus in the airway and GI tract. Which ion/water movement best explains this",
+    "topic": "CFTR airway/GI physiology",
+    "options": {
+      "A": "Increased chloride secretion with decreased sodium absorption",
+      "B": "Normal chloride secretion with isolated ciliary immotility",
+      "C": "Increased sweat gland chloride reabsorption",
+      "D": "Decreased chloride secretion into the lumen with increased sodium and water absorption"
+    },
+    "correct": "D",
+    "explanation": "In the airway/GI tract, defective CFTR decreases chloride secretion into the lumen, causing increased sodium/water absorption and thick mucus.",
+    "optionExplanations": {
+      "A": "This is the opposite of CF airway/GI physiology.",
+      "B": "This suggests primary ciliary dyskinesia rather than CF.",
+      "C": "CF causes decreased chloride reabsorption in sweat glands.",
+      "D": "Correct. In the airway/GI tract, defective CFTR decreases chloride secretion into the lumen, causing increased sodium/water absorption and thick mucus."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "Why is sweat chloride elevated in cystic fibrosis",
+    "topic": "CF sweat gland physiology",
+    "options": {
+      "A": "Decreased chloride reabsorption in sweat glands",
+      "B": "Increased chloride secretion into sweat ducts",
+      "C": "Increased renal chloride wasting only",
+      "D": "Increased chloride reabsorption in sweat glands"
+    },
+    "correct": "A",
+    "explanation": "In sweat glands, CFTR dysfunction decreases chloride reabsorption, leading to elevated sweat chloride.",
+    "optionExplanations": {
+      "A": "Correct. In sweat glands, CFTR dysfunction decreases chloride reabsorption, leading to elevated sweat chloride.",
+      "B": "The key sweat gland defect is decreased reabsorption, not increased secretion.",
+      "C": "Sweat chloride is elevated due to sweat gland CFTR dysfunction.",
+      "D": "This would decrease sweat chloride."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A child has ΔF508 cystic fibrosis. Which mutation class and defect best describe this variant",
+    "topic": "ΔF508 mutation",
+    "options": {
+      "A": "Class I production defect with premature termination",
+      "B": "Class III regulation defect where CFTR will not open",
+      "C": "Class II processing defect with misfolded CFTR trapped/degraded in the ER",
+      "D": "Class IV conductance defect with poor ion flow"
+    },
+    "correct": "C",
+    "explanation": "ΔF508 is the most common CF mutation and is a class II processing defect: misfolded CFTR is trapped and degraded in the ER.",
+    "optionExplanations": {
+      "A": "Class I is a production defect, treated with production/read-through corrector concepts.",
+      "B": "Class III is a gating/regulation defect and uses potentiators.",
+      "C": "Correct. ΔF508 is the most common CF mutation and is a class II processing defect: misfolded CFTR is trapped and degraded in the ER.",
+      "D": "Class IV is decreased conductance and also uses potentiators."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A CFTR mutation causes premature termination of CFTR mRNA. Which class is this",
+    "topic": "CFTR mutation classes",
+    "options": {
+      "A": "Class II processing defect",
+      "B": "Class III regulation defect",
+      "C": "Class V reduced production/synthesis defect",
+      "D": "Class I production defect"
+    },
+    "correct": "D",
+    "explanation": "Class I CFTR mutations are production defects caused by premature termination.",
+    "optionExplanations": {
+      "A": "Class II is misfolding/ER trapping, such as ΔF508.",
+      "B": "Class III means CFTR will not open.",
+      "C": "Class V is reduced production, not premature termination.",
+      "D": "Correct. Class I CFTR mutations are production defects caused by premature termination."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A CFTR mutation produces a channel that reaches the membrane but will not open properly. Which therapy concept best fits",
+    "topic": "CFTR modulators",
+    "options": {
+      "A": "Corrector",
+      "B": "Potentiator",
+      "C": "Production corrector only",
+      "D": "Pancreatic enzyme replacement"
+    },
+    "correct": "B",
+    "explanation": "Class III regulation/gating defects involve CFTR that will not open and are treated with potentiators that increase CFTR function.",
+    "optionExplanations": {
+      "A": "Correctors improve processing/delivery of CFTR, especially class II defects.",
+      "B": "Correct. Class III regulation/gating defects involve CFTR that will not open and are treated with potentiators that increase CFTR function.",
+      "C": "Production correctors promote read-through of premature termination codons in class I defects.",
+      "D": "This treats exocrine pancreatic insufficiency but does not fix CFTR gating."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "Which lab pattern is listed for cystic fibrosis in the notes",
+    "topic": "CF electrolyte pattern",
+    "options": {
+      "A": "Hypernatremia, hyperkalemia, hyperchloremia, metabolic acidosis",
+      "B": "Hyponatremia, hyperkalemia, hyperchloremia, respiratory acidosis",
+      "C": "Hyponatremia, hypokalemia, hypochloremia, metabolic alkalosis",
+      "D": "Normal electrolytes with isolated respiratory alkalosis"
+    },
+    "correct": "C",
+    "explanation": "The CF notes list hyponatremia, hypokalemia, hypochloremia, and metabolic alkalosis.",
+    "optionExplanations": {
+      "A": "This is the opposite of the listed pattern.",
+      "B": "This does not match the CF electrolyte pattern listed.",
+      "C": "Correct. The CF notes list hyponatremia, hypokalemia, hypochloremia, and metabolic alkalosis.",
+      "D": "The notes list characteristic electrolyte abnormalities."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A child with CF develops chronic cough, sputum, recurrent pneumonia, bronchiectasis, sinusitis, nasal polyps, asthma-like symptoms, ABPA, and clubbing. What is the core pulmonary pathophysiology",
+    "topic": "CF pulmonary disease",
+    "options": {
+      "A": "Thick mucus → impaired clearance → infection → inflammation → bronchiectasis",
+      "B": "Defective surfactant production only",
+      "C": "Absent tracheoesophageal separation",
+      "D": "Primary pulmonary vascular maldevelopment"
+    },
+    "correct": "A",
+    "explanation": "CF pulmonary disease follows a vicious cycle: mucus plugging → infection → inflammation → airway damage/bronchiectasis.",
+    "optionExplanations": {
+      "A": "Correct. CF pulmonary disease follows a vicious cycle: mucus plugging → infection → inflammation → airway damage/bronchiectasis.",
+      "B": "This describes neonatal respiratory distress syndrome physiology, not CF.",
+      "C": "This describes tracheoesophageal fistula.",
+      "D": "This is not the CF pulmonary mechanism."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A young child with cystic fibrosis has recurrent respiratory infections. Which organisms are emphasized early in childhood",
+    "topic": "CF infections by age",
+    "options": {
+      "A": "Pseudomonas aeruginosa only from birth",
+      "B": "Candida albicans and RSV only",
+      "C": "Mycoplasma pneumoniae and EBV",
+      "D": "Staphylococcus aureus and Haemophilus influenzae"
+    },
+    "correct": "D",
+    "explanation": "Early childhood CF infections commonly involve Staphylococcus aureus and Haemophilus influenzae.",
+    "optionExplanations": {
+      "A": "Pseudomonas is emphasized later/older CF.",
+      "B": "These are not the classic early CF bacterial organisms listed.",
+      "C": "These are not the CF organisms emphasized in the notes.",
+      "D": "Correct. Early childhood CF infections commonly involve Staphylococcus aureus and Haemophilus influenzae."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "An older child with cystic fibrosis develops recurrent pulmonary infections with a classic late organism. Which organism is most emphasized",
+    "topic": "Older CF infections",
+    "options": {
+      "A": "Group A Streptococcus",
+      "B": "Bordetella pertussis",
+      "C": "Pseudomonas aeruginosa",
+      "D": "Parvovirus B19"
+    },
+    "correct": "C",
+    "explanation": "Later/older CF is classically associated with Pseudomonas aeruginosa infections.",
+    "optionExplanations": {
+      "A": "This is associated with pharyngitis/rheumatic fever risk, not the classic older CF organism.",
+      "B": "Pertussis is vaccine-preventable cough illness, not classic older CF colonization.",
+      "C": "Correct. Later/older CF is classically associated with Pseudomonas aeruginosa infections.",
+      "D": "Parvovirus B19 causes fifth disease/aplastic crisis, not CF pulmonary colonization."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A CF patient has increased cough and sputum, decreased exercise tolerance, crackles, and FEV1/FVC decreased more than 10% from best prior value. Which event is this",
+    "topic": "CF pulmonary exacerbation",
+    "options": {
+      "A": "Night terror",
+      "B": "Pulmonary exacerbation",
+      "C": "Tet spell",
+      "D": "Form-deprivation amblyopia"
+    },
+    "correct": "B",
+    "explanation": "A CF pulmonary exacerbation is a change from baseline with increased cough/sputum, decreased exercise tolerance, crackles, and >10% decline in FEV1/FVC; it may include hemoptysis, fever, weight loss, low oxygen saturation, or new infiltrates.",
+    "optionExplanations": {
+      "A": "Night terrors are sudden arousals from slow-wave sleep with autonomic symptoms and amnesia.",
+      "B": "Correct. A CF pulmonary exacerbation is a change from baseline with increased cough/sputum, decreased exercise tolerance, crackles, and >10% decline in FEV1/FVC; it may include hemoptysis, fever, weight loss, low oxygen saturation, or new infiltrates.",
+      "C": "Tet spells are hypercyanotic attacks in tetralogy of Fallot.",
+      "D": "This is vision loss from blocked visual input such as cataract."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A newborn has meconium ileus, later develops steatorrhea, failure to thrive, protein deficiency, and fat-soluble vitamin deficiencies. Which disease best explains this pattern",
+    "topic": "CF GI/nutrition",
+    "options": {
+      "A": "Primary ciliary dyskinesia",
+      "B": "Congenital hypothyroidism",
+      "C": "Juvenile spondyloarthropathy",
+      "D": "Cystic fibrosis with exocrine pancreatic insufficiency"
+    },
+    "correct": "D",
+    "explanation": "CF causes pancreatic duct obstruction and exocrine pancreatic insufficiency, leading to malabsorption, steatorrhea, FTT, protein deficiency, and fat-soluble vitamin deficiencies. Meconium ileus is a neonatal clue.",
+    "optionExplanations": {
+      "A": "PCD causes recurrent respiratory infections, otitis media, bronchiectasis, and normal sweat chloride; pancreatic insufficiency is not typical.",
+      "B": "This causes poor feeding, lethargy, constipation, and high TSH/low T4.",
+      "C": "This causes arthritis, sacroiliitis, enthesitis, and HLA-B27 positivity.",
+      "D": "Correct. CF causes pancreatic duct obstruction and exocrine pancreatic insufficiency, leading to malabsorption, steatorrhea, FTT, protein deficiency, and fat-soluble vitamin deficiencies. Meconium ileus is a neonatal clue."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "Which vitamin group should be supplemented in cystic fibrosis with pancreatic insufficiency",
+    "topic": "CF nutrition",
+    "options": {
+      "A": "Fat-soluble vitamins A, D, E, and K",
+      "B": "Only vitamin C",
+      "C": "Only vitamin B12 and folate",
+      "D": "Only thiamine"
+    },
+    "correct": "A",
+    "explanation": "CF pancreatic insufficiency causes fat malabsorption, requiring supplementation of fat-soluble vitamins A, D, E, and K.",
+    "optionExplanations": {
+      "A": "Correct. CF pancreatic insufficiency causes fat malabsorption, requiring supplementation of fat-soluble vitamins A, D, E, and K.",
+      "B": "CF malabsorption particularly affects fat-soluble vitamins.",
+      "C": "These are water-soluble vitamins and not the main CF malabsorption group listed.",
+      "D": "Thiamine is not the key CF supplementation group in the notes."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A teenager with CF develops diabetes from pancreatic destruction. Which feature differentiates CF-related diabetes from classic type 1 diabetes",
+    "topic": "CF-related diabetes",
+    "options": {
+      "A": "Always has islet cell antibodies",
+      "B": "Always presents with severe DKA",
+      "C": "Usually nonketotic and without autoimmune markers",
+      "D": "Caused by HLA-DR3 autoimmune β-cell destruction only"
+    },
+    "correct": "C",
+    "explanation": "CF-related diabetes is due to pancreatic destruction with β-cell loss and insulin deficiency, but unlike T1DM, it is usually nonketotic and lacks autoimmune markers; low-dose insulin may be needed.",
+    "optionExplanations": {
+      "A": "Autoimmune markers are typically absent in CF-related diabetes.",
+      "B": "CF-related diabetes is usually nonketotic.",
+      "C": "Correct. CF-related diabetes is due to pancreatic destruction with β-cell loss and insulin deficiency, but unlike T1DM, it is usually nonketotic and lacks autoimmune markers; low-dose insulin may be needed.",
+      "D": "That describes T1DM risk/pathogenesis."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A newborn screen suggests cystic fibrosis. Which screening marker is listed",
+    "topic": "CF newborn screen",
+    "options": {
+      "A": "Low T4 with elevated TSH",
+      "B": "Elevated sweat chloride as the initial newborn screen only",
+      "C": "Low ferritin and high TIBC",
+      "D": "Elevated immunoreactive trypsinogen with or without DNA testing"
+    },
+    "correct": "D",
+    "explanation": "CF newborn screening uses elevated immunoreactive trypsinogen (IRT), with or without DNA testing.",
+    "optionExplanations": {
+      "A": "This screens for congenital hypothyroidism.",
+      "B": "Sweat chloride is confirmatory, not the listed newborn screen marker.",
+      "C": "This suggests iron deficiency anemia.",
+      "D": "Correct. CF newborn screening uses elevated immunoreactive trypsinogen (IRT), with or without DNA testing."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "Which test confirms cystic fibrosis after a positive newborn screen",
+    "topic": "CF diagnosis",
+    "options": {
+      "A": "Overnight polysomnography",
+      "B": "Sweat chloride test and/or CFTR genetic testing",
+      "C": "Echocardiography only",
+      "D": "Tumbling E chart"
+    },
+    "correct": "B",
+    "explanation": "Confirmatory testing for CF includes sweat chloride testing and CFTR genetic testing.",
+    "optionExplanations": {
+      "A": "This is the gold standard for obstructive sleep apnea.",
+      "B": "Correct. Confirmatory testing for CF includes sweat chloride testing and CFTR genetic testing.",
+      "C": "This is required for Kawasaki disease/cardiac evaluation, not CF confirmation.",
+      "D": "This is a pediatric vision screening tool."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A child with CF receives dornase alfa. Which mechanism explains its benefit",
+    "topic": "CF mucolytic therapy",
+    "options": {
+      "A": "DNase breaks extracellular DNA from neutrophils to decrease sputum viscosity",
+      "B": "Blocks prostaglandin synthesis to close the ductus",
+      "C": "Blurs the stronger eye to treat amblyopia",
+      "D": "Increases PTH to mineralize bone"
+    },
+    "correct": "A",
+    "explanation": "Dornase alfa is DNase; it breaks down extracellular DNA from neutrophils, reducing sputum viscosity.",
+    "optionExplanations": {
+      "A": "Correct. Dornase alfa is DNase; it breaks down extracellular DNA from neutrophils, reducing sputum viscosity.",
+      "B": "This describes indomethacin/ibuprofen in PDA closure.",
+      "C": "This describes atropine penalization.",
+      "D": "This is unrelated to CF airway therapy."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "Why is hypertonic saline used in cystic fibrosis airway care",
+    "topic": "CF airway clearance",
+    "options": {
+      "A": "It closes CFTR channels",
+      "B": "It suppresses REM sleep",
+      "C": "It treats pancreatic enzyme deficiency",
+      "D": "It draws water into the airway to improve mucus clearance"
+    },
+    "correct": "D",
+    "explanation": "Hypertonic saline draws water into the airway, improving mucus clearance. Side effects include cough, airway irritation, and salty taste.",
+    "optionExplanations": {
+      "A": "CF already has defective CFTR; hypertonic saline acts osmotically.",
+      "B": "This is unrelated to CF therapy.",
+      "C": "Pancreatic enzyme replacement treats pancreatic insufficiency.",
+      "D": "Correct. Hypertonic saline draws water into the airway, improving mucus clearance. Side effects include cough, airway irritation, and salty taste."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "Which nutritional treatment is central for CF with pancreatic insufficiency",
+    "topic": "CF nutrition treatment",
+    "options": {
+      "A": "Low-calorie diet and fluid restriction",
+      "B": "Avoid all fats without vitamin supplementation",
+      "C": "Pancreatic enzyme replacement, high-calorie diet, and fat-soluble vitamin supplementation",
+      "D": "Indomethacin and aspirin"
+    },
+    "correct": "C",
+    "explanation": "CF nutrition management includes pancreatic enzyme replacement, high-calorie diet, and fat-soluble vitamin supplementation. Many patients need about 1.2–2× normal calories.",
+    "optionExplanations": {
+      "A": "CF patients often need increased calories.",
+      "B": "Fat absorption is supported with enzyme replacement and vitamin supplementation rather than blanket avoidance.",
+      "C": "Correct. CF nutrition management includes pancreatic enzyme replacement, high-calorie diet, and fat-soluble vitamin supplementation. Many patients need about 1.2–2× normal calories.",
+      "D": "These are not CF nutrition treatments."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A child with CF has a class II processing defect. Which modulator concept is most appropriate",
+    "topic": "CFTR correctors",
+    "options": {
+      "A": "Corrector to increase processing and delivery of CFTR",
+      "B": "Potentiator only to open normally processed channels",
+      "C": "Production corrector only for premature stop codons",
+      "D": "No CFTR-targeted therapy can be mutation-specific"
+    },
+    "correct": "A",
+    "explanation": "Correctors increase processing and delivery of CFTR and are used for processing defects such as ΔF508.",
+    "optionExplanations": {
+      "A": "Correct. Correctors increase processing and delivery of CFTR and are used for processing defects such as ΔF508.",
+      "B": "Potentiators are for gating/conductance defects.",
+      "C": "Production correctors promote read-through in class I defects.",
+      "D": "The notes emphasize mutation-class-based modulators."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A toddler’s parent asks about normal sleep needs. Which estimate is most consistent with the notes",
+    "topic": "Normal sleep needs",
+    "options": {
+      "A": "Toddlers need only 7 hours/day with no naps",
+      "B": "Toddlers need about 12–14 hours/day and often one afternoon nap by 18 months",
+      "C": "Adolescents need only 5 hours/night",
+      "D": "Preschoolers require 18–20 hours/day"
+    },
+    "correct": "B",
+    "explanation": "Toddlers need about 12–14 hours/day and usually have one afternoon nap by 18 months.",
+    "optionExplanations": {
+      "A": "This is too little for toddlers.",
+      "B": "Correct. Toddlers need about 12–14 hours/day and usually have one afternoon nap by 18 months.",
+      "C": "Adolescents usually sleep less than needed; they need about 9–9.5 hours.",
+      "D": "Preschoolers need about 11–13 hours/day."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "An adolescent sleeps 7 hours nightly and has poor mood, behavior, cognition, academics, and drowsy driving. What is the sleep teaching point",
+    "topic": "Adolescent sleep",
+    "options": {
+      "A": "Adolescents need less sleep than adults",
+      "B": "Drowsy driving is unrelated to sleep deficit",
+      "C": "All adolescents need daytime naps only",
+      "D": "Adolescents often sleep 7–7.5 hours but need about 9–9.5 hours"
+    },
+    "correct": "D",
+    "explanation": "Adolescents often sleep 7–7.5 hours but need about 9–9.5 hours. Sleep deficits affect mood, behavior, cognition, academics, and drowsy driving risk.",
+    "optionExplanations": {
+      "A": "The notes emphasize they need more than they often get.",
+      "B": "Drowsy driving is listed as a consequence.",
+      "C": "A consistent adequate sleep schedule is the key point.",
+      "D": "Correct. Adolescents often sleep 7–7.5 hours but need about 9–9.5 hours. Sleep deficits affect mood, behavior, cognition, academics, and drowsy driving risk."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "Which infant sleep safety recommendation is correct",
+    "topic": "Infant sleep safety",
+    "options": {
+      "A": "Prone sleep on soft bedding",
+      "B": "Pillows and loose blankets for all infants",
+      "C": "Supine sleep on a firm mattress in a safety-approved crib without pillows",
+      "D": "Head covered to retain heat"
+    },
+    "correct": "C",
+    "explanation": "Infant sleep safety includes supine sleep, firm mattress, safety-approved crib, no pillows, head uncovered, smoke-free environment, and removing hanging toys/mobiles once the older infant can reach.",
+    "optionExplanations": {
+      "A": "This is unsafe; the note emphasizes back-to-sleep and firm mattress.",
+      "B": "No pillows are recommended.",
+      "C": "Correct. Infant sleep safety includes supine sleep, firm mattress, safety-approved crib, no pillows, head uncovered, smoke-free environment, and removing hanging toys/mobiles once the older infant can reach.",
+      "D": "The head should be uncovered."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "Night terrors, sleepwalking, and enuresis occur during which sleep stage group according to the table",
+    "topic": "Sleep stages",
+    "options": {
+      "A": "REM sleep",
+      "B": "Stage 3/4 deep slow-wave sleep",
+      "C": "Stage 1 only",
+      "D": "Stage 2 sleep spindles only"
+    },
+    "correct": "B",
+    "explanation": "Stage 3/4 deep slow-wave sleep is associated with night terrors, sleepwalking, and enuresis.",
+    "optionExplanations": {
+      "A": "REM is associated with vivid dreams, increased HR/BP, irregular breathing, rapid eye movements, and muscle paralysis.",
+      "B": "Correct. Stage 3/4 deep slow-wave sleep is associated with night terrors, sleepwalking, and enuresis.",
+      "C": "Stage 1 is light sleep/drifting/slow eye movements/falling sensation.",
+      "D": "Stage 2 has sleep spindles and comprises about 50% of sleep."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A 4-year-old has loud snoring, observed apneas, paradoxical chest motion, diaphoresis, enuresis, morning headaches, and ADHD-like daytime behavior. Which diagnosis is most likely",
+    "topic": "Pediatric OSA",
+    "options": {
+      "A": "Obstructive sleep apnea syndrome",
+      "B": "Narcolepsy",
+      "C": "Restless legs syndrome",
+      "D": "Night terrors"
+    },
+    "correct": "A",
+    "explanation": "Pediatric OSA is partial/complete upper airway obstruction during sleep. Clues include snoring/labored breathing, observed apneas, retractions/paradoxical chest motion, restless sleep, diaphoresis, enuresis, cyanosis, unusual sleep positions, daytime ADHD-like behavior/sleepiness, and morning headaches from hypercapnia.",
+    "optionExplanations": {
+      "A": "Correct. Pediatric OSA is partial/complete upper airway obstruction during sleep. Clues include snoring/labored breathing, observed apneas, retractions/paradoxical chest motion, restless sleep, diaphoresis, enuresis, cyanosis, unusual sleep positions, daytime ADHD-like behavior/sleepiness, and morning headaches from hypercapnia.",
+      "B": "Narcolepsy causes chronic excessive daytime sleepiness, cataplexy, sleep paralysis, and hypnagogic hallucinations.",
+      "C": "RLS causes uncomfortable leg sensations at rest with urge to move legs.",
+      "D": "Night terrors are sudden arousals from slow-wave sleep early in the night with amnesia."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "What is the gold standard diagnostic test for pediatric obstructive sleep apnea",
+    "topic": "OSA diagnosis",
+    "options": {
+      "A": "Home audio recording alone",
+      "B": "Nap study only",
+      "C": "Pulse oximetry alone",
+      "D": "Overnight observed polysomnography"
+    },
+    "correct": "D",
+    "explanation": "The gold standard for pediatric OSA is overnight observed polysomnography. Audio/video, pulse oximetry, and nap studies are less helpful.",
+    "optionExplanations": {
+      "A": "Audio/video is less helpful than polysomnography.",
+      "B": "Nap study is less helpful.",
+      "C": "Pulse oximetry alone is not the gold standard.",
+      "D": "Correct. The gold standard for pediatric OSA is overnight observed polysomnography. Audio/video, pulse oximetry, and nap studies are less helpful."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A 3-year-old with OSA has enlarged tonsils and adenoids. Which treatment is first-line in many children",
+    "topic": "OSA treatment",
+    "options": {
+      "A": "Dornase alfa",
+      "B": "Adenotonsillectomy",
+      "C": "PGE1",
+      "D": "Atropine penalization"
+    },
+    "correct": "B",
+    "explanation": "Adenotonsillectomy is first-line in many children with pediatric OSA. CPAP/BiPAP is used if persistent or not a surgical candidate; weight loss/lifestyle changes help with obesity.",
+    "optionExplanations": {
+      "A": "Dornase alfa is a CF mucolytic.",
+      "B": "Correct. Adenotonsillectomy is first-line in many children with pediatric OSA. CPAP/BiPAP is used if persistent or not a surgical candidate; weight loss/lifestyle changes help with obesity.",
+      "C": "PGE1 maintains ductal patency in ductal-dependent CHD.",
+      "D": "Atropine penalization treats amblyopia."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A child abruptly screams with tachycardia in the first third of the night, is hard to console, and has no memory the next day. Which sleep disorder is most likely",
+    "topic": "Night terrors",
+    "options": {
+      "A": "Nightmares",
+      "B": "Narcolepsy",
+      "C": "Night terrors",
+      "D": "Insomnia"
+    },
+    "correct": "C",
+    "explanation": "Night terrors are sudden arousals from slow-wave sleep stage 3/4 in the first third of the night with intense terror/autonomic symptoms and partial or complete amnesia.",
+    "optionExplanations": {
+      "A": "Nightmares occur in REM sleep later in the night and are remembered.",
+      "B": "Narcolepsy causes excessive daytime sleepiness and cataplexy/sleep paralysis/hypnagogic hallucinations.",
+      "C": "Correct. Night terrors are sudden arousals from slow-wave sleep stage 3/4 in the first third of the night with intense terror/autonomic symptoms and partial or complete amnesia.",
+      "D": "Insomnia is difficulty falling/staying asleep or waking early."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A prepubertal child walks around during the first third of the night, is difficult to arouse, and has amnesia afterward. What is the most appropriate management focus",
+    "topic": "Sleepwalking",
+    "options": {
+      "A": "Safety measures, adequate sleep, calm bedtime ritual, and removing hazards/locking windows and doors",
+      "B": "Wake forcefully every episode",
+      "C": "Give antibiotics",
+      "D": "Restrict all sleep to induce fatigue"
+    },
+    "correct": "A",
+    "explanation": "Sleepwalking occurs in slow-wave sleep stage 3/4 during the first third of the night, with difficulty arousing and amnesia. Management focuses on adequate sleep, calm bedtime ritual, removing hazards, locking windows/doors, ground-floor sleeping if severe, and rarely benzodiazepines.",
+    "optionExplanations": {
+      "A": "Correct. Sleepwalking occurs in slow-wave sleep stage 3/4 during the first third of the night, with difficulty arousing and amnesia. Management focuses on adequate sleep, calm bedtime ritual, removing hazards, locking windows/doors, ground-floor sleeping if severe, and rarely benzodiazepines.",
+      "B": "Safety and prevention are emphasized rather than forceful awakening.",
+      "C": "Sleepwalking is not bacterial.",
+      "D": "Sleep deprivation can worsen parasomnias; adequate sleep is recommended."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A teenager has chronic excessive daytime sleepiness, sudden muscle weakness triggered by laughter, sleep paralysis, and hypnagogic hallucinations. Which diagnosis is most likely",
+    "topic": "Narcolepsy",
+    "options": {
+      "A": "Restless legs syndrome",
+      "B": "Night terrors",
+      "C": "OSA from tonsillar hypertrophy only",
+      "D": "Narcolepsy"
+    },
+    "correct": "D",
+    "explanation": "Narcolepsy is a chronic neurologic disorder causing excessive daytime sleepiness. Classic features include cataplexy triggered by emotion, sleep paralysis, hypnagogic hallucinations, automatic behaviors, and disturbed nighttime sleep. Treatment includes medications, strict sleep-wake schedule, planned short naps, and avoiding dangerous activities when sleepy.",
+    "optionExplanations": {
+      "A": "RLS causes uncomfortable leg sensations at rest and urge to move legs, often affecting sleep onset.",
+      "B": "Night terrors occur in slow-wave sleep early in the night with amnesia.",
+      "C": "OSA causes snoring, apneas, labored breathing, and daytime behavioral/sleepiness symptoms, but cataplexy and hypnagogic hallucinations point to narcolepsy.",
+      "D": "Correct. Narcolepsy is a chronic neurologic disorder causing excessive daytime sleepiness. Classic features include cataplexy triggered by emotion, sleep paralysis, hypnagogic hallucinations, automatic behaviors, and disturbed nighttime sleep. Treatment includes medications, strict sleep-wake schedule, planned short naps, and avoiding dangerous activities when sleepy."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Immunizations Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A community has high vaccination rates, leaving few susceptible hosts. Transmission of a contagious pathogen falls. Which concept best explains this effect",
+    "topic": "Herd immunity",
+    "options": {
+      "A": "Antigenic drift",
+      "B": "Herd immunity",
+      "C": "Passive immunity only",
+      "D": "Immune tolerance"
+    },
+    "correct": "B",
+    "explanation": "Herd immunity occurs when high vaccination rates reduce susceptible hosts enough that pathogen transmission breaks.",
+    "optionExplanations": {
+      "A": "Antigenic drift is gradual viral antigenic change, not population-level protection from high vaccine coverage.",
+      "B": "Correct. Herd immunity occurs when high vaccination rates reduce susceptible hosts enough that pathogen transmission breaks.",
+      "C": "Passive immunity is antibody transfer; herd immunity is community-level protection.",
+      "D": "Immune tolerance is reduced immune response to self/antigen, not transmission interruption."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A vaccine-preventable disease has a very high R0. What happens to the vaccination threshold needed for herd immunity",
+    "topic": "R0 and vaccine threshold",
+    "options": {
+      "A": "Higher R0 requires lower vaccine coverage",
+      "B": "R0 does not affect herd immunity thresholds",
+      "C": "Only natural infection can provide herd immunity",
+      "D": "Higher R0 requires higher population immunity"
+    },
+    "correct": "D",
+    "explanation": "The vaccination threshold depends on R0. Higher R0 means higher population immunity is required. Measles has very high R0 and therefore needs very high vaccine coverage.",
+    "optionExplanations": {
+      "A": "This is reversed; higher transmissibility requires higher coverage.",
+      "B": "The notes explicitly state that threshold depends on R0.",
+      "C": "Vaccination can create herd immunity without requiring disease morbidity.",
+      "D": "Correct. The vaccination threshold depends on R0. Higher R0 means higher population immunity is required. Measles has very high R0 and therefore needs very high vaccine coverage."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A parent says measles vaccination is unnecessary because measles is rarely seen now. Which high-yield explanation best addresses this misconception",
+    "topic": "Vaccines as victims of success",
+    "options": {
+      "A": "Vaccines reduced disease so dramatically that people forget the original morbidity and mortality",
+      "B": "Measles has become biologically extinct",
+      "C": "Vaccines work only if disease is currently common",
+      "D": "Natural immunity has no risk"
+    },
+    "correct": "A",
+    "explanation": "Vaccines can become victims of their own success: disease morbidity/mortality falls so dramatically that perceived disease risk decreases while perceived vaccine risk increases.",
+    "optionExplanations": {
+      "A": "Correct. Vaccines can become victims of their own success: disease morbidity/mortality falls so dramatically that perceived disease risk decreases while perceived vaccine risk increases.",
+      "B": "Measles can re-emerge when vaccination coverage declines.",
+      "C": "Vaccines prevent return and spread even when disease is uncommon.",
+      "D": "Natural infection carries morbidity and mortality risks."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A region with declining vaccine coverage develops clusters of susceptible children. Which diseases are specifically noted as able to re-emerge in undervaccinated populations",
+    "topic": "Disease re-emergence",
+    "options": {
+      "A": "Osteosarcoma, Ewing sarcoma, and osteochondroma",
+      "B": "SCFE, Legg-Calvé-Perthes, and Osgood-Schlatter disease",
+      "C": "Measles, pertussis, and polio",
+      "D": "Anorexia, bulimia, and ARFID"
+    },
+    "correct": "C",
+    "explanation": "Declining vaccination decreases herd immunity and can allow previously controlled diseases to return, especially measles, pertussis, and polio in undervaccinated regions.",
+    "optionExplanations": {
+      "A": "These are bone/soft tissue disorders, not vaccine-preventable infections.",
+      "B": "These are pediatric MSK conditions.",
+      "C": "Correct. Declining vaccination decreases herd immunity and can allow previously controlled diseases to return, especially measles, pertussis, and polio in undervaccinated regions.",
+      "D": "These are eating disorders, not vaccine-preventable diseases."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A student asks why MMR and varicella are delayed until 12 months rather than given in early infancy. Which explanation is most accurate",
+    "topic": "Maternal antibody interference",
+    "options": {
+      "A": "Maternal IgG can neutralize live vaccine antigens and weaken response",
+      "B": "Infants cannot respond to any vaccine before 12 months",
+      "C": "MMR and varicella are toxoid vaccines",
+      "D": "Live vaccines never work in children"
+    },
+    "correct": "A",
+    "explanation": "Maternal antibody interference is a main issue for live vaccines. MMR and varicella are delayed until 12 months because maternal IgG may neutralize vaccine antigens and cause a weak response.",
+    "optionExplanations": {
+      "A": "Correct. Maternal antibody interference is a main issue for live vaccines. MMR and varicella are delayed until 12 months because maternal IgG may neutralize vaccine antigens and cause a weak response.",
+      "B": "Many vaccines are given before 12 months, such as HepB, RV, DTaP, Hib, PCV, and IPV.",
+      "C": "MMR and varicella are live vaccines.",
+      "D": "They work well when given at the appropriate age."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A preconception visit reveals that a patient needs MMR. Which timing/counseling is most appropriate from the notes",
+    "topic": "Pre-pregnancy MMR",
+    "options": {
+      "A": "Give MMR routinely during the first trimester",
+      "B": "Give MMR only after the infant receives DTaP",
+      "C": "Never give MMR to adults",
+      "D": "Give MMR at least 1 month before pregnancy and avoid it during pregnancy"
+    },
+    "correct": "D",
+    "explanation": "MMR is a live vaccine. Before pregnancy, vaccine records should be checked; MMR should be given at least 1 month before pregnancy and avoided during pregnancy.",
+    "optionExplanations": {
+      "A": "Live MMR is avoided during pregnancy.",
+      "B": "Maternal preconception MMR timing is independent of infant DTaP.",
+      "C": "Adults may need MMR if not immune, but it should be timed appropriately around pregnancy.",
+      "D": "Correct. MMR is a live vaccine. Before pregnancy, vaccine records should be checked; MMR should be given at least 1 month before pregnancy and avoided during pregnancy."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A pregnant patient asks about influenza vaccination. Which recommendation is listed",
+    "topic": "Influenza in pregnancy",
+    "options": {
+      "A": "Avoid influenza vaccine throughout pregnancy",
+      "B": "Give influenza vaccine before flu season, ideally by October",
+      "C": "Give only after delivery",
+      "D": "Give only if the patient already has influenza"
+    },
+    "correct": "B",
+    "explanation": "During pregnancy, influenza vaccination is recommended before flu season, ideally by October, because pregnancy increases severe flu risk.",
+    "optionExplanations": {
+      "A": "Influenza vaccination is recommended in pregnancy.",
+      "B": "Correct. During pregnancy, influenza vaccination is recommended before flu season, ideally by October, because pregnancy increases severe flu risk.",
+      "C": "Pregnancy itself is a higher-risk period for severe influenza.",
+      "D": "Vaccines are preventive; acute influenza is treated differently."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A pregnant patient is counseled to receive Tdap between 27 and 36 weeks. What is the main reason",
+    "topic": "Tdap in pregnancy",
+    "options": {
+      "A": "Prevents congenital rubella syndrome",
+      "B": "Provides lifetime immunity against all respiratory viruses",
+      "C": "Protects the infant from pertussis until infant DTaP begins at 2 months",
+      "D": "Replaces all infant vaccines"
+    },
+    "correct": "C",
+    "explanation": "Tdap is recommended at 27–36 weeks during pregnancy to protect the infant from pertussis until the infant begins DTaP at 2 months.",
+    "optionExplanations": {
+      "A": "That is the reason to ensure rubella/MMR immunity before pregnancy, not Tdap during pregnancy.",
+      "B": "Tdap targets tetanus, diphtheria, and pertussis, not all respiratory viruses.",
+      "C": "Correct. Tdap is recommended at 27–36 weeks during pregnancy to protect the infant from pertussis until the infant begins DTaP at 2 months.",
+      "D": "Maternal Tdap provides early protection but does not replace the infant vaccine schedule."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A pregnant patient asks when RSV vaccine is given according to the notes",
+    "topic": "RSV vaccine in pregnancy",
+    "options": {
+      "A": "Before conception only",
+      "B": "At birth to the mother only",
+      "C": "Only at age 11 to 12 years",
+      "D": "Last trimester"
+    },
+    "correct": "D",
+    "explanation": "The pregnancy timeline lists RSV vaccine in the last trimester.",
+    "optionExplanations": {
+      "A": "The notes list RSV during pregnancy in the last trimester.",
+      "B": "The listed timing is last trimester.",
+      "C": "The 11–12 year vaccines listed are Tdap, HPV, and MenACWY.",
+      "D": "Correct. The pregnancy timeline lists RSV vaccine in the last trimester."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A pregnant patient asks about COVID-19 vaccination. Which recommendation is listed",
+    "topic": "COVID-19 in pregnancy",
+    "options": {
+      "A": "Give anytime during pregnancy; mRNA preferred",
+      "B": "Avoid during pregnancy",
+      "C": "Give only exactly at 27 to 36 weeks",
+      "D": "Give only as a live vaccine"
+    },
+    "correct": "A",
+    "explanation": "The notes list COVID-19 vaccination anytime during pregnancy, with mRNA preferred.",
+    "optionExplanations": {
+      "A": "Correct. The notes list COVID-19 vaccination anytime during pregnancy, with mRNA preferred.",
+      "B": "The notes recommend COVID-19 vaccination during pregnancy.",
+      "C": "That timing is listed for Tdap.",
+      "D": "The notes specify mRNA preferred."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "Which vaccine is listed at birth in the pediatric timeline",
+    "topic": "Birth vaccine",
+    "options": {
+      "A": "MMR",
+      "B": "Varicella",
+      "C": "Hepatitis B",
+      "D": "HPV"
+    },
+    "correct": "C",
+    "explanation": "The pediatric vaccine timeline lists HepB at birth.",
+    "optionExplanations": {
+      "A": "MMR is listed at 12–15 months and booster at 4–6 years.",
+      "B": "Varicella is listed at 12–15 months and booster at 4–6 years.",
+      "C": "Correct. The pediatric vaccine timeline lists HepB at birth.",
+      "D": "HPV is listed at 11–12 years."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "Which vaccine set is listed at 2, 4, and 6 months",
+    "topic": "2, 4, 6 month vaccines",
+    "options": {
+      "A": "MMR, varicella, HepA only",
+      "B": "RV, DTaP, Hib, PCV, IPV, with HepB/COVID/flu possible at 6 months",
+      "C": "Tdap, HPV, MenACWY only",
+      "D": "Shingrix and pneumococcal adult series only"
+    },
+    "correct": "B",
+    "explanation": "At 2, 4, and 6 months, the timeline lists RV, DTaP, Hib, PCV, IPV, with HepB/COVID/flu possible at 6 months.",
+    "optionExplanations": {
+      "A": "These are listed at 12–15 months.",
+      "B": "Correct. At 2, 4, and 6 months, the timeline lists RV, DTaP, Hib, PCV, IPV, with HepB/COVID/flu possible at 6 months.",
+      "C": "These are listed at 11–12 years.",
+      "D": "Those are adult/older adult vaccines, not infant schedule items."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A 13-month-old presents for routine immunizations. Which set best matches the 12–15 month timeline",
+    "topic": "12–15 month vaccines",
+    "options": {
+      "A": "HepB only",
+      "B": "Tdap, HPV, and MenACWY",
+      "C": "MenACWY booster only",
+      "D": "MMR, varicella, HepA, Hib/PCV boosters, and DTaP"
+    },
+    "correct": "D",
+    "explanation": "At 12–15 months, the schedule lists MMR, varicella, HepA, Hib/PCV boosters, and DTaP.",
+    "optionExplanations": {
+      "A": "HepB is listed at birth and also may be part of infant series timing, not the full 12–15 month set.",
+      "B": "These are listed at 11–12 years.",
+      "C": "The MenACWY booster is listed at 16 years.",
+      "D": "Correct. At 12–15 months, the schedule lists MMR, varicella, HepA, Hib/PCV boosters, and DTaP."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A 5-year-old presents for booster vaccines. Which set best matches the 4–6 year timeline",
+    "topic": "4–6 year boosters",
+    "options": {
+      "A": "HepB only",
+      "B": "DTaP, IPV, MMR, and varicella boosters",
+      "C": "RSV and COVID only",
+      "D": "HPV and MenACWY booster only"
+    },
+    "correct": "B",
+    "explanation": "At 4–6 years, the timeline lists DTaP, IPV, MMR, and varicella boosters.",
+    "optionExplanations": {
+      "A": "HepB is not the listed 4–6 year booster set.",
+      "B": "Correct. At 4–6 years, the timeline lists DTaP, IPV, MMR, and varicella boosters.",
+      "C": "These are not the 4–6 year booster set in the notes.",
+      "D": "HPV/MenACWY are adolescent vaccines; MenACWY booster is at 16."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "An 11-year-old is due for routine adolescent immunizations. Which set is listed",
+    "topic": "11–12 year vaccines",
+    "options": {
+      "A": "Tdap, HPV, and MenACWY",
+      "B": "MMR, varicella, and HepA",
+      "C": "HepB only",
+      "D": "DTaP, Hib, PCV, IPV, and RV"
+    },
+    "correct": "A",
+    "explanation": "At 11–12 years, the timeline lists Tdap, HPV, and MenACWY.",
+    "optionExplanations": {
+      "A": "Correct. At 11–12 years, the timeline lists Tdap, HPV, and MenACWY.",
+      "B": "These are listed at 12–15 months, with MMR/varicella boosters at 4–6 years.",
+      "C": "HepB is listed at birth and in infancy, not as the adolescent set.",
+      "D": "This is the infant 2/4/6 month pattern."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A 16-year-old is seen for routine immunization follow-up. Which booster is specifically listed at 16 years",
+    "topic": "16 year vaccine",
+    "options": {
+      "A": "First HepB dose",
+      "B": "First rotavirus dose",
+      "C": "MMR before pregnancy",
+      "D": "MenACWY booster"
+    },
+    "correct": "D",
+    "explanation": "The pediatric timeline lists a MenACWY booster at 16 years.",
+    "optionExplanations": {
+      "A": "HepB is listed at birth.",
+      "B": "Rotavirus is listed in the infant series.",
+      "C": "This is preconception counseling, not the 16-year booster.",
+      "D": "Correct. The pediatric timeline lists a MenACWY booster at 16 years."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A parent says vaccines overload a child’s immune system. Which response best fits the lecture’s motivational interviewing example",
+    "topic": "Vaccine misconception: immune overload",
+    "options": {
+      "A": "Argue immediately and list every vaccine fact",
+      "B": "Dismiss the concern as irrational",
+      "C": "Acknowledge concern, ask permission, then explain that recommended vaccines together do not increase adverse effects compared with spacing them out",
+      "D": "Refuse to continue the visit unless vaccines are accepted"
+    },
+    "correct": "C",
+    "explanation": "The notes emphasize motivational interviewing: listen, reflect concerns, ask permission to share information, then guide. The example says recommended vaccines together do not increase adverse effects compared with spacing them out.",
+    "optionExplanations": {
+      "A": "The notes say facts alone fail and to avoid arguing/dumping facts.",
+      "B": "The recommended approach is to reflect concerns and build trust.",
+      "C": "Correct. The notes emphasize motivational interviewing: listen, reflect concerns, ask permission to share information, then guide. The example says recommended vaccines together do not increase adverse effects compared with spacing them out.",
+      "D": "This does not match motivational interviewing."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A patient is hesitant about vaccines despite being given many statistics. Which reason from the notes explains why facts alone often fail",
+    "topic": "Vaccine hesitancy",
+    "options": {
+      "A": "Confirmation bias and emotion often overpower facts",
+      "B": "Parents cannot understand medical information",
+      "C": "All hesitancy is due to lack of intelligence",
+      "D": "More statistics always fixes hesitancy"
+    },
+    "correct": "A",
+    "explanation": "The vaccine hesitancy section states that facts alone fail because of confirmation bias and because emotion often outweighs facts.",
+    "optionExplanations": {
+      "A": "Correct. The vaccine hesitancy section states that facts alone fail because of confirmation bias and because emotion often outweighs facts.",
+      "B": "The notes do not frame hesitancy this way.",
+      "C": "This is not the approach; motivational interviewing is recommended.",
+      "D": "The notes specifically caution that facts alone often fail."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "Which counseling style is most consistent with motivational interviewing for vaccine hesitancy",
+    "topic": "Motivational interviewing",
+    "options": {
+      "A": "Lecture without asking questions",
+      "B": "Debate until the parent concedes",
+      "C": "Ignore emotional concerns and focus only on numbers",
+      "D": "Ask open-ended questions, listen, reflect concerns, identify change talk, and guide once openness appears"
+    },
+    "correct": "D",
+    "explanation": "Motivational interviewing aims to help the parent find their own reason to change. The approach includes open-ended questions, listening, reflecting, identifying change talk, and guiding toward a plan.",
+    "optionExplanations": {
+      "A": "The notes recommend open-ended questions and avoiding fact-dumping.",
+      "B": "The notes recommend avoiding arguing.",
+      "C": "The notes emphasize that emotion is important and hope/trust are more effective.",
+      "D": "Correct. Motivational interviewing aims to help the parent find their own reason to change. The approach includes open-ended questions, listening, reflecting, identifying change talk, and guiding toward a plan."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A clinician says, “Would it be okay if I shared what we know?” before discussing vaccine safety. Which communication technique is being used",
+    "topic": "Ask permission",
+    "options": {
+      "A": "Paternalistic persuasion",
+      "B": "Asking permission before sharing information",
+      "C": "Avoidance of education",
+      "D": "Threatening consequences"
+    },
+    "correct": "B",
+    "explanation": "The motivational interviewing example uses asking permission before sharing information, which maintains trust and reduces defensiveness.",
+    "optionExplanations": {
+      "A": "Paternalism would be telling the parent what to do without engaging concerns.",
+      "B": "Correct. The motivational interviewing example uses asking permission before sharing information, which maintains trust and reduces defensiveness.",
+      "C": "The clinician is preparing to educate after permission.",
+      "D": "This is not a threat; it is a collaborative communication strategy."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "Which statement is listed as a common vaccine misconception",
+    "topic": "Vaccine myths",
+    "options": {
+      "A": "Vaccines include multiple types such as live, inactivated, conjugate, toxoid, recombinant, and mRNA",
+      "B": "Vaccine schedules consider age-specific risk",
+      "C": "All vaccines contain live weakened organisms",
+      "D": "MMR and varicella are delayed because of maternal antibody interference"
+    },
+    "correct": "C",
+    "explanation": "One listed myth is that all vaccines contain live weakened organisms. The notes state schedules depend on vaccine type, including live, inactivated, conjugate, toxoid, recombinant, and mRNA vaccines.",
+    "optionExplanations": {
+      "A": "This is accurate, not a misconception.",
+      "B": "This is accurate schedule logic.",
+      "C": "Correct. One listed myth is that all vaccines contain live weakened organisms. The notes state schedules depend on vaccine type, including live, inactivated, conjugate, toxoid, recombinant, and mRNA vaccines.",
+      "D": "This is an accurate explanation."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "Which statement is a common myth listed in the immunization section",
+    "topic": "Vaccine myths",
+    "options": {
+      "A": "Vaccines reduce morbidity and mortality",
+      "B": "High measles R0 requires high coverage",
+      "C": "Vaccines can protect communities through herd immunity",
+      "D": "Vaccines must be 100 percent effective to matter"
+    },
+    "correct": "D",
+    "explanation": "The notes list “vaccines must be 100% effective to matter” as a misconception. Even imperfect vaccines can reduce transmission, severity, and outbreaks.",
+    "optionExplanations": {
+      "A": "This is the reason vaccines are described as victims of their own success.",
+      "B": "This is accurate.",
+      "C": "This is accurate.",
+      "D": "Correct. The notes list “vaccines must be 100% effective to matter” as a misconception. Even imperfect vaccines can reduce transmission, severity, and outbreaks."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A parent says hygiene and nutrition, not vaccines, caused disease decline. How is this categorized in the notes",
+    "topic": "Vaccine myths",
+    "options": {
+      "A": "A common vaccine misconception",
+      "B": "A contraindication to vaccination",
+      "C": "A reason to delay all live vaccines until adolescence",
+      "D": "A reason vaccines only work after infection"
+    },
+    "correct": "A",
+    "explanation": "“Hygiene/nutrition caused disease decline, not vaccines” is listed as a high-yield vaccine myth.",
+    "optionExplanations": {
+      "A": "Correct. “Hygiene/nutrition caused disease decline, not vaccines” is listed as a high-yield vaccine myth.",
+      "B": "A misconception is not a medical contraindication.",
+      "C": "MMR/varicella are delayed until 12 months due to maternal antibody interference, not hygiene claims.",
+      "D": "Vaccines are preventive."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A parent says natural immunity is better than vaccine-acquired immunity. In the lecture framework, this statement is best classified as",
+    "topic": "Natural immunity misconception",
+    "options": {
+      "A": "A reason to intentionally expose children to measles",
+      "B": "A reason to stop all vaccine schedules",
+      "C": "A vaccine misconception because natural infection carries disease risk",
+      "D": "A contraindication to MMR"
+    },
+    "correct": "C",
+    "explanation": "“Natural immunity is better than acquired” is listed as a common vaccine misconception. The vaccine section emphasizes that vaccines dramatically reduce disease morbidity and mortality.",
+    "optionExplanations": {
+      "A": "Natural infection can cause serious morbidity/mortality.",
+      "B": "The section emphasizes the importance of vaccination.",
+      "C": "Correct. “Natural immunity is better than acquired” is listed as a common vaccine misconception. The vaccine section emphasizes that vaccines dramatically reduce disease morbidity and mortality.",
+      "D": "This belief is not a medical contraindication."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A parent believes vaccines are only for children. Which schedule fact best refutes this misconception",
+    "topic": "Vaccines across lifespan",
+    "options": {
+      "A": "Vaccines stop after 6 months of age",
+      "B": "Adults still need vaccines, and after childbirth patients resume the normal adult vaccine schedule",
+      "C": "Only newborns receive vaccines",
+      "D": "All adult vaccines are live and contraindicated"
+    },
+    "correct": "B",
+    "explanation": "“Vaccines are only for children” is listed as a myth. The notes include pregnancy vaccines and state that after childbirth patients resume the normal adult vaccine schedule.",
+    "optionExplanations": {
+      "A": "The pediatric schedule continues at 12–15 months, 4–6 years, 11–12 years, and 16 years.",
+      "B": "Correct. “Vaccines are only for children” is listed as a myth. The notes include pregnancy vaccines and state that after childbirth patients resume the normal adult vaccine schedule.",
+      "C": "Vaccines are given throughout childhood, adolescence, pregnancy, and adulthood.",
+      "D": "Vaccine types vary, and many adult vaccines are not live."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "Which set of factors helps determine the pediatric vaccine schedule according to the notes",
+    "topic": "Vaccine schedule logic",
+    "options": {
+      "A": "Parent preference alone",
+      "B": "Alphabetical order of vaccine names",
+      "C": "Only whether the disease is currently common locally",
+      "D": "Vaccine type, age-specific disease risk, immune response timing, transmission/mortality risk, and maternal antibody interference"
+    },
+    "correct": "D",
+    "explanation": "Schedule logic depends on vaccine type, age-specific disease risk, age when immune system responds well, age of highest transmission/mortality risk, and maternal antibody interference.",
+    "optionExplanations": {
+      "A": "Parent concerns matter for counseling, but schedule logic is based on immunology and epidemiology.",
+      "B": "This is not a vaccine schedule principle.",
+      "C": "Schedules also consider age risk, immune response, vaccine type, and maternal antibody interference.",
+      "D": "Correct. Schedule logic depends on vaccine type, age-specific disease risk, age when immune system responds well, age of highest transmission/mortality risk, and maternal antibody interference."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A patient says more vaccinated than unvaccinated people sometimes get sick during an outbreak, so vaccines do not work. Which concept best explains the flaw",
+    "topic": "Base-rate misconception",
+    "options": {
+      "A": "It proves vaccines increase disease risk",
+      "B": "It proves vaccines must be 100 percent effective",
+      "C": "This is a listed misconception; high vaccination rates can make the absolute number of cases among vaccinated people look larger despite lower individual risk",
+      "D": "It means herd immunity cannot occur"
+    },
+    "correct": "C",
+    "explanation": "The notes list “more vaccinated than unvaccinated people get sick” as a high-yield myth. This reflects base-rate effects in highly vaccinated populations, not vaccine failure.",
+    "optionExplanations": {
+      "A": "Vaccines reduce individual and population risk.",
+      "B": "The notes identify this as another misconception.",
+      "C": "Correct. The notes list “more vaccinated than unvaccinated people get sick” as a high-yield myth. This reflects base-rate effects in highly vaccinated populations, not vaccine failure.",
+      "D": "Herd immunity can occur when enough people are protected."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "Which emotional frame is described as more effective for behavior change than fear-driven inaction",
+    "topic": "Vaccine hesitancy emotions",
+    "options": {
+      "A": "Hope and trust",
+      "B": "Shame and blame",
+      "C": "Threat and dismissal",
+      "D": "Confusion and avoidance"
+    },
+    "correct": "A",
+    "explanation": "The notes state that emotion is greater than facts in vaccine hesitancy: fear can lead to inaction, while hope and trust are more effective for behavior change.",
+    "optionExplanations": {
+      "A": "Correct. The notes state that emotion is greater than facts in vaccine hesitancy: fear can lead to inaction, while hope and trust are more effective for behavior change.",
+      "B": "The notes recommend reflecting concerns and building trust, not shaming.",
+      "C": "Threats/dismissal do not match motivational interviewing.",
+      "D": "Motivational interviewing guides toward a plan when openness appears."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A parent says vaccine-preventable diseases are extinct. Which response is best aligned with the notes",
+    "topic": "Disease extinction misconception",
+    "options": {
+      "A": "This is correct, so vaccination can stop",
+      "B": "They are not necessarily extinct; declining coverage can allow outbreaks to return",
+      "C": "Only nutrition is needed now",
+      "D": "Extinct diseases require live vaccines only"
+    },
+    "correct": "B",
+    "explanation": "“Vaccinated diseases are extinct” is listed as a misconception. Declining vaccination decreases herd immunity and can allow measles, pertussis, and polio to re-emerge.",
+    "optionExplanations": {
+      "A": "Stopping vaccination can create susceptible clusters.",
+      "B": "Correct. “Vaccinated diseases are extinct” is listed as a misconception. Declining vaccination decreases herd immunity and can allow measles, pertussis, and polio to re-emerge.",
+      "C": "The notes identify hygiene/nutrition as a vaccine myth when used to dismiss vaccines.",
+      "D": "This does not address the misconception."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A vaccine-hesitant parent says, “I’m worried it’s too many shots and might overwhelm their immune system.” Which physician response best follows the provided example",
+    "topic": "Motivational interviewing example",
+    "options": {
+      "A": "“You are wrong; let me list the data.”",
+      "B": "“We cannot discuss this because vaccines are mandatory.”",
+      "C": "“That makes sense. You’re trying to avoid harm. Would it be okay if I shared what we know?”",
+      "D": "“Spacing vaccines always prevents adverse effects.”"
+    },
+    "correct": "C",
+    "explanation": "The example uses reflection and permission: validate the parent’s protective intent, ask permission, then explain that recommended vaccines together do not increase adverse effects compared with spacing them out.",
+    "optionExplanations": {
+      "A": "This is arguing/fact-dumping, which the notes discourage.",
+      "B": "This does not use open-ended, reflective communication.",
+      "C": "Correct. The example uses reflection and permission: validate the parent’s protective intent, ask permission, then explain that recommended vaccines together do not increase adverse effects compared with spacing them out.",
+      "D": "The example states recommended vaccines together do not increase adverse effects compared with spacing them out."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>

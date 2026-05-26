@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pediatric MSK Physiology Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #111827;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .segments {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 999px;
+      background: #334155;
+      flex: 1;
+      min-width: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .segment.active {
+      background: #e2e8f0;
+    }
+    .segment.answered {
+      background: #6fa8dc;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .red {
+      background: rgba(127, 29, 29, 0.65);
+      color: #fee2e2;
+    }
+    .green {
+      background: rgba(6, 95, 70, 0.65);
+      color: #d1fae5;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: #6b7280;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .stem {
+      font-weight: 700;
+      line-height: 1.45;
+      margin: 8px 0 16px;
+    }
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .option:hover {
+      background: #f3f4f6;
+    }
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .explanation p {
+      margin: 6px 0;
+    }
+    .correctText {
+      color: #047857;
+    }
+    .incorrectText {
+      color: #b91c1c;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .nav button {
+      padding: 9px 14px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .nav button:hover {
+      background: #f3f4f6;
+    }
+    .footer {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="segments" id="segments"></div>
+      <div class="status">
+        <span id="progressText"></span>
+        <span class="pill red">× <span id="wrongCount">0</span></span>
+        <span class="pill green">✓ <span id="rightCount">0</span></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div id="explanation" class="explanation" style="display:none;"></div>
+      <div class="nav">
+        <button onclick="prevQuestion()">Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+    <p class="footer"></p>
+  </div>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 7-year-old falls while playing soccer and has arm pain. Compared with adult bone, which pediatric bone feature best explains why children may bend or incompletely fracture rather than fully break",
+    "topic": "Pediatric bone basics",
+    "options": {
+      "A": "Lower collagen content makes pediatric bone brittle",
+      "B": "Absent periosteum causes delayed healing",
+      "C": "Closed growth plates make the physis strong",
+      "D": "Higher collagen content makes pediatric bone more flexible"
+    },
+    "correct": "D",
+    "explanation": "Children’s bones have higher collagen content, making them more flexible. They also have thicker periosteum, which helps faster healing.",
+    "optionExplanations": {
+      "A": "The notes emphasize higher collagen and more flexibility, not lower collagen.",
+      "B": "Children have a thicker periosteum and faster healing.",
+      "C": "Children have open growth plates; the physis is a weak link.",
+      "D": "Correct. Children’s bones have higher collagen content, making them more flexible. They also have thicker periosteum, which helps faster healing."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A child has pain at the end of a long bone after trauma. Which structure is considered the weak link in pediatric long bones",
+    "topic": "Growth plate injury",
+    "options": {
+      "A": "Diaphyseal compact cortex",
+      "B": "Articular cartilage only",
+      "C": "Growth plate / physis",
+      "D": "Synovial membrane"
+    },
+    "correct": "C",
+    "explanation": "The growth plate, or physis, is the weak link in pediatric long bones and is prone to injury.",
+    "optionExplanations": {
+      "A": "The physis is emphasized as the weak link.",
+      "B": "Articular cartilage is not the named weak link in this section.",
+      "C": "Correct. The growth plate, or physis, is the weak link in pediatric long bones and is prone to injury.",
+      "D": "Synovium is not the long-bone weak link for physeal trauma."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A child has traction-related pain at the tibial tubercle where the patellar tendon attaches. Which term describes this non-articulating epiphysis where tendon or muscle attaches",
+    "topic": "Apophysis",
+    "options": {
+      "A": "Physis",
+      "B": "Apophysis",
+      "C": "Diaphysis",
+      "D": "Metaphysis"
+    },
+    "correct": "B",
+    "explanation": "An apophysis is a non-articulating epiphysis where tendon or muscle attaches. Examples include the greater trochanter, iliac crest, calcaneus, and tibial tubercle.",
+    "optionExplanations": {
+      "A": "The physis is the growth plate.",
+      "B": "Correct. An apophysis is a non-articulating epiphysis where tendon or muscle attaches. Examples include the greater trochanter, iliac crest, calcaneus, and tibial tubercle.",
+      "C": "The diaphysis is the shaft of a long bone.",
+      "D": "The metaphysis is the flared region near the growth plate, not specifically a tendon/muscle attachment epiphysis."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A 9-year-old twists his ankle and has focal bony tenderness. The parent says it is probably just a sprain. What is the best high-yield principle",
+    "topic": "Pediatric fractures",
+    "options": {
+      "A": "True ligament sprains are more common than fractures in children",
+      "B": "Normal walking always excludes fracture",
+      "C": "No imaging is needed if the child can localize pain",
+      "D": "Children rarely have true sprains, so think fracture first"
+    },
+    "correct": "D",
+    "explanation": "Children rarely have true sprains; in a pediatric injury, think fracture first, especially with point tenderness.",
+    "optionExplanations": {
+      "A": "The notes say children rarely have true sprains.",
+      "B": "Ability to walk does not reliably exclude fracture.",
+      "C": "Point tenderness is a key MSK exam finding and may support imaging.",
+      "D": "Correct. Children rarely have true sprains; in a pediatric injury, think fracture first, especially with point tenderness."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A child with extremity trauma has focal tenderness over one point of bone. Which exam finding is emphasized as key for pediatric MSK injury",
+    "topic": "Pediatric MSK exam",
+    "options": {
+      "A": "Diffuse itching",
+      "B": "Point tenderness",
+      "C": "Symmetric rash",
+      "D": "Absent fever only"
+    },
+    "correct": "B",
+    "explanation": "Point tenderness is emphasized as a key MSK exam finding in pediatric injuries.",
+    "optionExplanations": {
+      "A": "Pruritus is not the key MSK trauma exam finding.",
+      "B": "Correct. Point tenderness is emphasized as a key MSK exam finding in pediatric injuries.",
+      "C": "Rash is not the focal trauma exam clue.",
+      "D": "Absence of fever does not replace the importance of point tenderness."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A child refuses to use his injured arm after a fall. Which high-yield interpretation is most appropriate",
+    "topic": "Refusal to use limb",
+    "options": {
+      "A": "This always indicates behavioral refusal",
+      "B": "This excludes fracture if swelling is absent",
+      "C": "Fracture or infection should be considered",
+      "D": "This confirms growing pains"
+    },
+    "correct": "C",
+    "explanation": "Refusal to use a limb is a red flag for fracture or infection.",
+    "optionExplanations": {
+      "A": "Refusal to use the limb should be taken seriously as fracture/infection.",
+      "B": "Fractures can occur without dramatic swelling.",
+      "C": "Correct. Refusal to use a limb is a red flag for fracture or infection.",
+      "D": "Growing pains have normal exam/growth and are not an acute refusal-to-use-limb presentation."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A child with limb pain has fever and overlying redness. What should be assumed until proven otherwise",
+    "topic": "MSK infection clue",
+    "options": {
+      "A": "Growing pains",
+      "B": "Benign sprain",
+      "C": "Nursemaid elbow only",
+      "D": "Infection"
+    },
+    "correct": "D",
+    "explanation": "Fever and redness in a pediatric MSK complaint should be treated as infection until proven otherwise.",
+    "optionExplanations": {
+      "A": "Growing pains have normal exam and no fever/redness.",
+      "B": "Children rarely have true sprains, and fever/redness is concerning.",
+      "C": "Nursemaid elbow causes refusal/use changes after traction but not fever/redness.",
+      "D": "Correct. Fever and redness in a pediatric MSK complaint should be treated as infection until proven otherwise."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A child injures his forearm. Which imaging/exam principle should be followed",
+    "topic": "Two-joint rule",
+    "options": {
+      "A": "Image only the most painful point",
+      "B": "Image only the contralateral limb",
+      "C": "Avoid imaging joints in children",
+      "D": "Image or examine the joint above and below the injury"
+    },
+    "correct": "D",
+    "explanation": "The two-joint rule means image/examine the joint above and below the injury.",
+    "optionExplanations": {
+      "A": "The two-joint rule expands evaluation above and below the injury.",
+      "B": "Bilateral X-rays can be useful in skeletally immature patients, but this is not the two-joint rule.",
+      "C": "Imaging may be needed; the rule is to include adjacent joints.",
+      "D": "Correct. The two-joint rule means image/examine the joint above and below the injury."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A skeletally immature child has a questionable X-ray finding after trauma. Which strategy can help interpretation",
+    "topic": "Bilateral X-rays",
+    "options": {
+      "A": "MRI is never used in children",
+      "B": "Only adult bones should be compared",
+      "C": "Bilateral X-rays can be useful for comparison",
+      "D": "All injuries should be diagnosed clinically only"
+    },
+    "correct": "C",
+    "explanation": "Bilateral X-rays can be useful in skeletally immature patients because normal ossification centers can be confusing.",
+    "optionExplanations": {
+      "A": "MRI may be used in some conditions such as hip pathology staging.",
+      "B": "The issue is comparing the child’s opposite side.",
+      "C": "Correct. Bilateral X-rays can be useful in skeletally immature patients because normal ossification centers can be confusing.",
+      "D": "Imaging is often important in pediatric MSK injury."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A child has a compression injury causing an incomplete fracture with buckling of the cortex. Which fracture type is most likely",
+    "topic": "Buckle fracture",
+    "options": {
+      "A": "Greenstick fracture",
+      "B": "Colles fracture",
+      "C": "Salter-Harris V fracture",
+      "D": "Buckle/torus fracture"
+    },
+    "correct": "D",
+    "explanation": "A buckle/torus fracture is a compression injury and is an incomplete pediatric fracture.",
+    "optionExplanations": {
+      "A": "Greenstick fracture has one cortex breaking while the opposite cortex bends.",
+      "B": "Colles fracture is a FOOSH distal radius/ulna fracture.",
+      "C": "Salter-Harris V is compression of the physis.",
+      "D": "Correct. A buckle/torus fracture is a compression injury and is an incomplete pediatric fracture."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A child has an incomplete fracture in which one cortex breaks and the opposite cortex bends. Which fracture type is this",
+    "topic": "Greenstick fracture",
+    "options": {
+      "A": "Greenstick fracture",
+      "B": "Buckle/torus fracture",
+      "C": "Colles fracture",
+      "D": "Salter-Harris I fracture"
+    },
+    "correct": "A",
+    "explanation": "Greenstick fracture occurs when one cortex breaks and the opposite cortex bends.",
+    "optionExplanations": {
+      "A": "Correct. Greenstick fracture occurs when one cortex breaks and the opposite cortex bends.",
+      "B": "Buckle fracture is a compression injury with cortical buckling.",
+      "C": "Colles fracture is FOOSH injury to distal radius/ulna.",
+      "D": "Salter-Harris I involves the physis only."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A child falls on an outstretched hand and sustains a distal radial/ulnar fracture. Which fracture name is most appropriate",
+    "topic": "Colles fracture",
+    "options": {
+      "A": "Buckle fracture",
+      "B": "Greenstick fracture",
+      "C": "Colles fracture",
+      "D": "Salter-Harris III fracture"
+    },
+    "correct": "C",
+    "explanation": "Colles fracture is a FOOSH injury causing distal radial/ulnar fracture.",
+    "optionExplanations": {
+      "A": "Buckle fracture is a compression injury.",
+      "B": "Greenstick is one cortex broken, opposite cortex bent.",
+      "C": "Correct. Colles fracture is a FOOSH injury causing distal radial/ulnar fracture.",
+      "D": "Salter-Harris III involves physis plus epiphysis."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A growth plate fracture involves only the physis. Which Salter-Harris type is this",
+    "topic": "Salter-Harris I",
+    "options": {
+      "A": "Salter-Harris II",
+      "B": "Salter-Harris I",
+      "C": "Salter-Harris III",
+      "D": "Salter-Harris V"
+    },
+    "correct": "B",
+    "explanation": "Salter-Harris I involves the physis only.",
+    "optionExplanations": {
+      "A": "Type II involves physis plus metaphysis.",
+      "B": "Correct. Salter-Harris I involves the physis only.",
+      "C": "Type III involves physis plus epiphysis.",
+      "D": "Type V is compression of the physis."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A growth plate fracture involves the physis and metaphysis. Which Salter-Harris type is this",
+    "topic": "Salter-Harris II",
+    "options": {
+      "A": "Salter-Harris II",
+      "B": "Salter-Harris I",
+      "C": "Salter-Harris III",
+      "D": "Salter-Harris IV"
+    },
+    "correct": "A",
+    "explanation": "Salter-Harris II involves the physis and metaphysis.",
+    "optionExplanations": {
+      "A": "Correct. Salter-Harris II involves the physis and metaphysis.",
+      "B": "Type I involves physis only.",
+      "C": "Type III involves physis and epiphysis.",
+      "D": "Type IV involves physis, metaphysis, and epiphysis."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A growth plate fracture involves the physis and epiphysis but not the metaphysis. Which Salter-Harris type is this",
+    "topic": "Salter-Harris III",
+    "options": {
+      "A": "Salter-Harris I",
+      "B": "Salter-Harris II",
+      "C": "Salter-Harris IV",
+      "D": "Salter-Harris III"
+    },
+    "correct": "D",
+    "explanation": "Salter-Harris III involves the physis and epiphysis.",
+    "optionExplanations": {
+      "A": "Type I involves physis only.",
+      "B": "Type II involves physis plus metaphysis.",
+      "C": "Type IV involves physis, metaphysis, and epiphysis.",
+      "D": "Correct. Salter-Harris III involves the physis and epiphysis."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A fracture extends through the physis, metaphysis, and epiphysis. Which Salter-Harris type is this",
+    "topic": "Salter-Harris IV",
+    "options": {
+      "A": "Salter-Harris IV",
+      "B": "Salter-Harris II",
+      "C": "Salter-Harris III",
+      "D": "Salter-Harris V"
+    },
+    "correct": "A",
+    "explanation": "Salter-Harris IV involves the physis, metaphysis, and epiphysis.",
+    "optionExplanations": {
+      "A": "Correct. Salter-Harris IV involves the physis, metaphysis, and epiphysis.",
+      "B": "Type II involves physis and metaphysis only.",
+      "C": "Type III involves physis and epiphysis only.",
+      "D": "Type V is compression of the physis."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A child has a crush injury causing compression of the growth plate. Which Salter-Harris type is this",
+    "topic": "Salter-Harris V",
+    "options": {
+      "A": "Salter-Harris V",
+      "B": "Salter-Harris I",
+      "C": "Salter-Harris II",
+      "D": "Salter-Harris III"
+    },
+    "correct": "A",
+    "explanation": "Salter-Harris V is compression of the physis.",
+    "optionExplanations": {
+      "A": "Correct. Salter-Harris V is compression of the physis.",
+      "B": "Type I is physis only.",
+      "C": "Type II is physis plus metaphysis.",
+      "D": "Type III is physis plus epiphysis."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A student remembers pediatric elbow ossification centers using CRITOE. Which sequence is correct",
+    "topic": "Elbow ossification order",
+    "options": {
+      "A": "Capitellum → Trochlea → Radial head → Olecranon → Internal epicondyle → External epicondyle",
+      "B": "Capitellum → Radial head → Internal/medial epicondyle → Trochlea → Olecranon → External/lateral epicondyle",
+      "C": "Radial head → Capitellum → Trochlea → Olecranon → Internal epicondyle → External epicondyle",
+      "D": "Olecranon → Capitellum → Radial head → Internal epicondyle → Trochlea → External epicondyle"
+    },
+    "correct": "B",
+    "explanation": "CRITOE = Capitellum, Radial head, Internal/medial epicondyle, Trochlea, Olecranon, External/lateral epicondyle.",
+    "optionExplanations": {
+      "A": "This does not match CRITOE.",
+      "B": "Correct. CRITOE = Capitellum, Radial head, Internal/medial epicondyle, Trochlea, Olecranon, External/lateral epicondyle.",
+      "C": "This starts with the wrong structure.",
+      "D": "This does not match CRITOE."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "An elbow X-ray after trauma shows a posterior fat pad. What does this mean",
+    "topic": "Posterior fat pad",
+    "options": {
+      "A": "It is normal in children",
+      "B": "It rules out supracondylar fracture",
+      "C": "It indicates nursemaid elbow",
+      "D": "It is always abnormal and suggests occult fracture"
+    },
+    "correct": "D",
+    "explanation": "A posterior fat pad sign is always abnormal and suggests an occult fracture.",
+    "optionExplanations": {
+      "A": "The notes state posterior fat pad is always abnormal.",
+      "B": "It suggests occult fracture rather than excluding it.",
+      "C": "Nursemaid elbow usually has normal X-ray.",
+      "D": "Correct. A posterior fat pad sign is always abnormal and suggests an occult fracture."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "An elbow X-ray after trauma shows an anterior sail sign. Which injury should be suspected",
+    "topic": "Anterior sail sign",
+    "options": {
+      "A": "Transient synovitis",
+      "B": "Osgood-Schlatter disease",
+      "C": "Distal humerus/supracondylar fracture",
+      "D": "Legg-Calvé-Perthes disease"
+    },
+    "correct": "C",
+    "explanation": "An anterior sail sign should raise suspicion for distal humerus/supracondylar fracture.",
+    "optionExplanations": {
+      "A": "Transient synovitis is a hip condition.",
+      "B": "Osgood-Schlatter is tibial tubercle apophysitis.",
+      "C": "Correct. An anterior sail sign should raise suspicion for distal humerus/supracondylar fracture.",
+      "D": "Legg-Calvé-Perthes is avascular necrosis of the proximal femoral head."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A 2-year-old refuses to use an arm after being pulled upward by the hand. The arm is held pronated and X-ray is normal. Which diagnosis is most likely",
+    "topic": "Nursemaid elbow",
+    "options": {
+      "A": "Colles fracture",
+      "B": "Nursemaid elbow",
+      "C": "SCFE",
+      "D": "Osgood-Schlatter disease"
+    },
+    "correct": "B",
+    "explanation": "Nursemaid elbow occurs age 1–4 from traction/pulling the arm, causing radial head subluxation from the annular ligament. The arm is held pronated and X-ray is normal.",
+    "optionExplanations": {
+      "A": "Colles fracture follows FOOSH and involves distal radius/ulna fracture.",
+      "B": "Correct. Nursemaid elbow occurs age 1–4 from traction/pulling the arm, causing radial head subluxation from the annular ligament. The arm is held pronated and X-ray is normal.",
+      "C": "SCFE causes hip/knee pain and gait changes in obese adolescents.",
+      "D": "Osgood-Schlatter causes anterior knee/tibial tubercle pain in athlete children."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "Which treatment is appropriate for nursemaid elbow",
+    "topic": "Nursemaid elbow treatment",
+    "options": {
+      "A": "Reduction with supination-flexion or hyperpronation until a click, then observe return of function",
+      "B": "Emergency hip pinning",
+      "C": "Long-term IV antibiotics",
+      "D": "Aspirin and IVIG"
+    },
+    "correct": "A",
+    "explanation": "Nursemaid elbow is reduced using supination-flexion or hyperpronation; a click may be felt and function should return.",
+    "optionExplanations": {
+      "A": "Correct. Nursemaid elbow is reduced using supination-flexion or hyperpronation; a click may be felt and function should return.",
+      "B": "This is for SCFE.",
+      "C": "This is for septic arthritis or osteomyelitis-type infection concerns, not nursemaid elbow.",
+      "D": "This is Kawasaki disease treatment."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child presents with knee pain, but the exam suggests hip pathology. Which principle is emphasized",
+    "topic": "Hip pathology principle",
+    "options": {
+      "A": "Always worry about the hip because knee pain may be referred from the hip",
+      "B": "Knee pain rules out hip disease",
+      "C": "Hip disorders never cause limp",
+      "D": "Hip imaging is never useful in children"
+    },
+    "correct": "A",
+    "explanation": "The section emphasizes: always worry about the hip; knee pain may be referred hip pain.",
+    "optionExplanations": {
+      "A": "Correct. The section emphasizes: always worry about the hip; knee pain may be referred hip pain.",
+      "B": "Knee pain can be referred from the hip.",
+      "C": "Hip disorders commonly cause limp/antalgic gait.",
+      "D": "Bilateral hip X-rays, frog-leg views, and MRI may be used depending on condition."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "An obese 12-year-old has hip and knee pain, antalgic gait, and decreased internal rotation and abduction. X-ray is assessed with Klein line and crescent sign. Which diagnosis is most likely",
+    "topic": "SCFE",
+    "options": {
+      "A": "Legg-Calvé-Perthes disease",
+      "B": "Slipped capital femoral epiphysis",
+      "C": "Transient synovitis",
+      "D": "Septic arthritis"
+    },
+    "correct": "B",
+    "explanation": "SCFE occurs classically in obese 11–13-year-olds due to a physis fracture with slipping of the femoral head, causing hip/knee pain, antalgic gait, and decreased internal rotation/abduction. Diagnosis uses bilateral hip X-rays, lateral Klein line, and AP crescent sign.",
+    "optionExplanations": {
+      "A": "This is AVN of the proximal femoral head, age 4–8, with Trendelenburg gait and decreased thigh/calf size.",
+      "B": "Correct. SCFE occurs classically in obese 11–13-year-olds due to a physis fracture with slipping of the femoral head, causing hip/knee pain, antalgic gait, and decreased internal rotation/abduction. Diagnosis uses bilateral hip X-rays, lateral Klein line, and AP crescent sign.",
+      "C": "This is usually age 3–8, afebrile limp/hip pain, often with normal X-ray.",
+      "D": "This presents toxic with fever, severe pain, high inflammatory markers, and requires drainage/IV antibiotics."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A child has SCFE. What is the appropriate management",
+    "topic": "SCFE treatment",
+    "options": {
+      "A": "Rest and NSAIDs only",
+      "B": "Observation without imaging",
+      "C": "Hyperpronation reduction",
+      "D": "Emergency or urgent orthopedic management"
+    },
+    "correct": "D",
+    "explanation": "SCFE requires emergency/urgent orthopedic management.",
+    "optionExplanations": {
+      "A": "Rest/NSAIDs are used for transient synovitis and Legg-Calvé-Perthes initially, not definitive SCFE care.",
+      "B": "SCFE needs prompt imaging and ortho management.",
+      "C": "This is for nursemaid elbow.",
+      "D": "Correct. SCFE requires emergency/urgent orthopedic management."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A 6-year-old has hip pain, Trendelenburg gait, decreased thigh/calf size, and imaging concerning for avascular necrosis of the proximal femoral head. Which diagnosis is most likely",
+    "topic": "Legg-Calvé-Perthes disease",
+    "options": {
+      "A": "SCFE",
+      "B": "Transient synovitis",
+      "C": "Legg-Calvé-Perthes disease",
+      "D": "Septic arthritis"
+    },
+    "correct": "C",
+    "explanation": "Legg-Calvé-Perthes occurs age 4–8 and is avascular necrosis of the proximal femoral head. It presents with hip pain, Trendelenburg gait, and decreased thigh/calf size.",
+    "optionExplanations": {
+      "A": "SCFE occurs in obese 11–13-year-olds with slipped epiphysis, hip/knee pain, antalgic gait, and decreased internal rotation/abduction.",
+      "B": "Transient synovitis causes afebrile limp/hip pain and is due to inflammation of the hip joint.",
+      "C": "Correct. Legg-Calvé-Perthes occurs age 4–8 and is avascular necrosis of the proximal femoral head. It presents with hip pain, Trendelenburg gait, and decreased thigh/calf size.",
+      "D": "Septic arthritis presents toxic with fever and severe pain."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A 5-year-old has Legg-Calvé-Perthes disease. Which diagnostic imaging approach is listed",
+    "topic": "Legg-Calvé-Perthes diagnosis",
+    "options": {
+      "A": "Klein line only on lateral X-ray",
+      "B": "AP, lateral, and frog-leg X-rays; MRI for staging",
+      "C": "Hip aspiration with cell count greater than 50,000",
+      "D": "No imaging because X-ray is always normal"
+    },
+    "correct": "B",
+    "explanation": "Legg-Calvé-Perthes diagnosis uses AP/lateral/frog-leg X-rays, with MRI for staging.",
+    "optionExplanations": {
+      "A": "Klein line is emphasized for SCFE.",
+      "B": "Correct. Legg-Calvé-Perthes diagnosis uses AP/lateral/frog-leg X-rays, with MRI for staging.",
+      "C": "This is septic arthritis workup.",
+      "D": "Imaging is used; transient synovitis often has normal X-ray."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A 4-year-old has afebrile limp and hip pain. X-ray is often normal, but ultrasound or MRI may show effusion. Which diagnosis is most likely",
+    "topic": "Transient synovitis",
+    "options": {
+      "A": "SCFE",
+      "B": "Septic arthritis",
+      "C": "Transient synovitis",
+      "D": "Legg-Calvé-Perthes disease"
+    },
+    "correct": "C",
+    "explanation": "Transient synovitis occurs age 3–8 and causes afebrile limp/hip pain from inflammation of the hip joint. X-ray is often normal; US/MRI may show effusion. Treatment is rest and NSAIDs.",
+    "optionExplanations": {
+      "A": "SCFE typically affects obese 11–13-year-olds and needs urgent ortho management.",
+      "B": "Septic arthritis causes toxic appearance, fever, severe pain, high ESR/CRP/WBC, and positive aspiration.",
+      "C": "Correct. Transient synovitis occurs age 3–8 and causes afebrile limp/hip pain from inflammation of the hip joint. X-ray is often normal; US/MRI may show effusion. Treatment is rest and NSAIDs.",
+      "D": "Legg-Calvé-Perthes is AVN of the proximal femoral head with Trendelenburg gait."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A toxic-appearing child has fever, severe hip pain, elevated ESR/CRP/WBC, and hip aspiration with positive Gram stain and cell count greater than 50,000. Which management is required",
+    "topic": "Septic arthritis",
+    "options": {
+      "A": "Emergency drainage plus IV antibiotics",
+      "B": "Rest and NSAIDs only",
+      "C": "Activity modification and VMO strengthening",
+      "D": "Observation only"
+    },
+    "correct": "A",
+    "explanation": "Septic arthritis is an infection of the hip joint. It presents with toxic appearance, fever, severe pain, elevated ESR/CRP/WBC, and positive aspiration. Treatment is emergency drainage plus IV antibiotics.",
+    "optionExplanations": {
+      "A": "Correct. Septic arthritis is an infection of the hip joint. It presents with toxic appearance, fever, severe pain, elevated ESR/CRP/WBC, and positive aspiration. Treatment is emergency drainage plus IV antibiotics.",
+      "B": "This treats transient synovitis, not septic arthritis.",
+      "C": "This is used for Osgood-Schlatter disease.",
+      "D": "Septic arthritis is an emergency."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "An athlete child has anterior knee pain, tibial tuberosity tenderness/edema, and pain with resisted extension. Which diagnosis is most likely",
+    "topic": "Osgood-Schlatter disease",
+    "options": {
+      "A": "Medial epicondylitis",
+      "B": "Lateral epicondylitis",
+      "C": "Osgood-Schlatter disease",
+      "D": "Transient synovitis"
+    },
+    "correct": "C",
+    "explanation": "Osgood-Schlatter disease is tibial tubercle apophysitis in athlete children, causing anterior knee pain, tibial tuberosity tenderness/edema, and pain with resisted extension. Treatment includes rest/activity modification, NSAIDs, PT, stretching, and VMO strengthening.",
+    "optionExplanations": {
+      "A": "Medial epicondylitis occurs in throwing athletes with medial elbow pain and valgus stress pain.",
+      "B": "Lateral epicondylitis is tennis elbow and usually self-resolves over 6–12 months.",
+      "C": "Correct. Osgood-Schlatter disease is tibial tubercle apophysitis in athlete children, causing anterior knee pain, tibial tuberosity tenderness/edema, and pain with resisted extension. Treatment includes rest/activity modification, NSAIDs, PT, stretching, and VMO strengthening.",
+      "D": "Transient synovitis causes afebrile limp/hip pain."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderSegments() {
+      const container = document.getElementById("segments");
+      container.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment" + (idx === currentIndex ? " active" : "") + (answers[q.id] !== undefined && idx !== currentIndex ? " answered" : "");
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.onclick = () => {
+          currentIndex = idx;
+          render();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderCounts() {
+      let right = 0;
+      let wrong = 0;
+      Object.entries(answers).forEach(([qid, choice]) => {
+        const q = questions.find(item => item.id === Number(qid));
+        if (q && choice === q.correct) right++;
+        if (q && choice !== q.correct) wrong++;
+      });
+      document.getElementById("rightCount").textContent = right;
+      document.getElementById("wrongCount").textContent = wrong;
+    }
+
+    function selectAnswer(letter) {
+      answers[questions[currentIndex].id] = letter;
+      render();
+    }
+
+    function renderOptions(q) {
+      const selected = answers[q.id];
+      const show = selected !== undefined;
+      const container = document.getElementById("options");
+      container.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (show && letter === q.correct) btn.className += " correct";
+        else if (show && letter === selected && letter !== q.correct) btn.className += " incorrect";
+        btn.onclick = () => selectAnswer(letter);
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderExplanation(q) {
+      const selected = answers[q.id];
+      const el = document.getElementById("explanation");
+      if (selected === undefined) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+      const isCorrect = selected === q.correct;
+      const optionLines = Object.entries(q.optionExplanations || {})
+        .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+        .join("");
+      el.style.display = "block";
+      el.innerHTML = `
+        <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+        <p class="${isCorrect ? "correctText" : "incorrectText"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+        <div style="margin-top: 10px;">
+          <p><strong>Why each option is right or wrong:</strong></p>
+          ${optionLines}
+        </div>
+      `;
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      document.getElementById("progressText").textContent = `${currentIndex + 1} / ${questions.length}`;
+      document.getElementById("questionNumber").textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      document.getElementById("topic").textContent = q.topic ? `Topic: ${q.topic}` : "";
+      document.getElementById("stem").textContent = q.stem + "?";
+      renderSegments();
+      renderCounts();
+      renderOptions(q);
+      renderExplanation(q);
+    }
+
+    function nextQuestion() {
+      currentIndex = (currentIndex + 1) % questions.length;
+      render();
+    }
+
+    function prevQuestion() {
+      currentIndex = (currentIndex - 1 + questions.length) % questions.length;
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
