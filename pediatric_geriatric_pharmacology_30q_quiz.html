@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pediatric + Geriatric Pharmacology Quiz</title>
+  <style>
+    :root {
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-200: #e2e8f0;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-500: #6b7280;
+      --green-100: #dcfce7;
+      --green-500: #22c55e;
+      --green-700: #15803d;
+      --red-100: #fee2e2;
+      --red-500: #ef4444;
+      --red-700: #b91c1c;
+      --blue: #6fa8dc;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--slate-900);
+      color: #111827;
+    }
+    .container {
+      padding: 24px;
+      max-width: 896px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .progress-wrap { flex: 1; }
+    .progress {
+      display: flex;
+      gap: 4px;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 9999px;
+      border: 0;
+      cursor: pointer;
+      flex: 1;
+      min-width: 4px;
+      background: var(--slate-700);
+      transition: background 0.15s ease;
+      padding: 0;
+    }
+    .segment.active { background: var(--slate-200); }
+    .segment.answered { background: var(--blue); }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .count {
+      color: var(--slate-200);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .badge.red {
+      background: rgba(127, 29, 29, 0.6);
+      color: #fee2e2;
+    }
+    .badge.green {
+      background: rgba(6, 78, 59, 0.6);
+      color: #d1fae5;
+    }
+    .card {
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gray-500);
+      font-size: 12px;
+      gap: 12px;
+    }
+    .stem {
+      font-weight: 700;
+      margin: 4px 0 0;
+      line-height: 1.45;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      background: var(--gray-50);
+      cursor: pointer;
+      line-height: 1.35;
+      font-size: 15px;
+    }
+    .option:hover { background: var(--gray-100); }
+    .option.correct {
+      background: var(--green-100);
+      border-color: var(--green-500);
+    }
+    .option.incorrect {
+      background: var(--red-100);
+      border-color: var(--red-500);
+    }
+    .explanation {
+      margin-top: 4px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      font-size: 14px;
+      line-height: 1.45;
+      display: none;
+    }
+    .explanation.show { display: block; }
+    .explanation p { margin: 0 0 8px; }
+    .explanation p:last-child { margin-bottom: 0; }
+    .green-text { color: var(--green-700); }
+    .red-text { color: var(--red-700); }
+    .option-explanations {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .nav button {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav button:hover { background: var(--gray-100); }
+    .footer {
+      color: var(--gray-500);
+      font-size: 12px;
+      min-height: 16px;
+    }
+    @media (max-width: 640px) {
+      .container { padding: 14px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .progress-wrap { width: 100%; }
+      .status { width: 100%; justify-content: space-between; }
+      .meta { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="topbar">
+      <div class="progress-wrap">
+        <div class="progress" id="progress"></div>
+      </div>
+      <div class="status">
+        <div class="count" id="count"></div>
+        <div class="badges">
+          <div class="badge red"><span>×</span><span id="wrongCount">0</span></div>
+          <div class="badge green"><span>✓</span><span id="rightCount">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+      <div class="nav">
+        <button id="prevBtn">Previous</button>
+        <button id="nextBtn">Next</button>
+      </div>
+    </section>
+
+    <p class="footer"></p>
+  </main>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 2-week-old neonate requires an aminoglycoside for a serious infection. Compared with an older child, which pharmacokinetic change most directly increases this infant's risk of drug accumulation",
+    "topic": "Neonatal renal excretion",
+    "options": {
+      "A": "Increased hepatic phase II conjugation",
+      "B": "Adult-like renal clearance by birth",
+      "C": "Markedly decreased glomerular filtration rate",
+      "D": "Reduced total body water"
+    },
+    "correct": "C",
+    "explanation": "Neonates have markedly reduced GFR, so renally cleared drugs such as aminoglycosides, vancomycin, penicillins, and digoxin can accumulate.",
+    "optionExplanations": {
+      "A": "Phase II metabolism is not the main clearance route for aminoglycosides.",
+      "B": "Renal function becomes closer to adult-like around 6 months, not birth.",
+      "C": "Correct. Low neonatal GFR decreases clearance of renally eliminated drugs.",
+      "D": "Infants have increased total body water, not reduced total body water."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A premature newborn receives a highly protein-bound medication and develops toxicity despite a dose tolerated by older children. Which factor best explains the increased free drug concentration",
+    "topic": "Neonatal protein binding",
+    "options": {
+      "A": "Increased plasma albumin concentration",
+      "B": "Decreased plasma protein concentration and binding affinity",
+      "C": "Accelerated CYP450 metabolism",
+      "D": "Decreased extracellular fluid volume"
+    },
+    "correct": "B",
+    "explanation": "Premature infants and newborns have lower plasma protein concentration, lower binding affinity, and competition with bilirubin, increasing free active drug.",
+    "optionExplanations": {
+      "A": "Albumin/binding capacity are reduced, not increased.",
+      "B": "Correct. Reduced binding raises the active free drug fraction.",
+      "C": "Infant CYP activity is generally reduced; this does not explain protein binding.",
+      "D": "Extracellular fluid percentage is increased in infants."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A neonate given an antibiotic develops poor feeding, vomiting, hypotonia, hypothermia, abdominal distension, irregular respirations, and ashen-gray cyanosis. Which impaired pathway is responsible",
+    "topic": "Chloramphenicol and gray baby syndrome",
+    "options": {
+      "A": "Delayed glucuronidation",
+      "B": "Excess sulfation",
+      "C": "Increased plasma esterase activity",
+      "D": "Accelerated renal tubular secretion"
+    },
+    "correct": "A",
+    "explanation": "Chloramphenicol causes gray baby syndrome because neonates have immature glucuronyltransferase activity, causing impaired glucuronidation and drug accumulation.",
+    "optionExplanations": {
+      "A": "Correct. Immature glucuronidation is the classic mechanism.",
+      "B": "Sulfation is relatively well developed in infants.",
+      "C": "Immature plasma esterases relate more to ester anesthetic elimination.",
+      "D": "Neonatal renal clearance is reduced, not accelerated."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A newborn has rising unconjugated bilirubin. Which antibiotic exposure is most concerning because it can displace bilirubin from albumin and increase kernicterus risk",
+    "topic": "Sulfonamides and kernicterus",
+    "options": {
+      "A": "Amoxicillin",
+      "B": "Azithromycin",
+      "C": "Sulfamethoxazole",
+      "D": "Cefdinir"
+    },
+    "correct": "C",
+    "explanation": "Sulfonamides can displace bilirubin from albumin in neonates, increasing free bilirubin and kernicterus risk.",
+    "optionExplanations": {
+      "A": "Not the classic bilirubin-displacing antibiotic.",
+      "B": "Not the classic kernicterus-risk drug in this context.",
+      "C": "Correct. Sulfonamides can displace bilirubin.",
+      "D": "Not the classic medication associated with bilirubin displacement."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A premature infant needs a loading dose of a water-soluble antibiotic. Which age-related distribution change is most relevant",
+    "topic": "Pediatric distribution and loading dose",
+    "options": {
+      "A": "Increased fat stores decrease volume of distribution",
+      "B": "Increased total body water increases volume of distribution",
+      "C": "Decreased extracellular fluid increases serum concentration",
+      "D": "Adult-like gastric emptying increases absorption"
+    },
+    "correct": "B",
+    "explanation": "Infants have increased total body water and extracellular fluid, so water-soluble drugs have a larger Vd and may require higher loading doses.",
+    "optionExplanations": {
+      "A": "Fat stores are not the key change for water-soluble drugs in infants.",
+      "B": "Correct. Higher body water expands Vd for water-soluble drugs.",
+      "C": "Extracellular fluid is increased, not decreased.",
+      "D": "Absorption does not determine Vd/loading dose."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A breastfeeding mother asks about nitrofurantoin while nursing an infant with known G6PD deficiency. What is the main concern",
+    "topic": "Breastfeeding medication caution",
+    "options": {
+      "A": "Kernicterus from direct bilirubin displacement only",
+      "B": "Permanent tooth discoloration",
+      "C": "Hemolysis risk in G6PD deficiency",
+      "D": "Suppression of fetal surfactant"
+    },
+    "correct": "C",
+    "explanation": "Nitrofurantoin and sulfamethoxazole were listed as cautions during breastfeeding because of hemolysis risk in infants with G6PD deficiency.",
+    "optionExplanations": {
+      "A": "Sulfonamides may affect bilirubin, but the G6PD-specific issue is hemolysis.",
+      "B": "Tooth discoloration is associated with tetracyclines.",
+      "C": "Correct. Nitrofurantoin can trigger hemolysis in G6PD deficiency.",
+      "D": "This is not the concern here."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A postpartum patient wants to increase milk production. Which medication is a D2 antagonist that may act as a galactagogue but can cause extrapyramidal symptoms",
+    "topic": "Lactation pharmacology",
+    "options": {
+      "A": "Metoclopramide",
+      "B": "Cabergoline",
+      "C": "Pseudoephedrine",
+      "D": "Bupropion"
+    },
+    "correct": "A",
+    "explanation": "Metoclopramide is a D2 antagonist listed as a galactagogue; D2 blockade can cause extrapyramidal or parkinsonian adverse effects.",
+    "optionExplanations": {
+      "A": "Correct. D2 antagonism increases prolactin.",
+      "B": "Cabergoline suppresses lactation via dopamine agonism.",
+      "C": "Pseudoephedrine was listed among lactation-suppressing agents.",
+      "D": "Bupropion was listed among lactation-suppressing agents."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A 44-lb child is prescribed amoxicillin 90 mg/kg/day divided twice daily. The suspension is 400 mg/5 mL. What volume should be given per dose",
+    "topic": "Pediatric dose calculation",
+    "options": {
+      "A": "5.6 mL per dose",
+      "B": "11.25 mL per dose",
+      "C": "22.5 mL per dose",
+      "D": "45 mL per dose"
+    },
+    "correct": "B",
+    "explanation": "44 lb ÷ 2.2 = 20 kg. Daily dose = 90 × 20 = 1800 mg/day. BID = 900 mg/dose. 400 mg/5 mL = 80 mg/mL, so 900 ÷ 80 = 11.25 mL per dose.",
+    "optionExplanations": {
+      "A": "This divides one extra time.",
+      "B": "Correct. The calculated per-dose volume is 11.25 mL.",
+      "C": "This is the total daily volume.",
+      "D": "This is far too high."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A child is treated for acute otitis media. According to the lecture, which regimen is first-line",
+    "topic": "Acute otitis media treatment",
+    "options": {
+      "A": "Ciprofloxacin",
+      "B": "Doxycycline",
+      "C": "Amoxicillin or amoxicillin-clavulanate",
+      "D": "Trimethoprim-sulfamethoxazole"
+    },
+    "correct": "C",
+    "explanation": "The lecture lists amoxicillin or amoxicillin-clavulanate as first-line treatment for acute otitis media.",
+    "optionExplanations": {
+      "A": "Fluoroquinolones are not listed first-line and are cautioned in pediatrics.",
+      "B": "Tetracyclines are not listed first-line and are cautioned in children.",
+      "C": "Correct. Amoxicillin or amoxicillin-clavulanate is first-line.",
+      "D": "TMP-SMX is not the listed first-line regimen."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A pregnant patient with HIV is placed on prophylaxis using two NRTIs plus a boosted protease inhibitor. Which option matches the regimen listed",
+    "topic": "HIV prophylaxis in pregnancy",
+    "options": {
+      "A": "Lamivudine plus zidovudine plus ritonavir-boosted atazanavir",
+      "B": "Acyclovir plus ribavirin plus oseltamivir",
+      "C": "Efavirenz plus fluconazole plus rifampin",
+      "D": "Tenofovir alone"
+    },
+    "correct": "A",
+    "explanation": "The listed regimen uses 2 NRTIs such as emtricitabine or lamivudine plus zidovudine or tenofovir, plus ritonavir-boosted atazanavir or lopinavir.",
+    "optionExplanations": {
+      "A": "Correct. This matches the listed structure.",
+      "B": "These are not the listed HIV pregnancy prophylaxis regimen.",
+      "C": "This is not the listed regimen.",
+      "D": "Tenofovir alone is incomplete."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "An older adult receives gentamicin. Which aging change increases the serum concentration of this water-soluble drug",
+    "topic": "Geriatric distribution",
+    "options": {
+      "A": "Increased total body water",
+      "B": "Decreased total body water",
+      "C": "Increased plasma albumin",
+      "D": "Increased hepatic blood flow"
+    },
+    "correct": "B",
+    "explanation": "Older adults have decreased body water, which increases concentrations of water-soluble drugs such as aminoglycosides.",
+    "optionExplanations": {
+      "A": "Total body water decreases with aging.",
+      "B": "Correct. Less body water raises water-soluble drug concentration.",
+      "C": "This is not the key change.",
+      "D": "Hepatic blood flow generally decreases with age."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "An 82-year-old takes diazepam and has prolonged sedation. Which age-related change best explains this",
+    "topic": "Lipophilic drugs in older adults",
+    "options": {
+      "A": "Decreased fat mass shortens half-life",
+      "B": "Increased fat increases volume of distribution and half-life",
+      "C": "Increased renal clearance prolongs half-life",
+      "D": "Increased phase I metabolism increases active metabolites"
+    },
+    "correct": "B",
+    "explanation": "Older adults have increased fat, increasing Vd and half-life of lipophilic drugs such as benzodiazepines and barbiturates.",
+    "optionExplanations": {
+      "A": "Fat mass tends to increase with aging.",
+      "B": "Correct. Lipophilic drugs can have prolonged effects.",
+      "C": "Renal clearance decreases with aging.",
+      "D": "Phase I metabolism decreases with aging."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "An 86-year-old low-BMI patient has normal serum creatinine but develops digoxin toxicity after a standard dose. What best explains this",
+    "topic": "Normal creatinine in older adults",
+    "options": {
+      "A": "Increased lean mass raises creatinine production",
+      "B": "Decreased lean mass lowers creatinine production and can mask reduced GFR",
+      "C": "Older adults have increased renal blood flow",
+      "D": "Digoxin is cleared mainly by phase II hepatic conjugation"
+    },
+    "correct": "B",
+    "explanation": "Low muscle mass decreases creatinine production, so normal creatinine can mask reduced GFR and lead to overestimated renal clearance.",
+    "optionExplanations": {
+      "A": "Lean mass decreases with aging/low BMI.",
+      "B": "Correct. Normal creatinine can hide renal impairment.",
+      "C": "Renal blood flow decreases with age.",
+      "D": "Digoxin is importantly renally cleared."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "An older patient has rising warfarin and phenytoin levels after no dose change. Which aging change best explains this",
+    "topic": "Geriatric hepatic metabolism",
+    "options": {
+      "A": "Decreased phase I CYP450 metabolism",
+      "B": "Increased renal tubular secretion",
+      "C": "Increased phase II metabolism",
+      "D": "Increased gastric acid secretion"
+    },
+    "correct": "A",
+    "explanation": "Phase I CYP450-mediated reactions decrease with age, so warfarin and phenytoin levels may rise.",
+    "optionExplanations": {
+      "A": "Correct. Reduced phase I metabolism can increase these levels.",
+      "B": "Not the main mechanism for these drugs.",
+      "C": "Phase II reactions are mostly unchanged.",
+      "D": "Gastric acid does not explain this."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "An older adult takes ciprofloxacin with iron tablets and has reduced antibiotic effect. Which mechanism is most likely",
+    "topic": "Chelation and absorption",
+    "options": {
+      "A": "CYP3A induction by iron",
+      "B": "Chelation reducing fluoroquinolone absorption",
+      "C": "Increased renal clearance of ciprofloxacin",
+      "D": "Bilirubin displacement from albumin"
+    },
+    "correct": "B",
+    "explanation": "Iron and antacids can chelate fluoroquinolones and tetracyclines, reducing absorption.",
+    "optionExplanations": {
+      "A": "Iron is not a CYP3A inducer.",
+      "B": "Correct. Chelation decreases absorption.",
+      "C": "This is an absorption problem, not clearance.",
+      "D": "This is a neonatal sulfonamide concern."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "An 88-year-old man with BPH takes diphenhydramine and pseudoephedrine for a cold, then develops urinary retention and hypertension. Which pairing best explains this",
+    "topic": "OTC cold medicine adverse effects",
+    "options": {
+      "A": "Diphenhydramine increases detrusor contraction; pseudoephedrine decreases SVR",
+      "B": "Diphenhydramine causes anticholinergic detrusor inhibition; pseudoephedrine increases urethral sphincter tone and SVR",
+      "C": "Diphenhydramine blocks alpha-1 receptors; pseudoephedrine causes hypoglycemia",
+      "D": "Diphenhydramine causes serotonin syndrome; pseudoephedrine blocks CYP3A"
+    },
+    "correct": "B",
+    "explanation": "Diphenhydramine decreases detrusor contraction via anticholinergic effects; pseudoephedrine/phenylephrine are alpha agonists that increase urethral sphincter tone and SVR.",
+    "optionExplanations": {
+      "A": "This reverses the effects.",
+      "B": "Correct. This causes urinary retention and hypertension.",
+      "C": "Diphenhydramine is anticholinergic, not alpha-1 blocking.",
+      "D": "This is not serotonin syndrome or CYP3A blockade."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "An 80-year-old starts terazosin and soon falls after standing. Which age-related physiologic change makes this more likely",
+    "topic": "Alpha-1 blockers and orthostasis",
+    "options": {
+      "A": "Increased baroreceptor sensitivity",
+      "B": "Decreased baroreceptor sensitivity",
+      "C": "Increased acetylcholine release at the bladder",
+      "D": "Increased total body water"
+    },
+    "correct": "B",
+    "explanation": "Alpha-1 blockers cause vasodilation, and older adults have decreased baroreceptor sensitivity, increasing orthostatic hypotension and fall risk.",
+    "optionExplanations": {
+      "A": "Baroreceptor sensitivity decreases with aging.",
+      "B": "Correct. Impaired compensation predisposes to orthostasis.",
+      "C": "This does not explain alpha-1 blocker falls.",
+      "D": "Total body water decreases and is not the mechanism."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A 79-year-old develops ankle edema after starting amlodipine. A second physician adds furosemide without recognizing edema as a drug adverse effect. What problem is this",
+    "topic": "Prescribing cascade",
+    "options": {
+      "A": "Therapeutic substitution",
+      "B": "Medication reconciliation",
+      "C": "Prescribing cascade",
+      "D": "Brown bag review"
+    },
+    "correct": "C",
+    "explanation": "A prescribing cascade occurs when a new drug is prescribed to treat a side effect of another drug instead of identifying and reducing/stopping the offending drug.",
+    "optionExplanations": {
+      "A": "This means replacing a medication with another similar option.",
+      "B": "This means verifying a medication list.",
+      "C": "Correct. New drug added for an adverse drug effect = prescribing cascade.",
+      "D": "This is bringing all medicines/supplements for review."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A frail older adult receives meperidine and diazepam, then becomes somnolent and delirious. Which explanation best fits",
+    "topic": "Meperidine and benzodiazepines",
+    "options": {
+      "A": "Meperidine active metabolites accumulate with reduced renal clearance; diazepam is long-acting and lipophilic",
+      "B": "Both drugs are safest because phase II metabolism is preserved",
+      "C": "Diazepam rapidly clears due to decreased fat stores",
+      "D": "Meperidine prevents delirium by blocking acetylcholine receptors"
+    },
+    "correct": "A",
+    "explanation": "Meperidine has active metabolites and reduced renal clearance in older adults. Diazepam is long-acting and lipophilic, increasing half-life and risk of delirium/falls.",
+    "optionExplanations": {
+      "A": "Correct. Both increase CNS toxicity risk in older adults.",
+      "B": "These drugs are not safest in older adults.",
+      "C": "Fat stores increase with aging.",
+      "D": "Anticholinergic effects can worsen delirium."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "An older patient with CKD and prior GI ulcer uses naproxen while taking warfarin. Which risk is most emphasized",
+    "topic": "NSAID risk and interactions",
+    "options": {
+      "A": "Hyperkalemia from mineralocorticoid excess",
+      "B": "Increased bleeding from GI irritation and platelet inhibition",
+      "C": "Kernicterus from bilirubin displacement",
+      "D": "Permanent gray discoloration from glucuronidation failure"
+    },
+    "correct": "B",
+    "explanation": "NSAIDs increase GI bleeding/ulcer and kidney injury risk. Warfarin plus NSAIDs increases bleeding through GI irritation and platelet inhibition.",
+    "optionExplanations": {
+      "A": "Hyperkalemia is more ACE inhibitor plus potassium/spironolactone.",
+      "B": "Correct. NSAID plus warfarin increases bleeding risk.",
+      "C": "Kernicterus is a neonatal bilirubin issue.",
+      "D": "Gray baby syndrome is chloramphenicol toxicity."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A 76-year-old taking lisinopril starts spironolactone. Which electrolyte problem is the key interaction concern",
+    "topic": "ACE inhibitor interactions",
+    "options": {
+      "A": "Hypokalemia",
+      "B": "Hypernatremia",
+      "C": "Hyperkalemia",
+      "D": "Hypocalcemia"
+    },
+    "correct": "C",
+    "explanation": "ACE inhibitors combined with potassium supplements or spironolactone increase hyperkalemia risk.",
+    "optionExplanations": {
+      "A": "The concern is high potassium.",
+      "B": "Not the key electrolyte issue.",
+      "C": "Correct. ACE inhibitor plus spironolactone can cause hyperkalemia.",
+      "D": "Not the main interaction."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "An older patient taking digoxin is started on amiodarone. Which adverse outcome should be anticipated",
+    "topic": "Digoxin interactions",
+    "options": {
+      "A": "Digoxin toxicity",
+      "B": "Theophylline toxicity",
+      "C": "Reduced warfarin effect",
+      "D": "Severe hypoglycemia"
+    },
+    "correct": "A",
+    "explanation": "The lecture lists digoxin plus amiodarone as causing digoxin toxicity; digoxin plus verapamil can cause bradycardia/heart block.",
+    "optionExplanations": {
+      "A": "Correct. Amiodarone can increase digoxin toxicity risk.",
+      "B": "Theophylline toxicity is associated with quinolones.",
+      "C": "Warfarin effect is increased by several antibiotics and phenytoin interactions, not reduced here.",
+      "D": "This is a sulfonylurea concern."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "An older adult on theophylline receives a quinolone antibiotic and develops toxicity symptoms. Which listed interaction explains this",
+    "topic": "Theophylline and quinolones",
+    "options": {
+      "A": "Quinolones reduce theophylline toxicity by inducing renal clearance",
+      "B": "Quinolones cause theophylline toxicity",
+      "C": "Quinolones chelate theophylline in plasma and inactivate it",
+      "D": "Quinolones block bilirubin conjugation"
+    },
+    "correct": "B",
+    "explanation": "The lecture lists theophylline plus quinolones as a high-yield interaction causing theophylline toxicity.",
+    "optionExplanations": {
+      "A": "The interaction increases toxicity.",
+      "B": "Correct. Quinolones can increase theophylline toxicity.",
+      "C": "Chelation is an absorption issue with iron/antacids and fluoroquinolones/tetracyclines.",
+      "D": "Not a bilirubin conjugation issue."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A patient drinks grapefruit juice daily while taking felodipine and develops lower blood pressure with reflex tachycardia. What is the mechanism",
+    "topic": "Grapefruit juice and CYP inhibition",
+    "options": {
+      "A": "CYP inhibition increases felodipine levels",
+      "B": "CYP induction decreases felodipine levels",
+      "C": "P-glycoprotein induction blocks absorption completely",
+      "D": "Albumin binding increases and inactivates felodipine"
+    },
+    "correct": "A",
+    "explanation": "Grapefruit juice inhibits CYP metabolism, increasing susceptible drug levels such as felodipine.",
+    "optionExplanations": {
+      "A": "Correct. CYP inhibition increases felodipine levels.",
+      "B": "This is the opposite of the lecture mechanism.",
+      "C": "The lecture emphasizes CYP inhibition.",
+      "D": "Albumin binding is not the mechanism."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A transplant patient starts St. John's wort and his immunosuppressant level falls. Which property explains this",
+    "topic": "St. John's wort",
+    "options": {
+      "A": "Potent CYP3A4 and P-glycoprotein induction",
+      "B": "Irreversible inhibition of renal excretion",
+      "C": "Direct bilirubin displacement from albumin",
+      "D": "Selective alpha-1 blockade"
+    },
+    "correct": "A",
+    "explanation": "St. John's wort is a potent CYP3A4 and P-glycoprotein inducer and can reduce levels/effects of immunosuppressants, HIV protease inhibitors, antineoplastics, antidepressants, and warfarin.",
+    "optionExplanations": {
+      "A": "Correct. CYP3A4/P-gp induction is key.",
+      "B": "Not the listed mechanism.",
+      "C": "This is a sulfonamide-neonate issue.",
+      "D": "Alpha-1 blockade causes orthostasis, not reduced drug levels."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "An older patient taking aspirin begins using ginkgo. Which adverse effect is most concerning",
+    "topic": "Ginkgo interaction",
+    "options": {
+      "A": "Hyperkalemia",
+      "B": "Bleeding risk",
+      "C": "Kernicterus",
+      "D": "Patent ductus arteriosus closure"
+    },
+    "correct": "B",
+    "explanation": "The lecture lists ginkgo plus aspirin as increasing bleeding risk.",
+    "optionExplanations": {
+      "A": "Hyperkalemia is ACE inhibitor plus potassium/spironolactone.",
+      "B": "Correct. Ginkgo plus aspirin increases bleeding risk.",
+      "C": "Kernicterus is unrelated.",
+      "D": "Indomethacin closes PDA; ginkgo does not."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A patient taking an SSRI adds an herbal supplement and develops agitation, confusion, tachycardia, headache, diaphoresis, and diarrhea. Which syndrome is most likely",
+    "topic": "Serotonin syndrome",
+    "options": {
+      "A": "Neuroleptic malignant syndrome",
+      "B": "Anticholinergic toxicity",
+      "C": "Serotonin syndrome",
+      "D": "Gray baby syndrome"
+    },
+    "correct": "C",
+    "explanation": "Serotonin syndrome results from increased serotonin due to high doses, combinations, illicit drugs, or herbals, with agitation/confusion, tachycardia, headache, diaphoresis, and diarrhea.",
+    "optionExplanations": {
+      "A": "NMS is more dopamine blockade with rigidity.",
+      "B": "Anticholinergic toxicity causes dry skin, urinary retention, constipation, and confusion.",
+      "C": "Correct. This symptom cluster matches serotonin syndrome.",
+      "D": "Gray baby syndrome occurs in neonates exposed to chloramphenicol."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "An older adult is prescribed a new medication. Which approach best reflects the lecture's prescribing principle",
+    "topic": "Start low, go slow",
+    "options": {
+      "A": "Begin at the usual adult maximum dose",
+      "B": "Start multiple medications simultaneously",
+      "C": "Use OTC or herbal products first because they are automatically safer",
+      "D": "Start one medication at a low dose, titrate gradually, and monitor response/adverse effects"
+    },
+    "correct": "D",
+    "explanation": "The lecture emphasizes asking if a drug is needed, considering non-drug options, and using start low/go slow: one drug at a time, low dose, gradual titration, and monitoring.",
+    "optionExplanations": {
+      "A": "Maximum initial dosing increases adverse effect risk.",
+      "B": "Starting multiple drugs makes adverse effects hard to identify.",
+      "C": "OTC/herbals are not automatically safer.",
+      "D": "Correct. This matches start low, go slow."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "An older adult with memory impairment, poor vision, high medication costs, and a complex schedule misses doses. Which intervention would most directly improve adherence",
+    "topic": "Medication adherence",
+    "options": {
+      "A": "Increase the number of daily doses",
+      "B": "Avoid explaining indications",
+      "C": "Use a shorter medication list, once-daily dosing when possible, a pillbox, and written indications",
+      "D": "Switch all prescriptions to herbal supplements"
+    },
+    "correct": "C",
+    "explanation": "Adherence can improve with a short medication list, once-daily dosing when possible, pillbox, bottle review, and written indications.",
+    "optionExplanations": {
+      "A": "Multiple doses worsen adherence.",
+      "B": "Writing indications can improve adherence.",
+      "C": "Correct. These are lecture-listed adherence strategies.",
+      "D": "Herbals are not automatically safer and may interact."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A neonate has a patent ductus arteriosus. Which medication would promote closure, and which type could keep it open",
+    "topic": "PDA pharmacology",
+    "options": {
+      "A": "Misoprostol closes it; indomethacin keeps it open",
+      "B": "Indomethacin closes it; prostaglandin analogs such as misoprostol keep it open",
+      "C": "Diazepam closes it; chloramphenicol keeps it open",
+      "D": "Ceftriaxone closes it; vancomycin keeps it open"
+    },
+    "correct": "B",
+    "explanation": "Indomethacin, an NSAID, is used to close PDA. Prostaglandin analogs such as misoprostol can keep it open.",
+    "optionExplanations": {
+      "A": "This reverses the roles.",
+      "B": "Correct. Indomethacin closes PDA; prostaglandins maintain patency.",
+      "C": "These are not PDA-directed drugs.",
+      "D": "These antibiotics are not PDA-directed drugs."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    const progressEl = document.getElementById("progress");
+    const countEl = document.getElementById("count");
+    const wrongCountEl = document.getElementById("wrongCount");
+    const rightCountEl = document.getElementById("rightCount");
+    const questionNumberEl = document.getElementById("questionNumber");
+    const topicEl = document.getElementById("topic");
+    const stemEl = document.getElementById("stem");
+    const optionsEl = document.getElementById("options");
+    const explanationEl = document.getElementById("explanation");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function getScore() {
+      let right = 0;
+      let wrong = 0;
+      Object.keys(answers).forEach((qid) => {
+        const q = questions.find((item) => item.id === Number(qid));
+        if (q && answers[qid] === q.correct) right += 1;
+        if (q && answers[qid] !== q.correct) wrong += 1;
+      });
+      return { right, wrong };
+    }
+
+    function goToQuestion(index) {
+      let newIndex = index;
+      if (newIndex < 0) newIndex = questions.length - 1;
+      if (newIndex >= questions.length) newIndex = 0;
+      currentIndex = newIndex;
+      render();
+    }
+
+    function selectAnswer(letter) {
+      const q = questions[currentIndex];
+      answers[q.id] = letter;
+      render();
+    }
+
+    function renderProgress() {
+      progressEl.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment";
+        if (idx === currentIndex) btn.classList.add("active");
+        else if (answers[q.id] !== undefined) btn.classList.add("answered");
+        btn.setAttribute("aria-label", `Go to question ${idx + 1}`);
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.addEventListener("click", () => goToQuestion(idx));
+        progressEl.appendChild(btn);
+      });
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      const selectedChoice = answers[q.id] !== undefined ? answers[q.id] : null;
+      const showExplanation = selectedChoice !== null;
+      const isCorrect = selectedChoice === q.correct;
+      const score = getScore();
+
+      renderProgress();
+      countEl.textContent = `${currentIndex + 1} / ${questions.length}`;
+      wrongCountEl.textContent = score.wrong;
+      rightCountEl.textContent = score.right;
+      questionNumberEl.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      topicEl.textContent = q.topic ? `Topic: ${q.topic}` : "";
+      stemEl.textContent = q.stem + "?";
+
+      optionsEl.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (showExplanation && letter === q.correct) btn.classList.add("correct");
+        else if (showExplanation && letter === selectedChoice && letter !== q.correct) btn.classList.add("incorrect");
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        btn.addEventListener("click", () => selectAnswer(letter));
+        optionsEl.appendChild(btn);
+      });
+
+      if (showExplanation) {
+        const optionDetails = Object.entries(q.optionExplanations)
+          .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+          .join("");
+        explanationEl.className = "explanation show";
+        explanationEl.innerHTML = `
+          <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+          <p class="${isCorrect ? "green-text" : "red-text"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+          <div class="option-explanations">
+            <p><strong>Why each option is right or wrong:</strong></p>
+            ${optionDetails}
+          </div>
+        `;
+      } else {
+        explanationEl.className = "explanation";
+        explanationEl.innerHTML = "";
+      }
+    }
+
+    prevBtn.addEventListener("click", () => goToQuestion(currentIndex - 1));
+    nextBtn.addEventListener("click", () => goToQuestion(currentIndex + 1));
+
+    render();
+  </script>
+</body>
+</html>

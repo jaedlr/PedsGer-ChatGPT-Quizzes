@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Single-Gene Genetic Disorders Quiz</title>
+  <style>
+    :root {
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-200: #e2e8f0;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-500: #6b7280;
+      --green-100: #dcfce7;
+      --green-500: #22c55e;
+      --green-700: #15803d;
+      --red-100: #fee2e2;
+      --red-500: #ef4444;
+      --red-700: #b91c1c;
+      --blue: #6fa8dc;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--slate-900);
+      color: #111827;
+    }
+    .container {
+      padding: 24px;
+      max-width: 896px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .progress-wrap { flex: 1; }
+    .progress {
+      display: flex;
+      gap: 4px;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 9999px;
+      border: 0;
+      cursor: pointer;
+      flex: 1;
+      min-width: 4px;
+      background: var(--slate-700);
+      transition: background 0.15s ease;
+      padding: 0;
+    }
+    .segment.active { background: var(--slate-200); }
+    .segment.answered { background: var(--blue); }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .count {
+      color: var(--slate-200);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .badge.red {
+      background: rgba(127, 29, 29, 0.6);
+      color: #fee2e2;
+    }
+    .badge.green {
+      background: rgba(6, 78, 59, 0.6);
+      color: #d1fae5;
+    }
+    .card {
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gray-500);
+      font-size: 12px;
+      gap: 12px;
+    }
+    .stem {
+      font-weight: 700;
+      margin: 4px 0 0;
+      line-height: 1.45;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      background: var(--gray-50);
+      cursor: pointer;
+      line-height: 1.35;
+      font-size: 15px;
+    }
+    .option:hover { background: var(--gray-100); }
+    .option.correct {
+      background: var(--green-100);
+      border-color: var(--green-500);
+    }
+    .option.incorrect {
+      background: var(--red-100);
+      border-color: var(--red-500);
+    }
+    .explanation {
+      margin-top: 4px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      font-size: 14px;
+      line-height: 1.45;
+      display: none;
+    }
+    .explanation.show { display: block; }
+    .explanation p { margin: 0 0 8px; }
+    .explanation p:last-child { margin-bottom: 0; }
+    .green-text { color: var(--green-700); }
+    .red-text { color: var(--red-700); }
+    .option-explanations {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .nav button {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav button:hover { background: var(--gray-100); }
+    .footer {
+      color: var(--gray-500);
+      font-size: 12px;
+      min-height: 16px;
+    }
+    @media (max-width: 640px) {
+      .container { padding: 14px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .progress-wrap { width: 100%; }
+      .status { width: 100%; justify-content: space-between; }
+      .meta { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="topbar">
+      <div class="progress-wrap">
+        <div class="progress" id="progress"></div>
+      </div>
+      <div class="status">
+        <div class="count" id="count"></div>
+        <div class="badges">
+          <div class="badge red"><span>×</span><span id="wrongCount">0</span></div>
+          <div class="badge green"><span>✓</span><span id="rightCount">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+      <div class="nav">
+        <button id="prevBtn">Previous</button>
+        <button id="nextBtn">Next</button>
+      </div>
+    </section>
+
+    <p class="footer"></p>
+  </main>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A family has an affected father with an autosomal dominant disorder and an unaffected mother. The father is heterozygous for the pathogenic allele. What is the recurrence risk for each child",
+    "topic": "Autosomal dominant inheritance",
+    "options": {
+      "A": "25% affected",
+      "B": "50% affected",
+      "C": "100% affected",
+      "D": "Only sons affected"
+    },
+    "correct": "B",
+    "explanation": "Autosomal dominant disorders require only one mutated allele. An affected heterozygous parent transmits the mutation to about 50% of offspring, and males and females are affected equally.",
+    "optionExplanations": {
+      "A": "25% affected is the classic risk when both parents are carriers for an autosomal recessive disorder.",
+      "B": "Correct. A heterozygous autosomal dominant parent has a 50% chance of passing the mutation to each child.",
+      "C": "100% would require all offspring to inherit a pathogenic allele, which is not expected from one heterozygous parent.",
+      "D": "Autosomal dominant disorders affect males and females equally. Sex-limited transmission suggests an X-linked pattern."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "Two unaffected parents have a child with an early-onset enzyme deficiency. The child's siblings, but not previous generations, are also at risk. Which inheritance pattern best fits this pedigree",
+    "topic": "Autosomal recessive inheritance",
+    "options": {
+      "A": "Autosomal dominant with complete penetrance",
+      "B": "Mitochondrial inheritance",
+      "C": "Autosomal recessive inheritance",
+      "D": "Y-linked inheritance"
+    },
+    "correct": "C",
+    "explanation": "Autosomal recessive disorders often involve enzyme loss-of-function, early onset, complete penetrance, unaffected carrier parents, and a horizontal pattern among siblings.",
+    "optionExplanations": {
+      "A": "Autosomal dominant disease usually shows vertical transmission through generations.",
+      "B": "Mitochondrial disorders are transmitted from an affected mother to all children with variable severity.",
+      "C": "Correct. Unaffected carrier parents with affected siblings is classic for autosomal recessive inheritance.",
+      "D": "Y-linked inheritance affects only males and is transmitted father to son."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A man with an X-linked recessive condition asks about risks to his children with an unaffected, noncarrier partner. Which statement is most accurate",
+    "topic": "X-linked recessive inheritance",
+    "options": {
+      "A": "All daughters will be carriers and no sons will be directly affected",
+      "B": "All sons will be affected and all daughters will be unaffected noncarriers",
+      "C": "Each child has a 25% chance of being affected",
+      "D": "Only daughters can be clinically affected"
+    },
+    "correct": "A",
+    "explanation": "In X-linked recessive inheritance, an affected male passes his mutant X chromosome to all daughters and his Y chromosome to all sons, so all daughters are carriers and no sons inherit the affected X from him.",
+    "optionExplanations": {
+      "A": "Correct. Affected fathers pass the mutant X to daughters and the Y chromosome to sons.",
+      "B": "This reverses X-linked transmission; sons receive the father's Y chromosome.",
+      "C": "A 25% affected risk is typical of two autosomal recessive carrier parents.",
+      "D": "X-linked recessive disorders usually affect males more commonly and more severely."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "Several members of a family carry the same NF1 mutation, but one has only cafe-au-lait macules while another has many neurofibromas and learning issues. Which genetic concept explains the different severity",
+    "topic": "Variable expressivity",
+    "options": {
+      "A": "Complete penetrance",
+      "B": "Variable expressivity",
+      "C": "Genetic anticipation",
+      "D": "Loss of heterozygosity"
+    },
+    "correct": "B",
+    "explanation": "Expressivity describes the severity or range of phenotype in people who have the same disease-causing mutation. NF1 is a classic example of variable expressivity.",
+    "optionExplanations": {
+      "A": "Penetrance describes whether the phenotype is present at all, not how severe it is.",
+      "B": "Correct. Variable expressivity means the same disorder can appear with different severity or features.",
+      "C": "Anticipation refers to earlier or more severe disease in later generations, often with repeat expansions.",
+      "D": "Loss of heterozygosity is a tumor suppressor mechanism, not the explanation for variable severity here."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A newborn has a single base substitution that converts a codon for lysine into a premature stop codon. Which mutation type is present",
+    "topic": "Nonsense mutation",
+    "options": {
+      "A": "Missense mutation",
+      "B": "Silent mutation",
+      "C": "Nonsense mutation",
+      "D": "Trinucleotide repeat expansion"
+    },
+    "correct": "C",
+    "explanation": "A nonsense mutation is a point mutation that creates a premature stop codon, often producing a truncated protein.",
+    "optionExplanations": {
+      "A": "A missense mutation changes one amino acid to another, not to a stop codon.",
+      "B": "A silent mutation does not change the encoded amino acid.",
+      "C": "Correct. Premature stop codon formation defines a nonsense mutation.",
+      "D": "A trinucleotide repeat expansion involves increased copies of a 3-base repeat, not a single base change to a stop codon."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A patient has lifelong markedly elevated LDL cholesterol, Achilles tendon xanthomas, and premature coronary artery disease. Which lipoprotein disorder best fits this presentation",
+    "topic": "Familial hypercholesterolemia type IIa",
+    "options": {
+      "A": "Type I familial hyperchylomicronemia",
+      "B": "Type IIa familial hypercholesterolemia",
+      "C": "Type III familial dysbetalipoproteinemia",
+      "D": "Type IV familial hypertriglyceridemia"
+    },
+    "correct": "B",
+    "explanation": "Type IIa familial hypercholesterolemia is usually due to an LDL receptor pathway defect such as LDL receptor or ApoB-100 abnormality, causing markedly increased LDL, tendon xanthomas, and premature atherosclerosis.",
+    "optionExplanations": {
+      "A": "Type I causes high chylomicrons with very high triglycerides, pancreatitis, eruptive xanthomas, and hepatosplenomegaly.",
+      "B": "Correct. Isolated severe LDL elevation with tendon xanthomas is classic type IIa familial hypercholesterolemia.",
+      "C": "Type III involves ApoE defects with remnant accumulation, palmar xanthomas, and increased cholesterol plus triglycerides.",
+      "D": "Type IV mainly increases VLDL and triglycerides, often with pancreatitis risk."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A child has recurrent pancreatitis, eruptive xanthomas, hepatosplenomegaly, and very high triglycerides due to elevated chylomicrons. Which defect is most likely",
+    "topic": "Familial hyperchylomicronemia type I",
+    "options": {
+      "A": "ApoE defect",
+      "B": "LDL receptor defect",
+      "C": "Increased hepatic VLDL production only",
+      "D": "Lipoprotein lipase or ApoC-II deficiency"
+    },
+    "correct": "D",
+    "explanation": "Type I familial hyperchylomicronemia is due to lipoprotein lipase deficiency or ApoC-II deficiency, causing chylomicron accumulation, very high triglycerides, pancreatitis, eruptive xanthomas, and hepatosplenomegaly.",
+    "optionExplanations": {
+      "A": "ApoE defects cause type III familial dysbetalipoproteinemia.",
+      "B": "LDL receptor defects cause type IIa familial hypercholesterolemia with high LDL.",
+      "C": "Increased hepatic VLDL production is more typical of type IV or type IIb patterns.",
+      "D": "Correct. LPL or ApoC-II defects impair chylomicron clearance."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A patient has palmar xanthomas, tuberoeruptive xanthomas, premature atherosclerosis, and elevated cholesterol plus triglycerides due to remnant accumulation. Which apoprotein is defective",
+    "topic": "Familial dysbetalipoproteinemia type III",
+    "options": {
+      "A": "ApoE",
+      "B": "ApoB-100",
+      "C": "ApoC-II",
+      "D": "ApoA-I"
+    },
+    "correct": "A",
+    "explanation": "Type III familial dysbetalipoproteinemia is due to an ApoE defect causing accumulation of IDL and chylomicron remnants with elevated triglycerides and cholesterol.",
+    "optionExplanations": {
+      "A": "Correct. ApoE is needed for remnant clearance; defects cause type III disease.",
+      "B": "ApoB-100 defects can cause type IIa familial hypercholesterolemia.",
+      "C": "ApoC-II deficiency causes type I familial hyperchylomicronemia.",
+      "D": "ApoA-I is associated with HDL metabolism and is not the defect emphasized here."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A child from an Ashkenazi Jewish family has developmental regression, blindness, motor weakness, and a cherry-red macula. There is no hepatosplenomegaly. Which accumulated substrate is most likely",
+    "topic": "Tay-Sachs disease",
+    "options": {
+      "A": "Sphingomyelin",
+      "B": "GM2 ganglioside",
+      "C": "Glucocerebroside",
+      "D": "Globotriaosylceramide"
+    },
+    "correct": "B",
+    "explanation": "Tay-Sachs disease is caused by hexosaminidase A deficiency with accumulation of GM2 ganglioside, neurodegeneration, cherry-red spot, and no hepatosplenomegaly.",
+    "optionExplanations": {
+      "A": "Sphingomyelin accumulates in Niemann-Pick A/B.",
+      "B": "Correct. Hexosaminidase A deficiency causes GM2 ganglioside accumulation.",
+      "C": "Glucocerebroside accumulates in Gaucher disease.",
+      "D": "Globotriaosylceramide accumulates in Fabry disease."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A child has neurodegeneration, hepatosplenomegaly, a cherry-red macula, and lipid-laden foamy macrophages. The disease is severe with CNS involvement and death by early childhood. Which enzyme is deficient",
+    "topic": "Niemann-Pick disease A/B",
+    "options": {
+      "A": "Hexosaminidase A",
+      "B": "Glucocerebrosidase",
+      "C": "Alpha-galactosidase A",
+      "D": "Sphingomyelinase"
+    },
+    "correct": "D",
+    "explanation": "Niemann-Pick A/B is caused by sphingomyelinase deficiency with sphingomyelin accumulation in macrophages and neurons. Type A has severe CNS disease and early death.",
+    "optionExplanations": {
+      "A": "Hexosaminidase A deficiency causes Tay-Sachs, which lacks hepatosplenomegaly.",
+      "B": "Glucocerebrosidase deficiency causes Gaucher disease with crumpled-paper macrophages and bone disease.",
+      "C": "Alpha-galactosidase A deficiency causes Fabry disease.",
+      "D": "Correct. Sphingomyelinase deficiency causes Niemann-Pick A/B."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A child has ataxia, dysarthria, psychomotor regression, and vertical supranuclear gaze palsy due to a lipid transport defect rather than sphingomyelinase deficiency. Which diagnosis is most likely",
+    "topic": "Niemann-Pick disease type C",
+    "options": {
+      "A": "Niemann-Pick type C",
+      "B": "Tay-Sachs disease",
+      "C": "Hurler syndrome",
+      "D": "McArdle disease"
+    },
+    "correct": "A",
+    "explanation": "Niemann-Pick type C is caused by a lipid transport defect, usually NPC1, causing cholesterol and ganglioside accumulation with ataxia, dysarthria, psychomotor regression, and vertical supranuclear gaze palsy.",
+    "optionExplanations": {
+      "A": "Correct. Vertical supranuclear gaze palsy is a classic clue for Niemann-Pick C.",
+      "B": "Tay-Sachs causes neurodegeneration and cherry-red spot due to GM2 accumulation, not a cholesterol trafficking defect.",
+      "C": "Hurler syndrome is a mucopolysaccharidosis with corneal clouding and coarse facies.",
+      "D": "McArdle disease causes exercise-induced cramps from muscle glycogen phosphorylase deficiency."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A child has hepatosplenomegaly, thrombocytopenia, pancytopenia, bone pain, avascular necrosis, and macrophages with a crumpled tissue-paper appearance. Which enzyme is deficient",
+    "topic": "Gaucher disease",
+    "options": {
+      "A": "Glucocerebrosidase",
+      "B": "Sphingomyelinase",
+      "C": "Alpha-L-iduronidase",
+      "D": "Lysosomal acid alpha-glucosidase"
+    },
+    "correct": "A",
+    "explanation": "Gaucher disease is due to glucocerebrosidase deficiency with glucocerebroside accumulation in macrophages of the liver, spleen, and bone marrow. Bone disease strongly points to Gaucher among lysosomal storage disorders.",
+    "optionExplanations": {
+      "A": "Correct. Glucocerebrosidase deficiency produces Gaucher cells with crumpled-paper cytoplasm.",
+      "B": "Sphingomyelinase deficiency causes Niemann-Pick A/B.",
+      "C": "Alpha-L-iduronidase deficiency causes Hurler syndrome.",
+      "D": "Lysosomal acid alpha-glucosidase deficiency causes Pompe disease."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A man has episodic burning pain in his hands and feet, hypohidrosis, angiokeratomas, proteinuria, and early strokes. The disorder is X-linked recessive. What substance accumulates",
+    "topic": "Fabry disease",
+    "options": {
+      "A": "GM2 ganglioside",
+      "B": "Globotriaosylceramide",
+      "C": "Sphingomyelin",
+      "D": "Heparan sulfate only"
+    },
+    "correct": "B",
+    "explanation": "Fabry disease is an X-linked recessive alpha-galactosidase A deficiency with accumulation of globotriaosylceramide in endothelial lysosomes, causing neuropathic pain, angiokeratomas, renal failure, stroke, and cardiac disease.",
+    "optionExplanations": {
+      "A": "GM2 ganglioside accumulates in Tay-Sachs disease.",
+      "B": "Correct. Globotriaosylceramide accumulation causes Fabry disease.",
+      "C": "Sphingomyelin accumulates in Niemann-Pick A/B.",
+      "D": "Heparan sulfate is associated with mucopolysaccharidoses such as Hurler and Hunter."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A child has coarse facial features, developmental delay, hepatosplenomegaly, skeletal deformities, valvular disease, and corneal clouding. Which enzyme defect best fits the severe autosomal recessive form",
+    "topic": "Hurler syndrome",
+    "options": {
+      "A": "Iduronate-2-sulfatase deficiency",
+      "B": "Alpha-L-iduronidase deficiency",
+      "C": "Hexosaminidase A deficiency",
+      "D": "HGPRT deficiency"
+    },
+    "correct": "B",
+    "explanation": "Hurler syndrome, or MPS I, is an autosomal recessive alpha-L-iduronidase deficiency. Corneal clouding and severe childhood disease help distinguish it from Hunter syndrome.",
+    "optionExplanations": {
+      "A": "Iduronate-2-sulfatase deficiency causes Hunter syndrome, usually without classic corneal clouding.",
+      "B": "Correct. Alpha-L-iduronidase deficiency causes Hurler syndrome.",
+      "C": "Hexosaminidase A deficiency causes Tay-Sachs disease.",
+      "D": "HGPRT deficiency causes Lesch-Nyhan syndrome."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A boy has coarse facies, hepatosplenomegaly, skeletal abnormalities, and developmental delay, but no corneal clouding. The disorder is X-linked recessive. Which enzyme is deficient",
+    "topic": "Hunter syndrome",
+    "options": {
+      "A": "Glucose-6-phosphatase",
+      "B": "Alpha-galactosidase A",
+      "C": "Iduronate-2-sulfatase",
+      "D": "Glucocerebrosidase"
+    },
+    "correct": "C",
+    "explanation": "Hunter syndrome, or MPS II, is an X-linked recessive iduronate-2-sulfatase deficiency. It resembles Hurler syndrome but is typically milder and classically lacks corneal clouding.",
+    "optionExplanations": {
+      "A": "Glucose-6-phosphatase deficiency causes Von Gierke disease.",
+      "B": "Alpha-galactosidase A deficiency causes Fabry disease.",
+      "C": "Correct. Hunter syndrome is due to iduronate-2-sulfatase deficiency.",
+      "D": "Glucocerebrosidase deficiency causes Gaucher disease."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A 9-month-old boy has lethargy, poor feeding, seizures after fasting, failure to thrive, protuberant abdomen, hepatomegaly, and thin limbs. Labs show low glucose, high lactate, high uric acid, and high triglycerides. Which enzyme is deficient",
+    "topic": "Von Gierke disease",
+    "options": {
+      "A": "Glucose-6-phosphatase",
+      "B": "Muscle glycogen phosphorylase",
+      "C": "Lysosomal acid alpha-glucosidase",
+      "D": "Branched-chain alpha-ketoacid dehydrogenase"
+    },
+    "correct": "A",
+    "explanation": "Von Gierke disease is type I glycogen storage disease due to glucose-6-phosphatase deficiency. Glucose-6-phosphate becomes trapped in hepatocytes, causing hepatomegaly, fasting hypoglycemia, lactic acidosis, hyperuricemia, and hypertriglyceridemia.",
+    "optionExplanations": {
+      "A": "Correct. Glucose-6-phosphatase deficiency prevents release of free glucose during fasting.",
+      "B": "Muscle glycogen phosphorylase deficiency causes McArdle disease with exercise intolerance.",
+      "C": "Lysosomal acid alpha-glucosidase deficiency causes Pompe disease with cardiomegaly.",
+      "D": "Branched-chain alpha-ketoacid dehydrogenase deficiency causes maple syrup urine disease, not this glycogen storage pattern."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A teenager develops exercise-induced cramps and muscle breakdown due to impaired glycogen mobilization in skeletal muscle. Which enzyme is most likely deficient",
+    "topic": "McArdle disease",
+    "options": {
+      "A": "Glucocerebrosidase",
+      "B": "Muscle glycogen phosphorylase",
+      "C": "Glucose-6-phosphatase",
+      "D": "Phenylalanine hydroxylase"
+    },
+    "correct": "B",
+    "explanation": "McArdle disease, or type V glycogen storage disease, is due to muscle glycogen phosphorylase deficiency and causes exercise-induced cramps and muscle breakdown.",
+    "optionExplanations": {
+      "A": "Glucocerebrosidase deficiency causes Gaucher disease.",
+      "B": "Correct. McArdle disease affects skeletal muscle glycogen phosphorylase.",
+      "C": "Glucose-6-phosphatase deficiency causes Von Gierke disease with fasting hypoglycemia and hepatomegaly.",
+      "D": "Phenylalanine hydroxylase deficiency causes PKU, which is outside this single-gene section's GSD comparison."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "An infant has lysosomal glycogen accumulation involving the heart and skeletal muscle with cardiomegaly. Which glycogen storage disease is most likely",
+    "topic": "Pompe disease",
+    "options": {
+      "A": "Von Gierke disease",
+      "B": "McArdle disease",
+      "C": "Pompe disease",
+      "D": "Fabry disease"
+    },
+    "correct": "C",
+    "explanation": "Pompe disease, or type II glycogen storage disease, is due to lysosomal acid alpha-glucosidase deficiency and causes lysosomal glycogen accumulation, especially in heart and muscle, with cardiomegaly.",
+    "optionExplanations": {
+      "A": "Von Gierke disease is a hepatic glucose-6-phosphatase deficiency with severe fasting hypoglycemia.",
+      "B": "McArdle disease affects skeletal muscle glycogen phosphorylase and causes exercise cramps.",
+      "C": "Correct. Pompe disease is the lysosomal glycogen storage disease associated with cardiomegaly.",
+      "D": "Fabry disease is a sphingolipid storage disorder, not a glycogen storage disease."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A girl has normal early development followed by regression around 1 year of age with loss of language and motor skills and repetitive hand-wringing. Affected males usually die in infancy. Which gene is mutated",
+    "topic": "Rett syndrome",
+    "options": {
+      "A": "MECP2",
+      "B": "HGPRT",
+      "C": "FGFR3",
+      "D": "NPC1"
+    },
+    "correct": "A",
+    "explanation": "Rett syndrome is an X-linked dominant MECP2 mutation. It mostly affects females and causes normal initial development followed by regression, loss of language and motor skills, and characteristic hand wringing.",
+    "optionExplanations": {
+      "A": "Correct. MECP2 mutation causes Rett syndrome.",
+      "B": "HGPRT deficiency causes Lesch-Nyhan syndrome.",
+      "C": "FGFR3 gain-of-function causes achondroplasia, which is not in this section's Rett comparison.",
+      "D": "NPC1 lipid transport defects cause Niemann-Pick C."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A boy has developmental delay, choreoathetosis, gout, renal stones, megaloblastic anemia, and self-mutilation by biting his lips and fingers. Which biochemical abnormality is expected",
+    "topic": "Lesch-Nyhan syndrome",
+    "options": {
+      "A": "Decreased urate production from purine salvage excess",
+      "B": "Increased urate production from HGPRT deficiency",
+      "C": "Increased LDL from LDL receptor deficiency",
+      "D": "Accumulation of GM2 ganglioside"
+    },
+    "correct": "B",
+    "explanation": "Lesch-Nyhan syndrome is an X-linked recessive HGPRT deficiency. Impaired purine salvage increases urate production, causing gout and renal stones along with neurobehavioral findings and self-mutilation.",
+    "optionExplanations": {
+      "A": "HGPRT deficiency decreases purine salvage and increases urate, not decreases it.",
+      "B": "Correct. HGPRT deficiency causes increased urate production.",
+      "C": "Increased LDL from LDL receptor defects causes familial hypercholesterolemia.",
+      "D": "GM2 ganglioside accumulation causes Tay-Sachs disease."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A child has coarse facial features, joint stiffness, skeletal deformities, hepatosplenomegaly, developmental delay, and valvular lesions due to impaired degradation of glycosaminoglycans. Which accumulated substances are most characteristic of this disease group",
+    "topic": "Mucopolysaccharidoses",
+    "options": {
+      "A": "Dermatan sulfate and heparan sulfate",
+      "B": "Glucocerebroside and sphingomyelin",
+      "C": "Chylomicrons and VLDL",
+      "D": "Glycogen and amylopectin-like polysaccharide"
+    },
+    "correct": "A",
+    "explanation": "Mucopolysaccharidoses are caused by defective degradation of glycosaminoglycans with accumulation of dermatan sulfate and/or heparan sulfate. They cause systemic findings such as coarse facies, skeletal deformities, developmental delay, hepatosplenomegaly, and valvular lesions.",
+    "optionExplanations": {
+      "A": "Correct. Dermatan sulfate and heparan sulfate accumulation is the key MPS clue.",
+      "B": "These are lipid substrates in Gaucher and Niemann-Pick disease.",
+      "C": "Chylomicrons and VLDL are lipoproteins involved in familial hyperlipidemias.",
+      "D": "Glycogen accumulation is seen in glycogen storage diseases, not mucopolysaccharidoses."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A man has LDL cholesterol about 2 to 3 times normal with tendon xanthomas. His cousin has the homozygous form of the same disease. What severity would be expected in the cousin",
+    "topic": "Familial hypercholesterolemia heterozygous vs homozygous",
+    "options": {
+      "A": "Normal LDL with isolated high triglycerides",
+      "B": "LDL/cholesterol about 5 to 6 times normal with early MI risk",
+      "C": "Only chylomicron accumulation without atherosclerosis",
+      "D": "No skin or tendon xanthomas because both alleles are mutated"
+    },
+    "correct": "B",
+    "explanation": "Heterozygous familial hypercholesterolemia causes LDL/cholesterol about 2 to 3 times elevated, while homozygous disease can be about 5 to 6 times elevated with skin or tendon xanthomas, early atherosclerosis, and early MI.",
+    "optionExplanations": {
+      "A": "Isolated triglyceride elevation suggests type IV or other hypertriglyceridemias, not homozygous FH.",
+      "B": "Correct. Homozygous FH causes much more severe LDL elevation and early cardiovascular disease.",
+      "C": "Chylomicron accumulation describes type I hyperchylomicronemia.",
+      "D": "Homozygous FH has prominent xanthomas rather than absence of xanthomas."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A patient with a lysosomal storage disorder develops hepatosplenomegaly, cytopenias, bone crises, and later has increased Parkinson disease risk from lysosomal dysfunction and alpha-synuclein accumulation. Which disorder is being described",
+    "topic": "Gaucher disease and Parkinson risk",
+    "options": {
+      "A": "Gaucher disease",
+      "B": "Fabry disease",
+      "C": "Tay-Sachs disease",
+      "D": "Hunter syndrome"
+    },
+    "correct": "A",
+    "explanation": "Gaucher disease is due to glucocerebrosidase deficiency and is associated with hepatosplenomegaly, cytopenias, bone disease, crumpled-paper macrophages, and increased Parkinson disease risk due to lysosomal dysfunction.",
+    "optionExplanations": {
+      "A": "Correct. Bone involvement plus crumpled-paper macrophages and Parkinson risk point to Gaucher disease.",
+      "B": "Fabry disease causes angiokeratomas, burning pain, hypohidrosis, renal failure, stroke, and cardiac disease.",
+      "C": "Tay-Sachs causes neurodegeneration and cherry-red spot without hepatosplenomegaly.",
+      "D": "Hunter syndrome causes MPS features without classic corneal clouding."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "A metabolic disease is common enough in Ashkenazi Jewish carrier screening panels due to founder effects and causes cherry-red spot without hepatosplenomegaly. Which enzyme should be tested",
+    "topic": "Ashkenazi Jewish carrier screening and Tay-Sachs",
+    "options": {
+      "A": "Hexosaminidase A",
+      "B": "Iduronate-2-sulfatase",
+      "C": "Muscle glycogen phosphorylase",
+      "D": "Ornithine transcarbamylase"
+    },
+    "correct": "A",
+    "explanation": "Tay-Sachs is increased in Ashkenazi Jewish populations due to founder effects. It is caused by hexosaminidase A deficiency and presents with neurodegeneration, cherry-red macula, and no hepatosplenomegaly.",
+    "optionExplanations": {
+      "A": "Correct. Hexosaminidase A testing fits Tay-Sachs disease.",
+      "B": "Iduronate-2-sulfatase deficiency causes Hunter syndrome.",
+      "C": "Muscle glycogen phosphorylase deficiency causes McArdle disease.",
+      "D": "Ornithine transcarbamylase deficiency is a urea cycle disorder not emphasized in this single-gene section."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "A child has premature atherosclerosis and xanthomas due to defective hepatic uptake of LDL. Which sequence best describes the pathogenesis",
+    "topic": "Familial hypercholesterolemia pathogenesis",
+    "options": {
+      "A": "Defective LDL receptor pathway → decreased hepatic LDL uptake → increased plasma LDL → arterial intima infiltration and oxidation",
+      "B": "NPC1 mutation → impaired cholesterol trafficking → vertical supranuclear gaze palsy",
+      "C": "LPL deficiency → chylomicron accumulation → pancreatitis without premature atherosclerosis as the main feature",
+      "D": "Glucose-6-phosphate trapping → lactic acidosis → fasting hypoglycemia"
+    },
+    "correct": "A",
+    "explanation": "Familial hypercholesterolemia usually involves a defective LDL receptor pathway. Reduced hepatic LDL uptake increases plasma LDL, which infiltrates the arterial intima, undergoes oxidation, and accelerates atherosclerosis.",
+    "optionExplanations": {
+      "A": "Correct. This is the pathogenesis of familial hypercholesterolemia.",
+      "B": "This describes Niemann-Pick C, not LDL-driven atherosclerosis.",
+      "C": "This describes type I hyperchylomicronemia rather than type IIa FH.",
+      "D": "This describes Von Gierke disease, not familial hypercholesterolemia."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A boy has an X-linked recessive disease but his heterozygous mother has mild symptoms. Which mechanism best explains disease expression in a carrier female",
+    "topic": "X-inactivation in carrier females",
+    "options": {
+      "A": "Random X-inactivation",
+      "B": "Paternal anticipation",
+      "C": "Robertsonian translocation",
+      "D": "Mitochondrial heteroplasmy"
+    },
+    "correct": "A",
+    "explanation": "Carrier females for X-linked recessive disorders may show mild disease due to random X-inactivation, which can leave a proportion of cells expressing the mutant X chromosome.",
+    "optionExplanations": {
+      "A": "Correct. Random X-inactivation explains mild manifestations in some carrier females.",
+      "B": "Paternal anticipation is seen in some trinucleotide repeat disorders such as Huntington disease, not carrier expression here.",
+      "C": "Robertsonian translocations are chromosomal rearrangements, not the mechanism for carrier symptoms.",
+      "D": "Heteroplasmy explains variable mitochondrial disease severity, not X-linked carrier expression."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "A 47,XXY male develops a syndrome usually seen in girls, with early normal development followed by loss of language and motor skills and hand wringing. Why can this male survive with the condition",
+    "topic": "Rett syndrome in XXY males",
+    "options": {
+      "A": "The extra X chromosome allows survival despite an X-linked dominant MECP2 mutation",
+      "B": "The disease is autosomal recessive, so one extra X chromosome is protective",
+      "C": "The syndrome is caused by mitochondrial DNA, so karyotype is irrelevant",
+      "D": "The mutation affects only Y-linked genes"
+    },
+    "correct": "A",
+    "explanation": "Rett syndrome is X-linked dominant and mostly affects females; affected 46,XY males usually die in infancy. A 47,XXY male can survive because the extra X chromosome provides a second X chromosome context similar to females.",
+    "optionExplanations": {
+      "A": "Correct. Rett syndrome can occur in 47,XXY males because they have an extra X chromosome.",
+      "B": "Rett syndrome is X-linked dominant, not autosomal recessive.",
+      "C": "Rett is due to MECP2 mutation, not mitochondrial DNA mutation.",
+      "D": "MECP2 is not Y-linked."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A child with a storage disease has no hepatosplenomegaly because macrophages can use an alternate enzyme, but neurons and retina accumulate substrate. Which disease best matches this mechanism",
+    "topic": "Tay-Sachs lack of hepatosplenomegaly",
+    "options": {
+      "A": "Niemann-Pick A",
+      "B": "Gaucher disease",
+      "C": "Tay-Sachs disease",
+      "D": "Fabry disease"
+    },
+    "correct": "C",
+    "explanation": "Tay-Sachs disease affects CNS/autonomic neurons and retina with GM2 accumulation. The lecture notes emphasize no hepatosplenomegaly because macrophages can use hexosaminidase B.",
+    "optionExplanations": {
+      "A": "Niemann-Pick A commonly has hepatosplenomegaly and foamy macrophages.",
+      "B": "Gaucher disease has hepatosplenomegaly and bone marrow macrophage involvement.",
+      "C": "Correct. Tay-Sachs has cherry-red spot and neurodegeneration without hepatosplenomegaly.",
+      "D": "Fabry disease causes endothelial lysosomal accumulation with angiokeratomas, pain, renal failure, and strokes."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A child has fasting intolerance with persistent hypoglycemia because the liver cannot release free glucose from glucose-6-phosphate. Which additional lab pattern would most likely accompany this disorder",
+    "topic": "Von Gierke disease lab pattern",
+    "options": {
+      "A": "Low lactate, low uric acid, low triglycerides",
+      "B": "High lactate, high uric acid, high triglycerides",
+      "C": "High LDL only with normal glucose",
+      "D": "High ceramide trihexoside with proteinuria"
+    },
+    "correct": "B",
+    "explanation": "Von Gierke disease traps glucose-6-phosphate in hepatocytes. Shunting into alternate pathways causes lactic acidosis, hyperuricemia, and hypertriglyceridemia in addition to fasting hypoglycemia and hepatomegaly.",
+    "optionExplanations": {
+      "A": "The direction is wrong; lactate, uric acid, and triglycerides increase.",
+      "B": "Correct. This is the classic lab pattern in Von Gierke disease.",
+      "C": "High LDL alone is more consistent with familial hypercholesterolemia.",
+      "D": "Globotriaosylceramide accumulation with proteinuria suggests Fabry disease."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A child has an autosomal dominant disorder caused by a single mutated allele, but one parent with the mutation appears clinically normal. Which concept best describes the unaffected parent",
+    "topic": "Incomplete penetrance",
+    "options": {
+      "A": "Variable expressivity",
+      "B": "Incomplete penetrance",
+      "C": "Compound heterozygosity",
+      "D": "X-linked lyonization"
+    },
+    "correct": "B",
+    "explanation": "Penetrance describes whether a phenotype is present in someone with the mutation. Incomplete penetrance means a person has the mutation but appears clinically normal.",
+    "optionExplanations": {
+      "A": "Variable expressivity describes differences in severity among affected individuals, not absence of phenotype.",
+      "B": "Correct. Incomplete penetrance means the mutation is present but the phenotype is absent.",
+      "C": "Compound heterozygosity means two different pathogenic variants in the same gene, usually for recessive disease.",
+      "D": "Lyonization is X-inactivation and is not the general AD concept being tested."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    const progressEl = document.getElementById("progress");
+    const countEl = document.getElementById("count");
+    const wrongCountEl = document.getElementById("wrongCount");
+    const rightCountEl = document.getElementById("rightCount");
+    const questionNumberEl = document.getElementById("questionNumber");
+    const topicEl = document.getElementById("topic");
+    const stemEl = document.getElementById("stem");
+    const optionsEl = document.getElementById("options");
+    const explanationEl = document.getElementById("explanation");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function getScore() {
+      let right = 0;
+      let wrong = 0;
+      Object.keys(answers).forEach((qid) => {
+        const q = questions.find((item) => item.id === Number(qid));
+        if (q && answers[qid] === q.correct) right += 1;
+        if (q && answers[qid] !== q.correct) wrong += 1;
+      });
+      return { right, wrong };
+    }
+
+    function goToQuestion(index) {
+      let newIndex = index;
+      if (newIndex < 0) newIndex = questions.length - 1;
+      if (newIndex >= questions.length) newIndex = 0;
+      currentIndex = newIndex;
+      render();
+    }
+
+    function selectAnswer(letter) {
+      const q = questions[currentIndex];
+      answers[q.id] = letter;
+      render();
+    }
+
+    function renderProgress() {
+      progressEl.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment";
+        if (idx === currentIndex) btn.classList.add("active");
+        else if (answers[q.id] !== undefined) btn.classList.add("answered");
+        btn.setAttribute("aria-label", `Go to question ${idx + 1}`);
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.addEventListener("click", () => goToQuestion(idx));
+        progressEl.appendChild(btn);
+      });
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      const selectedChoice = answers[q.id] !== undefined ? answers[q.id] : null;
+      const showExplanation = selectedChoice !== null;
+      const isCorrect = selectedChoice === q.correct;
+      const score = getScore();
+
+      renderProgress();
+      countEl.textContent = `${currentIndex + 1} / ${questions.length}`;
+      wrongCountEl.textContent = score.wrong;
+      rightCountEl.textContent = score.right;
+      questionNumberEl.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      topicEl.textContent = q.topic ? `Topic: ${q.topic}` : "";
+      stemEl.textContent = q.stem + "?";
+
+      optionsEl.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (showExplanation && letter === q.correct) btn.classList.add("correct");
+        else if (showExplanation && letter === selectedChoice && letter !== q.correct) btn.classList.add("incorrect");
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        btn.addEventListener("click", () => selectAnswer(letter));
+        optionsEl.appendChild(btn);
+      });
+
+      if (showExplanation) {
+        const optionDetails = Object.entries(q.optionExplanations)
+          .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+          .join("");
+        explanationEl.className = "explanation show";
+        explanationEl.innerHTML = `
+          <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+          <p class="${isCorrect ? "green-text" : "red-text"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+          <div class="option-explanations">
+            <p><strong>Why each option is right or wrong:</strong></p>
+            ${optionDetails}
+          </div>
+        `;
+      } else {
+        explanationEl.className = "explanation";
+        explanationEl.innerHTML = "";
+      }
+    }
+
+    prevBtn.addEventListener("click", () => goToQuestion(currentIndex - 1));
+    nextBtn.addEventListener("click", () => goToQuestion(currentIndex + 1));
+
+    render();
+  </script>
+</body>
+</html>

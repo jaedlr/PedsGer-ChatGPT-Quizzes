@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hemolymphatic Disorders Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-900 min-h-screen">
+  <div id="root"></div>
+  <script type="text/babel">
+const { useState } = React;
+
+const questions = [
+  {
+    "id": 1,
+    "stem": "A 4 year old child presents with pallor, bruising, recurrent infections, and bone pain. CBC shows pancytopenia and bone marrow is packed with lymphoblasts. Which statement about this malignancy is most accurate",
+    "topic": "Pediatric ALL epidemiology",
+    "options": {
+      "A": "It is usually less treatable in children than adults",
+      "B": "It is the most common malignancy in children",
+      "C": "It usually arises from mature plasma cells",
+      "D": "It is primarily a disease of older adults"
+    },
+    "correct": "B",
+    "explanation": "Acute lymphoblastic leukemia is the most common childhood malignancy and accounts for most pediatric leukemias. The slides emphasize classic marrow failure symptoms: pancytopenia, bleeding, anemia symptoms, and infections.",
+    "optionExplanations": {
+      "A": "Incorrect. Children have much better 5-year survival than adults in the slide summary.",
+      "B": "Correct. ALL is the most common malignancy in children and is the dominant pediatric leukemia.",
+      "C": "Incorrect. Plasma cell neoplasms are not the focus here; ALL involves immature lymphoblasts.",
+      "D": "Incorrect. ALL is especially high-yield in children, with B-ALL peaking in early childhood."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "A 3 year old boy is diagnosed with precursor B acute lymphoblastic leukemia. Flow cytometry confirms immature B-lineage lymphoblasts. Which presentation pattern is most typical for this disease compared with lymphoblastic lymphoma",
+    "topic": "B-ALL vs B-LBL",
+    "options": {
+      "A": "Anterior mediastinal mass without marrow involvement",
+      "B": "Leukemic involvement of bone marrow and peripheral blood",
+      "C": "Isolated right-sided colonic mass",
+      "D": "Pure red cell aplasia without leukocytosis"
+    },
+    "correct": "B",
+    "explanation": "The section distinguishes leukemia from lymphoma: leukemia primarily involves bone marrow and peripheral blood, while lymphoma is a mass lesion without major marrow involvement. B-ALL is usually leukemic.",
+    "optionExplanations": {
+      "A": "Incorrect. A mediastinal/tissue mass is more typical of T-LBL/T-ALL presentations.",
+      "B": "Correct. B-ALL usually presents as leukemia with marrow and blood involvement.",
+      "C": "Incorrect. A right-sided colon cancer pattern belongs to Lynch syndrome, not this section.",
+      "D": "Incorrect. ALL causes marrow replacement with pancytopenia, not isolated red cell aplasia."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "A 15 year old boy presents with dyspnea, facial swelling, and a large anterior mediastinal mass. CBC shows marked leukocytosis with circulating blasts, and marrow blasts express T-cell markers. Which genetic association is most characteristic in this disease category",
+    "topic": "T-ALL genetics",
+    "options": {
+      "A": "KMT2A/MLL rearrangement",
+      "B": "TEL-AML1 fusion",
+      "C": "Hyperdiploidy greater than 50 chromosomes",
+      "D": "NOTCH1 mutation"
+    },
+    "correct": "D",
+    "explanation": "T-ALL/T-LBL is associated with immature T-lineage lymphoblasts, adolescent males, mediastinal/tissue masses, and NOTCH1 mutations.",
+    "optionExplanations": {
+      "A": "Incorrect. KMT2A/MLL rearrangement is highlighted for infant leukemia.",
+      "B": "Incorrect. TEL-AML1 is a favorable B-ALL association.",
+      "C": "Incorrect. Hyperdiploidy is a favorable cytogenetic feature in B-ALL.",
+      "D": "Correct. NOTCH1 mutations are a high-yield association for T-ALL."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A neonate is diagnosed with leukemia. Molecular testing identifies a rearrangement that the slides identify as the most common leukemia association in infants less than 1 year old. Which abnormality is most likely",
+    "topic": "Infant leukemia genetics",
+    "options": {
+      "A": "BCR-ABL1 fusion",
+      "B": "KMT2A/MLL rearrangement",
+      "C": "iAMP21",
+      "D": "PAX5 point mutation only"
+    },
+    "correct": "B",
+    "explanation": "The slides list KMT2A/MLL rearranged leukemia as the most common leukemia in infants under 1 year, often occurring in utero and with frequent CNS involvement.",
+    "optionExplanations": {
+      "A": "Incorrect. BCR-ABL1 is an adult-associated ALL abnormality and is uncommon in childhood ALL.",
+      "B": "Correct. KMT2A/MLL rearrangement is the high-yield infant leukemia association.",
+      "C": "Incorrect. iAMP21 is an unfavorable B-ALL cytogenetic abnormality but not the infant leukemia clue given.",
+      "D": "Incorrect. PAX5 is a B-ALL driver, but the infant-specific association emphasized is KMT2A/MLL."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "A child has a preleukemic lymphoid clone detected retrospectively from neonatal blood spots but never develops leukemia. Which concept best explains this finding",
+    "topic": "ALL pathogenesis",
+    "options": {
+      "A": "The first hit alone is usually sufficient for overt leukemia",
+      "B": "ALL is caused only by inherited germline mutations",
+      "C": "Preleukemic clones always progress to leukemia",
+      "D": "A second postnatal hit is usually required for overt leukemia"
+    },
+    "correct": "D",
+    "explanation": "The ALL pathogenesis section describes a multistep process: a first hit often occurs in utero, forming a preleukemic clone, and a second postnatal hit produces overt leukemia. Only about 1% of children with a preleukemic clone progress.",
+    "optionExplanations": {
+      "A": "Incorrect. The first hit alone usually creates only a preleukemic clone.",
+      "B": "Incorrect. Pediatric cancers may be more inherited than adult cancers, but ALL pathogenesis here is not only germline inheritance.",
+      "C": "Incorrect. The slides state only a small fraction of preleukemic clones progress.",
+      "D": "Correct. Overt ALL generally requires an additional postnatal genetic event."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "A bone marrow report from a child with suspected acute leukemia uses the WHO criterion for acute leukemia. What blast percentage cutoff is used in this classification",
+    "topic": "ALL classification",
+    "options": {
+      "A": "At least 20% marrow blasts",
+      "B": "At least 5% marrow blasts",
+      "C": "At least 10% marrow blasts",
+      "D": "At least 30% marrow blasts"
+    },
+    "correct": "A",
+    "explanation": "The slides contrast older FAB classification with WHO classification: FAB used a 30% blast cutoff, while WHO uses a 20% cutoff, with certain recurrent genetic abnormalities able to define disease even below threshold.",
+    "optionExplanations": {
+      "A": "Correct. WHO classification uses blasts ≥20%.",
+      "B": "Incorrect. 5% is not the acute leukemia cutoff given in the slides.",
+      "C": "Incorrect. 10% is below the WHO threshold described.",
+      "D": "Incorrect. 30% is the older FAB cutoff, not the WHO cutoff."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A pathology slide from a pediatric leukemia shows small homogeneous blasts with thin cytoplasm, a high nuclear-to-cytoplasmic ratio, and inconspicuous nucleoli. Which older FAB morphology category best matches this description",
+    "topic": "FAB morphology",
+    "options": {
+      "A": "L2",
+      "B": "L1",
+      "C": "L3/Burkitt-like",
+      "D": "Early T-precursor ALL"
+    },
+    "correct": "B",
+    "explanation": "FAB L1 morphology is described as small, homogeneous cells with thin cytoplasm, high nuclear-to-cytoplasmic ratio, and inconspicuous nucleoli.",
+    "optionExplanations": {
+      "A": "Incorrect. L2 has mixed large and small cells with irregular nuclei and prominent nucleoli.",
+      "B": "Correct. These are the classic L1 features from the table.",
+      "C": "Incorrect. L3/Burkitt-like cells are large and homogeneous with deeply basophilic vacuolated cytoplasm.",
+      "D": "Incorrect. Early T-precursor ALL is an immunophenotypic category, not the FAB morphology pattern described."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "A 6 year old with B-ALL has a peripheral smear with severe normocytic normochromic anemia, thrombocytopenia, and absolute neutropenia. No blasts are seen in the peripheral blood. Which interpretation is most accurate",
+    "topic": "B-ALL blood findings",
+    "options": {
+      "A": "This is compatible with B-ALL because blasts may or may not be seen in peripheral blood",
+      "B": "This excludes B-ALL because blasts must always circulate",
+      "C": "This proves Burkitt lymphoma because anemia is normocytic",
+      "D": "This indicates Fanconi anemia rather than leukemia"
+    },
+    "correct": "A",
+    "explanation": "The B-ALL lab section states that WBC count may be high, normal, or low, and blasts may or may not be seen in peripheral blood. Marrow evaluation is still central.",
+    "optionExplanations": {
+      "A": "Correct. Absence of peripheral blasts does not rule out B-ALL.",
+      "B": "Incorrect. The slides explicitly say peripheral blasts may or may not be seen.",
+      "C": "Incorrect. Burkitt lymphoma is a mature B-cell lymphoma and is distinguished by immunophenotype and morphology, not simply normocytic anemia.",
+      "D": "Incorrect. Fanconi anemia can cause pancytopenia, but this stem describes established B-ALL labs."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "A child with suspected ALL has lymphoblasts that are myeloperoxidase negative. PAS is positive in a block-like pattern. What is the best next diagnostic principle based on the slides",
+    "topic": "Cytochemistry and immunophenotyping",
+    "options": {
+      "A": "PAS positivity alone is specific enough to diagnose ALL",
+      "B": "Morphology plus immunophenotyping is needed because no cytochemical stain is specific",
+      "C": "Cytochemical stains are sufficient and immunophenotyping is unnecessary",
+      "D": "MPO negativity proves Fanconi anemia"
+    },
+    "correct": "B",
+    "explanation": "The slides state that ALL lymphoblasts are MPO negative and PAS may be positive in a block-like pattern, but no cytochemical stain is specific. Diagnosis requires morphology plus immunophenotyping.",
+    "optionExplanations": {
+      "A": "Incorrect. PAS may be positive, but it is not specific.",
+      "B": "Correct. Immunophenotyping is required for definitive classification.",
+      "C": "Incorrect. The slides emphasize morphology plus immunophenotyping.",
+      "D": "Incorrect. MPO negativity does not diagnose Fanconi anemia."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A lymphoid malignancy is being evaluated. Which marker combination most strongly supports an immature lymphoblast population rather than mature Burkitt lymphoma",
+    "topic": "Immature lymphoblast markers",
+    "options": {
+      "A": "TdT and CD34 positivity",
+      "B": "Surface immunoglobulin and strong CD20",
+      "C": "Absent CD45 and absent PAX5",
+      "D": "Only monotypic surface IgM"
+    },
+    "correct": "A",
+    "explanation": "TdT and CD34 are immature markers highlighted in the slides and help distinguish lymphoblasts from Burkitt lymphoma, which is a mature B-cell lymphoma.",
+    "optionExplanations": {
+      "A": "Correct. TdT and CD34 positivity supports immature lymphoblasts.",
+      "B": "Incorrect. Surface Ig and strong CD20 favor mature Burkitt lymphoma.",
+      "C": "Incorrect. The example B-LBL immunophenotype includes CD45 and B-lineage markers such as PAX5/CD79a.",
+      "D": "Incorrect. Monotypic surface Ig favors mature B-cell lymphoma."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "A 5 year old with precursor B-ALL has cytogenetics showing t(12;21). Which prognostic category best matches this finding",
+    "topic": "B-ALL favorable prognosis",
+    "options": {
+      "A": "Unfavorable prognosis",
+      "B": "Diagnostic of T-ALL",
+      "C": "Diagnostic of Burkitt lymphoma",
+      "D": "Favorable prognosis"
+    },
+    "correct": "D",
+    "explanation": "The B-ALL cytogenetics table lists t(12;21) TEL-AML1 as favorable. Hyperdiploidy greater than 50 is also favorable.",
+    "optionExplanations": {
+      "A": "Incorrect. Unfavorable examples include BCR-ABL, KMT2A/MLL, hypodiploidy, PBX/E2A, and iAMP21.",
+      "B": "Incorrect. T-ALL is associated with T markers and often NOTCH1 mutations.",
+      "C": "Incorrect. Burkitt lymphoma is a mature B-cell lymphoma and not defined by TEL-AML1.",
+      "D": "Correct. t(12;21) TEL-AML1 is a favorable B-ALL abnormality."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A child with B-ALL has hypodiploidy on cytogenetic testing. Which additional abnormality from the slides would fall into the same prognostic category",
+    "topic": "B-ALL unfavorable prognosis",
+    "options": {
+      "A": "Hyperdiploidy greater than 50",
+      "B": "t(12;21) TEL-AML1",
+      "C": "t(9;22) BCR-ABL",
+      "D": "No structural or numerical abnormality"
+    },
+    "correct": "C",
+    "explanation": "Hypodiploidy is an unfavorable B-ALL feature. The same table lists t(9;22) BCR-ABL, KMT2A/MLL, t(1;19) PBX/E2A, and iAMP21 as unfavorable.",
+    "optionExplanations": {
+      "A": "Incorrect. Hyperdiploidy greater than 50 is favorable.",
+      "B": "Incorrect. TEL-AML1 is favorable.",
+      "C": "Correct. BCR-ABL is an unfavorable B-ALL abnormality.",
+      "D": "Incorrect. The slides state most ALL cases have numerical or structural changes; this option is not a specific unfavorable category."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A 42 year old with ALL is found to have the Philadelphia chromosome. Which statement is most accurate",
+    "topic": "Philadelphia chromosome in ALL",
+    "options": {
+      "A": "It is inherited and increases familial leukemia risk",
+      "B": "It is more common in childhood ALL than adult ALL",
+      "C": "It is present only in cancerous blood-forming cells",
+      "D": "It is equivalent to the TEL-AML1 favorable fusion"
+    },
+    "correct": "C",
+    "explanation": "The Philadelphia chromosome is BCR-ABL. The slides state it is seen in 20–30% of adult ALL and 2–4% of childhood ALL, is present only in cancerous blood-forming cells, and is not inherited.",
+    "optionExplanations": {
+      "A": "Incorrect. The slides state it is not inherited and does not increase familial risk.",
+      "B": "Incorrect. It is more common in adult ALL than childhood ALL.",
+      "C": "Correct. It is a somatic abnormality present only in cancerous blood-forming cells.",
+      "D": "Incorrect. TEL-AML1 is a different, favorable pediatric B-ALL abnormality."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "A child has an ALL phenotype that lacks the Philadelphia chromosome but has genetic changes behaving similarly to the BCR-ABL pathway. According to the slides, which label best describes this entity",
+    "topic": "Ph-like ALL",
+    "options": {
+      "A": "Burkitt lymphoma",
+      "B": "Fanconi anemia",
+      "C": "Ph-like ALL",
+      "D": "T-LBL by definition"
+    },
+    "correct": "C",
+    "explanation": "Ph-like ALL has no Philadelphia chromosome, but its genetic changes behave similarly to the BCR-ABL pathway and may respond to similar targeted therapy approaches.",
+    "optionExplanations": {
+      "A": "Incorrect. Burkitt lymphoma is a mature B-cell lymphoma with different markers and morphology.",
+      "B": "Incorrect. Fanconi anemia is an inherited marrow failure/DNA repair syndrome.",
+      "C": "Correct. This is the definition of Ph-like ALL in the slides.",
+      "D": "Incorrect. T-LBL is defined by immature T-cell tissue mass disease, not by BCR-ABL-like signaling."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "A pediatric tumor biopsy shows a starry-sky pattern and a mature B-cell immunophenotype with strong CD20 and monotypic surface immunoglobulin. TdT and CD34 are negative. Which diagnosis is favored over B-ALL/LBL",
+    "topic": "Burkitt lymphoma vs B-ALL",
+    "options": {
+      "A": "B-ALL/LBL",
+      "B": "T-ALL",
+      "C": "Fanconi anemia",
+      "D": "Burkitt lymphoma"
+    },
+    "correct": "D",
+    "explanation": "The differential table distinguishes Burkitt lymphoma as a mature B-cell tumor with monotypic surface Ig, starry-sky histology, strong/consistent CD20, and negative TdT/CD34.",
+    "optionExplanations": {
+      "A": "Incorrect. B-ALL/LBL is an immature precursor B-cell neoplasm and is usually TdT/CD34 positive.",
+      "B": "Incorrect. T-ALL would express T-cell markers and often presents with mediastinal disease.",
+      "C": "Incorrect. Fanconi anemia is not a mature B-cell lymphoma.",
+      "D": "Correct. Mature B-cell markers plus starry-sky morphology favor Burkitt lymphoma."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A child with acute leukemia has blasts that are myeloperoxidase positive. Why is this finding important",
+    "topic": "ALL vs AML",
+    "options": {
+      "A": "It supports AML rather than ALL",
+      "B": "It confirms precursor B-ALL",
+      "C": "It confirms T-LBL",
+      "D": "It rules out all acute leukemias"
+    },
+    "correct": "A",
+    "explanation": "The slides emphasize that ALL vs AML must be distinguished because treatment differs. AML is generally MPO positive, while ALL is generally MPO negative.",
+    "optionExplanations": {
+      "A": "Correct. MPO positivity supports myeloid differentiation and favors AML.",
+      "B": "Incorrect. Precursor B-ALL is generally MPO negative.",
+      "C": "Incorrect. T-LBL is also lymphoblastic and would not be defined by MPO positivity.",
+      "D": "Incorrect. MPO positivity supports a type of acute leukemia rather than ruling it out."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A 14 year old boy has a rapidly enlarging anterior mediastinal mass with pleural effusion and symptoms of superior vena cava syndrome. Bone marrow blasts are less than 25% of nucleated marrow cells. Which diagnosis best fits",
+    "topic": "T-LBL presentation",
+    "options": {
+      "A": "B-ALL",
+      "B": "Fanconi anemia",
+      "C": "ABO incompatibility",
+      "D": "T-lymphoblastic lymphoma"
+    },
+    "correct": "D",
+    "explanation": "T-LBL commonly presents in adolescent males as a rapid anterior mediastinal mass with pleural/pericardial effusions, respiratory symptoms, and SVC syndrome. By definition, T-LBL has blasts less than 25% of nucleated marrow cells.",
+    "optionExplanations": {
+      "A": "Incorrect. B-ALL is usually leukemic and more common in early childhood.",
+      "B": "Incorrect. Fanconi anemia presents with congenital anomalies and marrow failure, not a thymic mass.",
+      "C": "Incorrect. ABO incompatibility is a neonatal hemolytic disease pattern.",
+      "D": "Correct. The mediastinal mass plus <25% marrow blasts fits T-LBL."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A T-cell acute leukemia subtype has cCD3 positivity, absent surface CD3, absent CD1a, absent CD2, absent CD4/CD8, variable TdT, and possible expression of CD34, CD117, HLA-DR, CD13, CD33, or CD65. Which subtype is described",
+    "topic": "Early T-precursor ALL",
+    "options": {
+      "A": "Mature Burkitt lymphoma",
+      "B": "Philadelphia-positive B-ALL",
+      "C": "Early T-precursor ALL",
+      "D": "Fanconi anemia"
+    },
+    "correct": "C",
+    "explanation": "The slides list this exact immunophenotype for early T-precursor ALL, including cytoplasmic CD3 positivity, absent surface CD3/CD1a/CD2/CD4/CD8, variable TdT, and possible stem/myeloid marker expression.",
+    "optionExplanations": {
+      "A": "Incorrect. Burkitt lymphoma is mature B-cell, with surface Ig and TdT/CD34 negativity.",
+      "B": "Incorrect. Philadelphia-positive B-ALL is defined by BCR-ABL and B-lineage features.",
+      "C": "Correct. This is the early T-precursor ALL immunophenotype.",
+      "D": "Incorrect. Fanconi anemia is a DNA repair disorder, not a T-ALL immunophenotype."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "A 7 year old has short stature, cafe-au-lait type hyperpigmentation, thumb/radial defects, hearing loss, and progressive pancytopenia. Bone marrow biopsy shows hypoplasia. Which underlying mechanism best explains the syndrome",
+    "topic": "Fanconi anemia pathophysiology",
+    "options": {
+      "A": "Defective DNA crosslink repair during S phase",
+      "B": "IgG anti-D antibodies crossing the placenta",
+      "C": "BCR-ABL fusion kinase activity",
+      "D": "Failure of bilirubin conjugation"
+    },
+    "correct": "A",
+    "explanation": "Fanconi anemia is an autosomal recessive inherited bone marrow failure syndrome due to defective DNA repair through homologous recombination/DNA crosslink repair. Damaged stem cells die, causing marrow failure; unrepaired mutations increase cancer risk.",
+    "optionExplanations": {
+      "A": "Correct. Defective DNA crosslink repair is the core Fanconi anemia mechanism.",
+      "B": "Incorrect. IgG anti-D antibodies explain Rh hemolytic disease of the newborn.",
+      "C": "Incorrect. BCR-ABL is Philadelphia chromosome-associated ALL/CML biology, not Fanconi anemia.",
+      "D": "Incorrect. Bilirubin conjugation failure is not the Fanconi mechanism."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A child with Fanconi anemia develops progressive cytopenias. Which CBC pattern is specifically highlighted in the slides as part of the diagnostic picture",
+    "topic": "Fanconi anemia labs",
+    "options": {
+      "A": "Microcytosis with low ferritin only",
+      "B": "Macrocytosis with pancytopenia",
+      "C": "Isolated eosinophilia",
+      "D": "Marked erythrocytosis with low EPO"
+    },
+    "correct": "B",
+    "explanation": "Fanconi anemia labs include pancytopenia with macrocytosis, often with MCV greater than 120, along with thrombocytopenia, anemia, and neutropenia.",
+    "optionExplanations": {
+      "A": "Incorrect. That would suggest iron deficiency, not Fanconi anemia.",
+      "B": "Correct. Macrocytosis plus pancytopenia is a key Fanconi anemia lab pattern.",
+      "C": "Incorrect. Isolated eosinophilia is not the pattern emphasized.",
+      "D": "Incorrect. Erythrocytosis with low EPO suggests polycythemia vera, not this section."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "A suspected Fanconi anemia patient has karyotype testing. Which finding would support the diagnosis according to the slides",
+    "topic": "Fanconi anemia diagnosis",
+    "options": {
+      "A": "t(12;21) TEL-AML1 fusion only",
+      "B": "Normal chromosomes with isolated hemoglobin S",
+      "C": "Increased spontaneous chromosomal breakage and rearrangements",
+      "D": "Loss of fetal hemoglobin and i antigen"
+    },
+    "correct": "C",
+    "explanation": "Fanconi anemia diagnosis can show increased spontaneous chromosomal breakage, gaps, rearrangements, exchanges, and duplications. The slides also mention increased HbF and increased i antigen.",
+    "optionExplanations": {
+      "A": "Incorrect. TEL-AML1 is a favorable B-ALL cytogenetic abnormality.",
+      "B": "Incorrect. Hemoglobin S is unrelated to this section.",
+      "C": "Correct. Chromosomal breakage is a classic Fanconi anemia diagnostic clue.",
+      "D": "Incorrect. The slides list increased HbF and increased i antigen, not decreased."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A child with biallelic BRCA2 mutations presents with congenital abnormalities and marrow failure. Which additional malignancy risk pattern is specifically noted in the slides for this genotype",
+    "topic": "Fanconi anemia BRCA2",
+    "options": {
+      "A": "Only medullary thyroid carcinoma",
+      "B": "Only benign osteomas and desmoid tumors",
+      "C": "Only chronic atrophic gastritis",
+      "D": "AML, medulloblastoma, and Wilms tumor risk"
+    },
+    "correct": "D",
+    "explanation": "The slides note BRCA2 is Fanconi anemia gene D1. BRCA2 biallelic children can develop Fanconi anemia with increased AML, medulloblastoma, and Wilms tumor risk.",
+    "optionExplanations": {
+      "A": "Incorrect. Medullary thyroid carcinoma belongs to MEN2A, not this section.",
+      "B": "Incorrect. Osteomas/desmoids are Gardner syndrome findings, not Fanconi anemia.",
+      "C": "Incorrect. Chronic atrophic gastritis is unrelated to the slide content.",
+      "D": "Correct. This is the BRCA2 biallelic pediatric Fanconi anemia cancer association listed."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "A child with Fanconi anemia has worsening marrow failure. Which treatment is listed as a major definitive therapy in the slides",
+    "topic": "Fanconi anemia treatment",
+    "options": {
+      "A": "Rh immune globulin at 28 weeks",
+      "B": "Phototherapy alone",
+      "C": "Targeted BCR-ABL inhibition",
+      "D": "Bone marrow transplant"
+    },
+    "correct": "D",
+    "explanation": "Treatment options listed for Fanconi anemia include bone marrow transplant, growth factors, antibiotics, blood transfusions, and androgens such as oxymetholone/oxymethanol.",
+    "optionExplanations": {
+      "A": "Incorrect. RhIg prevents Rh hemolytic disease, not Fanconi anemia.",
+      "B": "Incorrect. Phototherapy is relevant to neonatal hyperbilirubinemia, not inherited marrow failure.",
+      "C": "Incorrect. BCR-ABL inhibition targets Philadelphia chromosome disease.",
+      "D": "Correct. Bone marrow transplant is a key treatment for Fanconi marrow failure."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "An Rh-negative mother delivers an Rh-positive infant during her first pregnancy. The infant is unaffected, but a later Rh-positive fetus is at risk for severe hemolysis. Which immunologic explanation best fits",
+    "topic": "Rh incompatibility immunology",
+    "options": {
+      "A": "Initial anti-Rh response is IgE, later exposure generates IgA in breast milk",
+      "B": "Initial anti-Rh response is IgM, later exposure generates IgG that crosses the placenta",
+      "C": "Rh antibodies are always IgM and always cross the placenta",
+      "D": "Rh disease is caused by T-cell cytotoxicity against fetal platelets"
+    },
+    "correct": "B",
+    "explanation": "Rh incompatibility usually affects second or subsequent pregnancies because the first exposure produces IgM, which does not cross the placenta. Subsequent exposure generates IgG, which crosses the placenta and hemolyzes fetal RBCs.",
+    "optionExplanations": {
+      "A": "Incorrect. IgE and breast milk IgA are not the mechanism described.",
+      "B": "Correct. This is the core reason first pregnancies are usually spared in Rh disease.",
+      "C": "Incorrect. IgM does not cross the placenta; later IgG does.",
+      "D": "Incorrect. The disease is antibody-mediated fetal RBC hemolysis."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "An Rh-negative pregnant patient undergoes a sensitizing bleeding event. To prevent hemolytic disease in a future Rh-positive fetus, which intervention timing is consistent with the slides",
+    "topic": "RhIg prevention",
+    "options": {
+      "A": "Only after the child develops kernicterus",
+      "B": "Only during the first trimester if the fetus is known to be group O",
+      "C": "At 28 weeks, within 72 hours after delivery, and after abortions or sensitizing events",
+      "D": "Never, because Rh reactions have no effective prevention"
+    },
+    "correct": "C",
+    "explanation": "The slides state RhIg should be given at 28 weeks, within 72 hours after delivery, and after abortions or sensitizing events. Severe intrauterine hemolysis may require fetal intravascular transfusion or early delivery.",
+    "optionExplanations": {
+      "A": "Incorrect. RhIg is preventive and should be given before severe neonatal complications.",
+      "B": "Incorrect. The issue is Rh D antigen exposure, not group O status.",
+      "C": "Correct. This matches the RhIg schedule listed in the slides.",
+      "D": "Incorrect. Rh disease has effective prevention with RhIg."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A newborn develops mild hemolytic disease shortly after birth. The mother is blood group O and the infant is group A. This is the first pregnancy. Which statement best explains why this can occur",
+    "topic": "ABO incompatibility",
+    "options": {
+      "A": "ABO disease requires prior sensitization from a previous pregnancy",
+      "B": "Some group O mothers have IgG anti-A or anti-B antibodies without prior sensitization",
+      "C": "Neonatal RBCs strongly express A/B antigens, making ABO disease more severe than Rh disease",
+      "D": "There is effective routine prevention with ABO immune globulin"
+    },
+    "correct": "B",
+    "explanation": "ABO incompatibility classically occurs when a group A or B infant is born to a group O mother. Some group O mothers have IgG anti-A/anti-B without sensitization, so firstborns can be affected.",
+    "optionExplanations": {
+      "A": "Incorrect. Firstborns can be affected in ABO incompatibility.",
+      "B": "Correct. This explains firstborn ABO hemolytic disease.",
+      "C": "Incorrect. Neonatal RBCs weakly express A/B antigens, which helps make ABO disease less severe than Rh disease.",
+      "D": "Incorrect. The slides state there is no effective prevention for ABO reactions."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "Why is ABO hemolytic disease of the newborn usually less severe than Rh hemolytic disease",
+    "topic": "ABO vs Rh severity",
+    "options": {
+      "A": "Most anti-A/anti-B antibodies are IgM, neonatal RBCs weakly express A/B antigens, and other tissues absorb antibody",
+      "B": "ABO antibodies cannot ever bind neonatal red cells",
+      "C": "ABO antigens are only present on maternal leukocytes",
+      "D": "ABO disease is prevented by routine immune globulin"
+    },
+    "correct": "A",
+    "explanation": "The slides give three reasons ABO disease is usually less severe: most anti-A/anti-B antibodies are IgM and do not cross the placenta, neonatal RBCs weakly express A/B antigens, and A/B antigens on many tissues absorb antibody away from RBCs.",
+    "optionExplanations": {
+      "A": "Correct. These are the exact mechanisms listed for lower ABO severity.",
+      "B": "Incorrect. Some group O mothers have IgG anti-A/anti-B that can affect fetal RBCs.",
+      "C": "Incorrect. A/B antigens exist on many tissues, not just maternal leukocytes.",
+      "D": "Incorrect. No effective prevention for ABO reactions is listed."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "A fetus with severe immune hemolysis develops generalized edema. The clinical team notes heart failure and low oncotic pressure. Which sequence best explains this complication",
+    "topic": "Hydrops fetalis mechanism",
+    "options": {
+      "A": "RBC destruction → severe anemia → hypoxic heart/liver injury → decreased plasma protein synthesis and cardiac failure → generalized edema",
+      "B": "Bilirubin conjugation → increased albumin synthesis → pulmonary edema",
+      "C": "IgM crosses placenta → fetal platelet destruction → isolated ascites",
+      "D": "Maternal leukocytosis → fetal renal agenesis → oligohydramnios"
+    },
+    "correct": "A",
+    "explanation": "Hemolytic disease causes RBC destruction and anemia. Severe anemia causes hypoxic injury to the heart and liver; liver injury decreases plasma protein synthesis, while cardiac failure and low oncotic pressure produce hydrops fetalis.",
+    "optionExplanations": {
+      "A": "Correct. This is the pathophysiologic chain described in the slides.",
+      "B": "Incorrect. The issue is unconjugated bilirubin and decreased plasma protein synthesis from liver injury.",
+      "C": "Incorrect. IgM does not cross the placenta and hydrops here is not isolated platelet destruction.",
+      "D": "Incorrect. Renal agenesis/oligohydramnios belongs to Potter sequence, not immune hydrops."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A neonate with hemolytic disease develops severe jaundice and later neurologic injury from bilirubin deposition. Which brain region is classically affected according to the slides",
+    "topic": "Kernicterus",
+    "options": {
+      "A": "Basal ganglia",
+      "B": "Hippocampal CA1 region",
+      "C": "Cerebellar vermis only",
+      "D": "Anterior pituitary"
+    },
+    "correct": "A",
+    "explanation": "Hemolysis increases unconjugated bilirubin. In neonates, bilirubin can cross the immature blood-brain barrier and deposit in lipid-rich brain tissue. Kernicterus classically affects the basal ganglia.",
+    "optionExplanations": {
+      "A": "Correct. The basal ganglia are the classic kernicterus site in the slides.",
+      "B": "Incorrect. Hippocampal CA1 injury is not the kernicterus clue here.",
+      "C": "Incorrect. Cerebellar vermis abnormalities are discussed in other congenital malformations, not kernicterus here.",
+      "D": "Incorrect. The anterior pituitary is not the classic deposition site."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A child with B-ALL has hypercellular marrow with proliferation of leukemic blasts and diminished normal hematopoiesis. Which clinical findings are best explained by this marrow process",
+    "topic": "B-ALL marrow failure presentation",
+    "options": {
+      "A": "Isolated hypertension and urinary retention",
+      "B": "Acholic stools and dark urine from biliary obstruction",
+      "C": "Pancytopenia with bleeding, anemia symptoms, and infections",
+      "D": "Only painless lymphadenopathy with no cytopenias"
+    },
+    "correct": "C",
+    "explanation": "B-ALL marrow involvement diminishes normal hematopoiesis, producing anemia, neutropenia, and thrombocytopenia. Clinically, this causes anemia symptoms, infection risk, bleeding/bruising, bone pain, and often splenomegaly/lymphadenopathy.",
+    "optionExplanations": {
+      "A": "Incorrect. Hypertension and urinary retention are not B-ALL marrow failure findings.",
+      "B": "Incorrect. Acholic stools and dark urine fit biliary atresia, not hemolymphatic disorders here.",
+      "C": "Correct. Marrow replacement causes pancytopenia and its consequences.",
+      "D": "Incorrect. Lymphadenopathy can occur, but B-ALL commonly has cytopenias from marrow failure."
+    }
+  }
+];
+
+function Quiz() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState({});
+
+  const currentQuestion = questions[currentIndex];
+  const selectedChoice =
+    answers[currentQuestion.id] !== undefined ? answers[currentQuestion.id] : null;
+  const showExplanation = selectedChoice !== null;
+
+  const handleSelect = (letter) => {
+    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: letter }));
+  };
+
+  const goToQuestion = (index) => {
+    let newIndex = index;
+    if (newIndex < 0) newIndex = questions.length - 1;
+    if (newIndex >= questions.length) newIndex = 0;
+    setCurrentIndex(newIndex);
+  };
+
+  const handleNext = () => goToQuestion(currentIndex + 1);
+  const handlePrev = () => goToQuestion(currentIndex - 1);
+
+  const isCorrect =
+    selectedChoice !== null && selectedChoice === currentQuestion.correct;
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1">
+          <div className="flex gap-1">
+            {questions.map((q, idx) => {
+              const answered = answers[q.id] !== undefined;
+              const isActive = idx === currentIndex;
+
+              const cls =
+                "h-2 rounded-full transition-colors cursor-pointer flex-1 min-w-[4px] " +
+                (isActive
+                  ? "bg-slate-200"
+                  : answered
+                  ? "bg-[#6fa8dc]"
+                  : "bg-slate-700");
+
+              return (
+                <button
+                  key={q.id}
+                  className={cls}
+                  onClick={() => setCurrentIndex(idx)}
+                  aria-label={`Go to question ${idx + 1}`}
+                  title={q.topic || `Question ${idx + 1}`}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="text-slate-200 text-sm font-semibold">
+            {currentIndex + 1} / {questions.length}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-900/60 text-red-100 text-sm font-semibold">
+              <span className="text-base">×</span>
+              <span>
+                {Object.entries(answers).filter(([qid, choice]) => {
+                  const q = questions.find((qq) => qq.id === Number(qid));
+                  return q && choice !== q.correct;
+                }).length}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/60 text-emerald-100 text-sm font-semibold">
+              <span className="text-base">✓</span>
+              <span>
+                {Object.entries(answers).filter(([qid, choice]) => {
+                  const q = questions.find((qq) => qq.id === Number(qid));
+                  return q && choice === q.correct;
+                }).length}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="border rounded-xl p-4 shadow-md bg-white space-y-4">
+        <div className="flex justify-between text-xs text-gray-500">
+          <span>
+            Question {currentIndex + 1} of {questions.length}
+          </span>
+          {currentQuestion.topic ? <span>Topic: {currentQuestion.topic}</span> : null}
+        </div>
+
+        <p className="font-semibold mt-1">{currentQuestion.stem}?</p>
+
+        <div className="mt-3 space-y-2">
+          {Object.entries(currentQuestion.options).map(([letter, text]) => {
+            const isSelected = selectedChoice === letter;
+            const isAnswer = letter === currentQuestion.correct;
+            let classes =
+              "w-full text-left p-2 rounded-lg border bg-gray-50 hover:bg-gray-100";
+
+            if (showExplanation && isAnswer) {
+              classes =
+                "w-full text-left p-2 rounded-lg border bg-green-100 border-green-500";
+            } else if (showExplanation && isSelected && !isAnswer) {
+              classes =
+                "w-full text-left p-2 rounded-lg border bg-red-100 border-red-500";
+            } else if (isSelected && !showExplanation) {
+              classes = "w-full text-left p-2 rounded-lg border bg-gray-100";
+            }
+
+            return (
+              <button
+                key={letter}
+                onClick={() => handleSelect(letter)}
+                className={classes}
+              >
+                <strong>{letter}.</strong> {" "}
+                {text}
+              </button>
+            );
+          })}
+        </div>
+
+        {showExplanation && (
+          <div className="mt-4 p-3 rounded-lg bg-gray-50 border text-sm space-y-2">
+            <p>
+              <strong>
+                Correct answer: {currentQuestion.correct}
+              </strong>{" "}
+              ({currentQuestion.options[currentQuestion.correct]})
+            </p>
+            <p className={isCorrect ? "text-green-700" : "text-red-700"}>
+              {isCorrect ? "Nice job. " : "Good attempt. "}
+              {currentQuestion.explanation}
+            </p>
+            {currentQuestion.optionExplanations ? (
+              <div className="mt-2 space-y-1">
+                <p className="font-semibold">Why each option is right or wrong:</p>
+                {Object.entries(currentQuestion.optionExplanations).map(
+                  ([letter, text]) => (
+                    <p key={letter}>
+                      <strong>{letter}.</strong> {" "}
+                      {text}
+                    </p>
+                  )
+                )}
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={handlePrev}
+            className="inline-flex items-center px-3 py-2 rounded-lg border text-xs font-medium hover:bg-gray-100"
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNext}
+            className="inline-flex items-center px-3 py-2 rounded-lg border text-xs font-medium hover:bg-gray-100"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+      <p className="text-xs text-gray-500">
+
+      </p>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Quiz />);
+  </script>
+</body>
+</html>

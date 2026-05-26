@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intro to Geriatrics & Geriatrics Assessment Quiz</title>
+  <style>
+    :root {
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-200: #e2e8f0;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-500: #6b7280;
+      --green-100: #dcfce7;
+      --green-500: #22c55e;
+      --green-700: #15803d;
+      --red-100: #fee2e2;
+      --red-500: #ef4444;
+      --red-700: #b91c1c;
+      --blue: #6fa8dc;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--slate-900);
+      color: #111827;
+    }
+    .container {
+      padding: 24px;
+      max-width: 896px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .progress-wrap { flex: 1; }
+    .progress {
+      display: flex;
+      gap: 4px;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 9999px;
+      border: 0;
+      cursor: pointer;
+      flex: 1;
+      min-width: 4px;
+      background: var(--slate-700);
+      transition: background 0.15s ease;
+      padding: 0;
+    }
+    .segment.active { background: var(--slate-200); }
+    .segment.answered { background: var(--blue); }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .count {
+      color: var(--slate-200);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .badge.red {
+      background: rgba(127, 29, 29, 0.6);
+      color: #fee2e2;
+    }
+    .badge.green {
+      background: rgba(6, 78, 59, 0.6);
+      color: #d1fae5;
+    }
+    .card {
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gray-500);
+      font-size: 12px;
+      gap: 12px;
+    }
+    .stem {
+      font-weight: 700;
+      margin: 4px 0 0;
+      line-height: 1.45;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      background: var(--gray-50);
+      cursor: pointer;
+      line-height: 1.35;
+      font-size: 15px;
+    }
+    .option:hover { background: var(--gray-100); }
+    .option.correct {
+      background: var(--green-100);
+      border-color: var(--green-500);
+    }
+    .option.incorrect {
+      background: var(--red-100);
+      border-color: var(--red-500);
+    }
+    .explanation {
+      margin-top: 4px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      font-size: 14px;
+      line-height: 1.45;
+      display: none;
+    }
+    .explanation.show { display: block; }
+    .explanation p { margin: 0 0 8px; }
+    .explanation p:last-child { margin-bottom: 0; }
+    .green-text { color: var(--green-700); }
+    .red-text { color: var(--red-700); }
+    .option-explanations {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .nav button {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav button:hover { background: var(--gray-100); }
+    .footer {
+      color: var(--gray-500);
+      font-size: 12px;
+      min-height: 16px;
+    }
+    @media (max-width: 640px) {
+      .container { padding: 14px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .progress-wrap { width: 100%; }
+      .status { width: 100%; justify-content: space-between; }
+      .meta { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="topbar">
+      <div class="progress-wrap">
+        <div class="progress" id="progress"></div>
+      </div>
+      <div class="status">
+        <div class="count" id="count"></div>
+        <div class="badges">
+          <div class="badge red"><span>×</span><span id="wrongCount">0</span></div>
+          <div class="badge green"><span>✓</span><span id="rightCount">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+      <div class="nav">
+        <button id="prevBtn">Previous</button>
+        <button id="nextBtn">Next</button>
+      </div>
+    </section>
+
+    <p class="footer"></p>
+  </main>
+
+  <script>
+    const questions = [
+  {
+    "id": 1,
+    "stem": "A 78-year-old has lived independently for years but develops severe delirium, dehydration, and functional decline after a mild urinary infection. Which aging concept best explains why a relatively small stressor caused major decompensation",
+    "topic": "Homeostenosis",
+    "options": {
+      "A": "Homeostenosis",
+      "B": "Chronologic aging",
+      "C": "Health span",
+      "D": "Frailty"
+    },
+    "correct": "A",
+    "explanation": "Homeostenosis is the progressive narrowing of homeostatic reserve with aging. Older adults have less physiologic buffer, so small stressors can produce disproportionate illness, medication side effects, or decompensation.",
+    "optionExplanations": {
+      "A": "Correct. Homeostenosis means reduced ability to respond to stressors.",
+      "B": "Chronologic aging refers only to years lived and does not explain functional reserve.",
+      "C": "Health span refers to years lived without major morbidity, pain, or functional limitation.",
+      "D": "Frailty is a syndrome defined by weight loss, exhaustion, weakness, slow gait, and low activity; it is not the general concept of narrowed reserve."
+    }
+  },
+  {
+    "id": 2,
+    "stem": "Two 82-year-old patients have the same chronologic age. One runs daily and manages all activities independently; the other is bedbound with multiple functional limitations. Which statement best explains this difference",
+    "topic": "Chronologic vs biologic age",
+    "options": {
+      "A": "Aging itself is a disease process",
+      "B": "Life span is the number of years without functional limitation",
+      "C": "Chronologic age predicts medication clearance better than renal function",
+      "D": "Biologic age reflects functional capacity rather than years lived"
+    },
+    "correct": "D",
+    "explanation": "Chronologic age is years lived, while biologic age reflects functional capacity. Older adults of the same chronologic age may have very different biologic reserve and independence.",
+    "optionExplanations": {
+      "A": "Aging increases vulnerability, but aging itself is not considered disease.",
+      "B": "Health span, not life span, refers to years without major morbidity or functional limitation.",
+      "C": "Medication clearance is better estimated through organ function, especially renal function, not age alone.",
+      "D": "Correct. Biologic age is functional capacity."
+    }
+  },
+  {
+    "id": 3,
+    "stem": "An 86-year-old has unintentional 12-lb weight loss in 1 year, exhaustion, weak grip strength, slow gait, and low physical activity. Which outcome is most strongly associated with this syndrome",
+    "topic": "Frailty",
+    "options": {
+      "A": "Improved tolerance of chemotherapy",
+      "B": "Protection against fractures because of low activity",
+      "C": "Increased falls, hospitalization, disability, and mortality",
+      "D": "Lower risk of medication adverse effects"
+    },
+    "correct": "C",
+    "explanation": "Frailty is diagnosed with at least 3 of the listed criteria. It is associated with increased falls, fractures, hospitalization, disability, mortality, and worse outcomes after surgery, chemotherapy, and dialysis.",
+    "optionExplanations": {
+      "A": "Frailty is associated with worse chemotherapy outcomes.",
+      "B": "Frailty increases fracture risk because of weakness, falls, and reduced reserve.",
+      "C": "Correct. Frailty predicts multiple adverse outcomes.",
+      "D": "Frailty increases vulnerability to adverse outcomes, including medication side effects."
+    }
+  },
+  {
+    "id": 4,
+    "stem": "A researcher studies old cells that no longer divide but secrete inflammatory cytokines that contribute to chronic tissue inflammation. Which hallmark of aging is being described",
+    "topic": "Cellular senescence",
+    "options": {
+      "A": "Altered nutrient sensing",
+      "B": "Telomere attrition",
+      "C": "Cellular senescence",
+      "D": "Stem cell exhaustion"
+    },
+    "correct": "C",
+    "explanation": "Cellular senescence describes aged or damaged cells that stop dividing and produce inflammatory cytokines. This contributes to chronic low-grade inflammatory changes with aging.",
+    "optionExplanations": {
+      "A": "Altered nutrient sensing involves pathways such as insulin/IGF-1, mTOR, sirtuins, and AMPK.",
+      "B": "Telomere attrition refers to telomere shortening until replication stops.",
+      "C": "Correct. Senescent cells stop dividing and increase inflammatory cytokine production.",
+      "D": "Stem cell exhaustion contributes to problems such as anemia and myelodysplasia."
+    }
+  },
+  {
+    "id": 5,
+    "stem": "An aging patient accumulates lipofuscin, Lewy bodies, tangles, plaques, and amylin because abnormal proteins are not properly cleared. Which hallmark of aging does this illustrate",
+    "topic": "Loss of proteostasis",
+    "options": {
+      "A": "Loss of proteostasis",
+      "B": "Mitochondrial dysfunction",
+      "C": "Epigenetic alteration",
+      "D": "Genetic instability"
+    },
+    "correct": "A",
+    "explanation": "Loss of proteostasis refers to impaired maintenance and clearance of proteins, causing accumulation of abnormal proteins such as lipofuscin, Lewy bodies, tangles, plaques, and amylin.",
+    "optionExplanations": {
+      "A": "Correct. Abnormal protein accumulation is loss of proteostasis.",
+      "B": "Mitochondrial dysfunction is associated with increased free radicals.",
+      "C": "Epigenetic alteration involves changed gene expression.",
+      "D": "Genetic instability refers to mutations and reduced DNA repair."
+    }
+  },
+  {
+    "id": 6,
+    "stem": "An older adult develops weakness, reduced muscle mass, falls, and fractures. Which age-related physiologic change best explains this pattern",
+    "topic": "Musculoskeletal aging",
+    "options": {
+      "A": "Loss of type II muscle fibers and decreased bone mineral density",
+      "B": "Increased ciliary clearance and hypoxic response",
+      "C": "Increased total body water and decreased fat",
+      "D": "Increased baroreceptor sensitivity"
+    },
+    "correct": "A",
+    "explanation": "Aging causes loss of muscle fibers, especially type II fibers, motor neuron apoptosis, and decreased bone mineral density. These changes contribute to sarcopenia, weakness, falls, and fractures.",
+    "optionExplanations": {
+      "A": "Correct. Type II fiber loss and reduced BMD drive sarcopenia, falls, and fractures.",
+      "B": "Aging decreases ciliary function and blunts hypoxia/hypercapnia responses.",
+      "C": "Aging decreases total body water, increases fat, and decreases lean mass.",
+      "D": "Baroreceptor sensitivity decreases with age, contributing to orthostatic hypotension."
+    }
+  },
+  {
+    "id": 7,
+    "stem": "A 79-year-old reports glare sensitivity, poor depth perception, worsening acuity, and dry eyes. Which age-related changes best explain these symptoms",
+    "topic": "Vision aging",
+    "options": {
+      "A": "Decreased renal blood flow and nephrosclerosis",
+      "B": "Myocardial fibrosis and valve calcification",
+      "C": "Lens yellowing, fewer rods/cones, ciliary atrophy, increased intraocular pressure, and decreased tears",
+      "D": "Delayed insulin secretion and increased visceral fat"
+    },
+    "correct": "C",
+    "explanation": "Age-related visual changes include decreased rods/cones, lens yellowing, ciliary atrophy, increased intraocular pressure, and decreased tear production. These cause reduced acuity, glare sensitivity, poor depth perception, glaucoma risk, and dry eyes.",
+    "optionExplanations": {
+      "A": "These are renal aging changes.",
+      "B": "These are cardiac aging changes.",
+      "C": "Correct. These are the major listed visual changes with aging.",
+      "D": "These are endocrine/body composition changes."
+    }
+  },
+  {
+    "id": 8,
+    "stem": "An 87-year-old with no obvious cognitive disorder increasingly avoids conversation and social events because he cannot follow speech well. Which high-yield consequence of this geriatric syndrome should be anticipated",
+    "topic": "Hearing loss",
+    "options": {
+      "A": "Depression, isolation, functional decline, and poor communication",
+      "B": "Hyperreflexia and tremor",
+      "C": "Prolonged hypoglycemia",
+      "D": "Cystic brown tumors"
+    },
+    "correct": "A",
+    "explanation": "Hearing loss is common in older adults and is associated with depression, isolation, functional decline, and poor communication. Clinicians should reduce background noise, speak clearly, and avoid shouting.",
+    "optionExplanations": {
+      "A": "Correct. Hearing loss commonly causes social and functional consequences.",
+      "B": "These are not listed consequences of age-related hearing loss.",
+      "C": "Prolonged hypoglycemia is a concern with sulfonylureas such as glyburide.",
+      "D": "Brown tumors are related to hyperparathyroidism, not hearing loss."
+    }
+  },
+  {
+    "id": 9,
+    "stem": "An older adult becomes lightheaded when standing after starting a blood pressure medication. Which vascular aging change increases this risk",
+    "topic": "Vascular aging and orthostasis",
+    "options": {
+      "A": "Decreased arterial stiffness",
+      "B": "Decreased baroreceptor sensitivity and increased arterial stiffness",
+      "C": "Increased baroreceptor sensitivity",
+      "D": "Increased elastic recoil"
+    },
+    "correct": "B",
+    "explanation": "Aging causes decreased baroreceptor sensitivity and increased arterial stiffness. This contributes to increased systolic blood pressure and orthostatic hypotension.",
+    "optionExplanations": {
+      "A": "Arterial stiffness increases with aging.",
+      "B": "Correct. This combination predisposes to systolic hypertension and orthostasis.",
+      "C": "Baroreceptor sensitivity decreases with aging.",
+      "D": "Elastic recoil decreases in the lungs with aging, not increases."
+    }
+  },
+  {
+    "id": 10,
+    "stem": "A 77-year-old receives a sedating opioid after surgery and develops hypoventilation and atelectasis. Which pulmonary aging change best contributes to increased sensitivity to respiratory depressants",
+    "topic": "Pulmonary aging",
+    "options": {
+      "A": "Increased hypoxia and hypercapnia response",
+      "B": "Increased mucociliary clearance",
+      "C": "Increased chest wall compliance",
+      "D": "Decreased elastic recoil, decreased chest wall compliance, ciliary atrophy, and blunted ventilatory responses"
+    },
+    "correct": "D",
+    "explanation": "Pulmonary aging includes decreased elastic recoil, decreased chest wall compliance, ciliary atrophy, and reduced response to hypoxia/hypercapnia. These increase infection/atelectasis risk and sensitivity to respiratory depressants.",
+    "optionExplanations": {
+      "A": "Ventilatory responses to hypoxia and hypercapnia decrease with aging.",
+      "B": "Ciliary atrophy reduces clearance.",
+      "C": "Chest wall compliance decreases with aging.",
+      "D": "Correct. These changes increase pulmonary vulnerability."
+    }
+  },
+  {
+    "id": 11,
+    "stem": "An 84-year-old woman with low body mass is started on digoxin. Her serum creatinine is reported as normal, but she develops nausea, confusion, and arrhythmia from digoxin toxicity. What best explains why her renal function was overestimated",
+    "topic": "Renal aging and creatinine",
+    "options": {
+      "A": "Low lean mass decreases creatinine production despite reduced GFR",
+      "B": "Digoxin is cleared mostly by pulmonary exhalation",
+      "C": "Aging increases renal blood flow and GFR",
+      "D": "Older adults produce more creatinine from increased lean mass"
+    },
+    "correct": "A",
+    "explanation": "Older adults may have reduced GFR despite a normal serum creatinine because decreased lean mass lowers creatinine production. Reduced renal clearance increases the risk of digoxin toxicity.",
+    "optionExplanations": {
+      "A": "Correct. Normal creatinine can hide reduced GFR in low-BMI older adults.",
+      "B": "Digoxin toxicity risk rises with reduced renal clearance.",
+      "C": "Renal blood flow and GFR decrease with aging.",
+      "D": "Lean mass decreases with age, lowering creatinine production."
+    }
+  },
+  {
+    "id": 12,
+    "stem": "A hospitalized 80-year-old becomes constipated and overly sedated after receiving opioids. Which age-related GI/liver changes help explain this",
+    "topic": "GI/liver aging",
+    "options": {
+      "A": "Increased type II muscle fibers",
+      "B": "Increased renal concentrating ability",
+      "C": "Decreased mastication/pharyngeal clearance, decreased CYP450 activity, and altered motility",
+      "D": "Increased CYP450 activity and faster gastric motility"
+    },
+    "correct": "C",
+    "explanation": "GI/liver aging includes decreased mastication and pharyngeal clearance, decreased CYP450 activity, and altered motility. Clinical implications include aspiration risk, slower drug clearance, constipation, and increased opioid sensitivity.",
+    "optionExplanations": {
+      "A": "Type II muscle fibers decrease with age.",
+      "B": "Renal concentrating ability decreases with age.",
+      "C": "Correct. These changes explain constipation and opioid sensitivity.",
+      "D": "CYP450 activity generally decreases, and motility is altered rather than accelerated in a protective way."
+    }
+  },
+  {
+    "id": 13,
+    "stem": "A patient asks why older adults can become dehydrated more easily and have altered distribution of medications. Which body composition change is most relevant",
+    "topic": "Body composition aging",
+    "options": {
+      "A": "Increased albumin and increased renal blood flow",
+      "B": "Increased total body water and increased lean mass",
+      "C": "Decreased total body water, increased fat, decreased lean mass, and decreased skin surface area",
+      "D": "Decreased fat and increased skin surface area"
+    },
+    "correct": "C",
+    "explanation": "Aging is associated with decreased total body water, increased fat, decreased lean mass, and decreased skin surface area. This contributes to dehydration risk, altered drug distribution, and decreased creatinine production.",
+    "optionExplanations": {
+      "A": "These are not the listed body composition changes.",
+      "B": "Total body water and lean mass decrease.",
+      "C": "Correct. These are the listed body composition changes in aging.",
+      "D": "Fat increases, and skin surface area decreases."
+    }
+  },
+  {
+    "id": 14,
+    "stem": "An older patient reports dyspnea with exertion. The clinician suspects normal aging contributes to symptoms but still evaluates for disease. Which paired age-related changes are most relevant",
+    "topic": "Dyspnea with aging",
+    "options": {
+      "A": "Increased ventilatory response and decreased V/Q mismatch",
+      "B": "Increased ciliary clearance and increased renal concentrating ability",
+      "C": "Decreased LV compliance and decreased pulmonary recoil/chest wall compliance",
+      "D": "Increased LV compliance and increased lung elastic recoil"
+    },
+    "correct": "C",
+    "explanation": "Dyspnea with aging can reflect cardiac changes such as decreased LV compliance and reduced exercise tolerance, plus pulmonary changes such as decreased recoil, decreased chest wall compliance, V/Q mismatch, and decreased ventilatory response.",
+    "optionExplanations": {
+      "A": "Ventilatory response decreases, and V/Q mismatch can increase.",
+      "B": "These are not the key dyspnea mechanisms.",
+      "C": "Correct. These cardiac and pulmonary changes contribute to exertional dyspnea.",
+      "D": "LV compliance and elastic recoil decrease with aging."
+    }
+  },
+  {
+    "id": 15,
+    "stem": "An 83-year-old has fallen twice. She has poor vision, orthostatic hypotension, vitamin D deficiency, and takes diphenhydramine plus a muscle relaxant. Which intervention bundle best matches fall prevention from the lecture",
+    "topic": "Falls prevention",
+    "options": {
+      "A": "Add a benzodiazepine for sleep and limit daytime walking",
+      "B": "Prescribe bed rest and avoid home modifications",
+      "C": "Use anticholinergics to reduce nocturia and prevent nighttime falls",
+      "D": "Minimize medications, check orthostatics/vision/footwear, add strength-balance training, and improve home safety"
+    },
+    "correct": "D",
+    "explanation": "Fall prevention is multifactorial: reduce fall-risk medications, evaluate orthostatics, vision, and footwear, consider vitamin D, use strength/balance training, and improve home safety with lighting, removal of rugs/clutter, grab bars, and raised toilet/commode.",
+    "optionExplanations": {
+      "A": "Benzodiazepines increase sedation, cognitive impairment, falls, and fractures.",
+      "B": "Strength and balance training are recommended; home safety changes are useful.",
+      "C": "Anticholinergics increase confusion, urinary retention, constipation, orthostasis, and falls.",
+      "D": "Correct. This matches the listed fall prevention strategy."
+    }
+  },
+  {
+    "id": 16,
+    "stem": "A clinic is performing a comprehensive geriatric assessment. Which set of domains best matches the core assessment areas",
+    "topic": "Comprehensive geriatric assessment",
+    "options": {
+      "A": "Only cognition and mood testing",
+      "B": "Medications, cognition, ADLs/function, hearing/vision, mood, social support, gait/balance, and preventive care",
+      "C": "Only cancer screening and immunizations",
+      "D": "Only cardiac, pulmonary, renal, and endocrine organ systems"
+    },
+    "correct": "B",
+    "explanation": "Comprehensive geriatric assessment promotes wellness and independent function by assessing physical, cognitive, psychological, functional, and social domains, including medications, cognition, function/ADLs, hearing/vision, mood, social support, gait/balance, and preventive care/immunizations.",
+    "optionExplanations": {
+      "A": "Cognition and mood are important but incomplete.",
+      "B": "Correct. This is the full core domain list.",
+      "C": "Preventive care is included but is only one domain.",
+      "D": "Organ-system assessment alone misses functional and psychosocial domains."
+    }
+  },
+  {
+    "id": 17,
+    "stem": "A physician gives a new medication plan to an 89-year-old with hearing impairment. Which communication approach best matches geriatric assessment principles",
+    "topic": "Communication with older adults",
+    "options": {
+      "A": "Face the patient, reduce background noise, write instructions, and ask for teach-back",
+      "B": "Give verbal instructions only because written instructions are confusing",
+      "C": "Shout loudly from behind the patient",
+      "D": "Speak quickly to reduce visit time"
+    },
+    "correct": "A",
+    "explanation": "Recommended approach includes respectful address, slower speech without rushing, facing the patient, reducing background noise, using hearing amplification if needed, writing instructions down, and asking the patient to repeat back medication changes.",
+    "optionExplanations": {
+      "A": "Correct. This approach supports hearing, comprehension, and medication safety.",
+      "B": "Written instructions are recommended.",
+      "C": "For hearing loss, speak clearly and reduce noise; do not shout.",
+      "D": "The lecture emphasizes speaking slower and not rushing."
+    }
+  },
+  {
+    "id": 18,
+    "stem": "A patient brings prescription bottles, OTC medications, and supplements to clinic. The physician asks how each is taken and what each is for. What is this medication review strategy called",
+    "topic": "Medication review",
+    "options": {
+      "A": "Prescribing cascade",
+      "B": "DIAPPERS assessment",
+      "C": "Medication reconciliation by elimination",
+      "D": "Brown bag approach"
+    },
+    "correct": "D",
+    "explanation": "The brown bag approach asks patients to bring all prescription medications, OTC drugs, and supplements in their bottles, then asks how they take each medication and what each is for.",
+    "optionExplanations": {
+      "A": "A prescribing cascade is when a new medication is prescribed to treat a side effect of another medication.",
+      "B": "DIAPPERS is a mnemonic for transient urinary incontinence causes.",
+      "C": "This is not the named strategy in the lecture.",
+      "D": "Correct. Bringing all medications in bottles is the brown bag approach."
+    }
+  },
+  {
+    "id": 19,
+    "stem": "An 82-year-old takes nightly diphenhydramine for sleep and develops confusion, urinary retention, constipation, dry mouth, blurred vision, orthostasis, and a fall. Which Beers-list mechanism best explains this cluster",
+    "topic": "Diphenhydramine and anticholinergic burden",
+    "options": {
+      "A": "Direct renal tubular toxicity only",
+      "B": "Dopamine agonism",
+      "C": "Selective beta-1 blockade",
+      "D": "Strong anticholinergic effect"
+    },
+    "correct": "D",
+    "explanation": "Diphenhydramine and many first-generation antihistamines have strong anticholinergic effects, causing confusion, urinary retention, constipation, dry mouth, blurred vision, orthostatic hypotension, and falls.",
+    "optionExplanations": {
+      "A": "NSAIDs are more associated with kidney injury; diphenhydramine causes anticholinergic toxicity.",
+      "B": "Dopamine agonism is not the mechanism of diphenhydramine adverse effects.",
+      "C": "Beta-1 blockade would cause bradycardia and reduced contractility, not this syndrome.",
+      "D": "Correct. This is classic anticholinergic toxicity in older adults."
+    }
+  },
+  {
+    "id": 20,
+    "stem": "A 79-year-old with insomnia asks for zolpidem because it is not a benzodiazepine. Which response is most accurate",
+    "topic": "Z-drugs in older adults",
+    "options": {
+      "A": "Z-drugs are preferred first-line because they significantly improve restorative sleep",
+      "B": "Z-drugs are avoided because they can cause delirium, falls/fractures, ER visits, and have minimal sleep benefit",
+      "C": "Z-drugs primarily cause prolonged hypoglycemia",
+      "D": "Z-drugs reduce motor vehicle accidents in older adults"
+    },
+    "correct": "B",
+    "explanation": "Z-drugs such as zolpidem, zaleplon, and eszopiclone have adverse effects similar to benzodiazepines in older adults, including delirium, falls/fractures, and ER visits, with minimal sleep benefit.",
+    "optionExplanations": {
+      "A": "The lecture states they have minimal sleep benefit and are on the Beers list.",
+      "B": "Correct. Z-drugs should generally be avoided in older adults.",
+      "C": "Prolonged hypoglycemia is a sulfonylurea concern, especially glyburide.",
+      "D": "Z-drugs are associated with motor vehicle accident risk, not protection."
+    }
+  },
+  {
+    "id": 21,
+    "stem": "An 88-year-old with dementia is started on an antipsychotic for agitation without assessing reversible causes. Which major Beers-list risk is most relevant",
+    "topic": "Antipsychotics in dementia",
+    "options": {
+      "A": "Increased stroke and mortality risk",
+      "B": "Improved baroreceptor sensitivity",
+      "C": "Reduced extrapyramidal symptoms",
+      "D": "Guaranteed reversal of dementia"
+    },
+    "correct": "A",
+    "explanation": "Antipsychotics in older adults, especially those with dementia, are associated with increased stroke and mortality risk. They can also cause sedation, orthostasis, and extrapyramidal symptoms.",
+    "optionExplanations": {
+      "A": "Correct. Increased stroke and mortality in dementia is the high-yield warning.",
+      "B": "They can worsen orthostasis rather than improve baroreceptor function.",
+      "C": "Antipsychotics can cause extrapyramidal symptoms.",
+      "D": "Antipsychotics do not reverse dementia."
+    }
+  },
+  {
+    "id": 22,
+    "stem": "A 76-year-old with osteoarthritis, CKD, hypertension, and heart failure takes daily ibuprofen. Which risk profile best explains why NSAIDs are often avoided in older adults",
+    "topic": "NSAIDs in older adults",
+    "options": {
+      "A": "Improved renal perfusion, lower blood pressure, and reduced GI bleeding",
+      "B": "Increased stroke and mortality only in dementia",
+      "C": "Prolonged hypoglycemia and urinary retention",
+      "D": "GI bleeding/ulcer, kidney injury, increased blood pressure, and worsening heart failure"
+    },
+    "correct": "D",
+    "explanation": "NSAIDs are Beers-list medications because they increase risk of GI bleeding/ulcer, kidney injury, increased blood pressure, and worsening heart failure.",
+    "optionExplanations": {
+      "A": "NSAIDs worsen, not improve, renal and GI risk.",
+      "B": "This warning is more characteristic of antipsychotic use in dementia.",
+      "C": "Prolonged hypoglycemia is linked to sulfonylureas; urinary retention is anticholinergic/alpha-agonist related.",
+      "D": "Correct. This is the listed NSAID risk profile."
+    }
+  },
+  {
+    "id": 23,
+    "stem": "An 81-year-old with diabetes has recurrent episodes of prolonged confusion and diaphoresis from hypoglycemia. Which medication class is specifically highlighted as risky, especially glyburide",
+    "topic": "Sulfonylureas",
+    "options": {
+      "A": "Alpha-1 blockers",
+      "B": "Z-drugs",
+      "C": "Skeletal muscle relaxants",
+      "D": "Sulfonylureas"
+    },
+    "correct": "D",
+    "explanation": "Sulfonylureas, especially glyburide, can cause prolonged hypoglycemia in older adults and are highlighted on the Beers list.",
+    "optionExplanations": {
+      "A": "Alpha-1 blockers such as doxazosin cause orthostatic hypotension and falls.",
+      "B": "Z-drugs increase delirium and fall/fracture risk with minimal sleep benefit.",
+      "C": "Skeletal muscle relaxants cause sedation, anticholinergic effects, weakness, and falls.",
+      "D": "Correct. Glyburide is especially associated with prolonged hypoglycemia."
+    }
+  },
+  {
+    "id": 24,
+    "stem": "An 84-year-old man starts doxazosin and soon falls after standing from bed. Which adverse effect best explains the fall",
+    "topic": "Alpha-1 blockers",
+    "options": {
+      "A": "Prolonged hypoglycemia",
+      "B": "Increased intraocular pressure",
+      "C": "Respiratory depression",
+      "D": "Orthostatic hypotension"
+    },
+    "correct": "D",
+    "explanation": "Alpha-1 blockers such as doxazosin can cause orthostatic hypotension, increasing fall risk in older adults, especially with age-related decreased baroreceptor sensitivity.",
+    "optionExplanations": {
+      "A": "Prolonged hypoglycemia is a sulfonylurea concern.",
+      "B": "Increased intraocular pressure is an age-related vision concern, not the main doxazosin effect.",
+      "C": "Respiratory depression is more associated with opioids.",
+      "D": "Correct. Alpha-1 blockade can cause orthostatic hypotension and falls."
+    }
+  },
+  {
+    "id": 25,
+    "stem": "An older adult acutely develops fluctuating confusion, impaired attention, altered consciousness, and disrupted sleep after hospitalization. Which diagnosis best fits",
+    "topic": "Delirium",
+    "options": {
+      "A": "Delirium",
+      "B": "Normal aging",
+      "C": "Dementia",
+      "D": "Frailty"
+    },
+    "correct": "A",
+    "explanation": "Delirium is acute in onset and fluctuating, with impaired attention/consciousness and altered sleep. A reversible cause should be sought.",
+    "optionExplanations": {
+      "A": "Correct. Acute fluctuating impaired attention is delirium.",
+      "B": "Acute fluctuating inattention is not normal aging.",
+      "C": "Dementia is chronic, acquired, progressive cognitive decline affecting daily life in an alert patient.",
+      "D": "Frailty is a vulnerability syndrome, not an acute cognitive disorder."
+    }
+  },
+  {
+    "id": 26,
+    "stem": "A family asks whether their parent’s chronic progressive cognitive decline that now interferes with daily life is just normal aging. The patient is alert during the visit. Which statement is most accurate",
+    "topic": "Dementia vs normal aging",
+    "options": {
+      "A": "Dementia requires acute fluctuating impaired attention",
+      "B": "Dementia is diagnosed only during altered consciousness",
+      "C": "Dementia is chronic acquired cognitive decline affecting daily life and is not normal aging",
+      "D": "Mild short-term memory decline always equals dementia"
+    },
+    "correct": "C",
+    "explanation": "Dementia is chronic, acquired, progressive cognitive decline that affects daily life in an alert patient. It is not normal aging.",
+    "optionExplanations": {
+      "A": "Acute fluctuating impaired attention is delirium.",
+      "B": "Dementia is assessed in an alert patient; altered consciousness suggests delirium.",
+      "C": "Correct. This matches the lecture distinction.",
+      "D": "Mild short-term memory decline can occur with aging and does not automatically equal dementia."
+    }
+  },
+  {
+    "id": 27,
+    "stem": "An older woman develops new urinary incontinence during an acute illness. The clinician uses the DIAPPERS mnemonic for transient causes. Which option is included",
+    "topic": "Urinary incontinence and DIAPPERS",
+    "options": {
+      "A": "Dementia, ischemia, arthritis, pneumonia, polycythemia, embolism, reflux",
+      "B": "Diabetes, insomnia, anemia, proteinuria, pancreatitis, emphysema, renal stones",
+      "C": "Delirium, infection, atrophic vaginitis, pharmacologic causes, psychological factors, excess/restricted mobility, and stool impaction",
+      "D": "Deep vein thrombosis"
+    },
+    "correct": "C",
+    "explanation": "Transient urinary incontinence causes are remembered with DIAPPERS: Delirium, Infection, Atrophic vaginitis, Pharmacologic, Psychological, Excess/restricted mobility, and Stool impaction.",
+    "optionExplanations": {
+      "A": "This list does not match DIAPPERS.",
+      "B": "This list does not match DIAPPERS.",
+      "C": "Correct. This is the transient urinary incontinence mnemonic.",
+      "D": "Deep vein thrombosis is not part of the DIAPPERS mnemonic."
+    }
+  },
+  {
+    "id": 28,
+    "stem": "An 80-year-old has chronic insomnia. Which treatment plan best matches the recommended approach from the lecture",
+    "topic": "Insomnia treatment",
+    "options": {
+      "A": "Zolpidem plus a benzodiazepine to restore deep sleep",
+      "B": "Alcohol before bed to reduce awakenings",
+      "C": "Nightly diphenhydramine because it is OTC",
+      "D": "Regular sleep schedule, safe comfortable environment, daytime activity, avoiding caffeine/nicotine/alcohol/screens, and treating nocturia/pain/restless legs/sleep apnea/mood symptoms"
+    },
+    "correct": "D",
+    "explanation": "Recommended insomnia management in older adults emphasizes behavioral/environmental measures and addressing contributors such as nocturia, pain, restless legs, sleep apnea, and mood symptoms. Benzodiazepines, Z-drugs, and diphenhydramine should be avoided when possible.",
+    "optionExplanations": {
+      "A": "Z-drugs and benzodiazepines increase falls, fractures, motor vehicle accidents, deaths, and delirium risk.",
+      "B": "Alcohol should be avoided as part of sleep hygiene.",
+      "C": "Diphenhydramine is strongly anticholinergic and increases confusion, urinary retention, and falls.",
+      "D": "Correct. This matches the recommended nonpharmacologic approach."
+    }
+  },
+  {
+    "id": 29,
+    "stem": "A 51-year-old asks which shingles vaccine schedule is recommended in the lecture. Which answer is correct",
+    "topic": "Immunizations",
+    "options": {
+      "A": "No shingles vaccination is recommended until age 80",
+      "B": "Shingrix annually beginning at age 65",
+      "C": "Shingrix beginning at age 50 as a 2-dose series",
+      "D": "Live zoster vaccine monthly after age 40"
+    },
+    "correct": "C",
+    "explanation": "The lecture lists Shingrix for adults age 50 and older as a 2-dose series.",
+    "optionExplanations": {
+      "A": "The age threshold given is 50, not 80.",
+      "B": "The lecture does not list annual Shingrix dosing.",
+      "C": "Correct. Shingrix is recommended at age 50 or older as a 2-dose series.",
+      "D": "Monthly live zoster vaccination is not the listed recommendation."
+    }
+  },
+  {
+    "id": 30,
+    "stem": "A 65-year-old asks about routine adult vaccines. Which immunization statement best matches the lecture",
+    "topic": "Immunizations",
+    "options": {
+      "A": "Influenza is given once at age 65 only",
+      "B": "Td/Tdap is given every 5 years with no adult Tdap requirement",
+      "C": "Pneumococcal vaccination may be PCV20 or PCV21, or PCV15 followed by PPSV23 in 1 year",
+      "D": "RSV vaccination is required for all adults starting at age 40"
+    },
+    "correct": "C",
+    "explanation": "The lecture lists pneumococcal vaccination options as PCV20 or PCV21, or PCV15 followed by PPSV23 in 1 year. Influenza is annual, Td/Tdap is every 10 years with at least one adult Tdap, and RSV is age 60 or older by shared decision-making/high-risk.",
+    "optionExplanations": {
+      "A": "Influenza vaccination is recommended annually.",
+      "B": "Td/Tdap is every 10 years, with at least one adult Tdap.",
+      "C": "Correct. This matches the pneumococcal options listed.",
+      "D": "The lecture lists RSV at age 60 or older with shared decision-making/high-risk, not all adults at age 40."
+    }
+  }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    const progressEl = document.getElementById("progress");
+    const countEl = document.getElementById("count");
+    const wrongCountEl = document.getElementById("wrongCount");
+    const rightCountEl = document.getElementById("rightCount");
+    const questionNumberEl = document.getElementById("questionNumber");
+    const topicEl = document.getElementById("topic");
+    const stemEl = document.getElementById("stem");
+    const optionsEl = document.getElementById("options");
+    const explanationEl = document.getElementById("explanation");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function getScore() {
+      let right = 0;
+      let wrong = 0;
+      Object.keys(answers).forEach((qid) => {
+        const q = questions.find((item) => item.id === Number(qid));
+        if (q && answers[qid] === q.correct) right += 1;
+        if (q && answers[qid] !== q.correct) wrong += 1;
+      });
+      return { right, wrong };
+    }
+
+    function goToQuestion(index) {
+      let newIndex = index;
+      if (newIndex < 0) newIndex = questions.length - 1;
+      if (newIndex >= questions.length) newIndex = 0;
+      currentIndex = newIndex;
+      render();
+    }
+
+    function selectAnswer(letter) {
+      const q = questions[currentIndex];
+      answers[q.id] = letter;
+      render();
+    }
+
+    function renderProgress() {
+      progressEl.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment";
+        if (idx === currentIndex) btn.classList.add("active");
+        else if (answers[q.id] !== undefined) btn.classList.add("answered");
+        btn.setAttribute("aria-label", `Go to question ${idx + 1}`);
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.addEventListener("click", () => goToQuestion(idx));
+        progressEl.appendChild(btn);
+      });
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      const selectedChoice = answers[q.id] !== undefined ? answers[q.id] : null;
+      const showExplanation = selectedChoice !== null;
+      const isCorrect = selectedChoice === q.correct;
+      const score = getScore();
+
+      renderProgress();
+      countEl.textContent = `${currentIndex + 1} / ${questions.length}`;
+      wrongCountEl.textContent = score.wrong;
+      rightCountEl.textContent = score.right;
+      questionNumberEl.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      topicEl.textContent = q.topic ? `Topic: ${q.topic}` : "";
+      stemEl.textContent = q.stem + "?";
+
+      optionsEl.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (showExplanation && letter === q.correct) btn.classList.add("correct");
+        else if (showExplanation && letter === selectedChoice && letter !== q.correct) btn.classList.add("incorrect");
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        btn.addEventListener("click", () => selectAnswer(letter));
+        optionsEl.appendChild(btn);
+      });
+
+      if (showExplanation) {
+        const optionDetails = Object.entries(q.optionExplanations)
+          .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+          .join("");
+        explanationEl.className = "explanation show";
+        explanationEl.innerHTML = `
+          <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+          <p class="${isCorrect ? "green-text" : "red-text"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+          <div class="option-explanations">
+            <p><strong>Why each option is right or wrong:</strong></p>
+            ${optionDetails}
+          </div>
+        `;
+      } else {
+        explanationEl.className = "explanation";
+        explanationEl.innerHTML = "";
+      }
+    }
+
+    prevBtn.addEventListener("click", () => goToQuestion(currentIndex - 1));
+    nextBtn.addEventListener("click", () => goToQuestion(currentIndex + 1));
+
+    render();
+  </script>
+</body>
+</html>

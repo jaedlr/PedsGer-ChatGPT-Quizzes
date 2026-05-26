@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complex Genetic Disorders Quiz</title>
+  <style>
+    :root {
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-200: #e2e8f0;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-500: #6b7280;
+      --green-100: #dcfce7;
+      --green-500: #22c55e;
+      --green-700: #15803d;
+      --red-100: #fee2e2;
+      --red-500: #ef4444;
+      --red-700: #b91c1c;
+      --blue: #6fa8dc;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--slate-900);
+      color: #111827;
+    }
+    .container {
+      padding: 24px;
+      max-width: 896px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .progress-wrap { flex: 1; }
+    .progress {
+      display: flex;
+      gap: 4px;
+    }
+    .segment {
+      height: 8px;
+      border-radius: 9999px;
+      border: 0;
+      cursor: pointer;
+      flex: 1;
+      min-width: 4px;
+      background: var(--slate-700);
+      transition: background 0.15s ease;
+      padding: 0;
+    }
+    .segment.active { background: var(--slate-200); }
+    .segment.answered { background: var(--blue); }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .count {
+      color: var(--slate-200);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .badge.red {
+      background: rgba(127, 29, 29, 0.6);
+      color: #fee2e2;
+    }
+    .badge.green {
+      background: rgba(6, 78, 59, 0.6);
+      color: #d1fae5;
+    }
+    .card {
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--gray-500);
+      font-size: 12px;
+      gap: 12px;
+    }
+    .stem {
+      font-weight: 700;
+      margin: 4px 0 0;
+      line-height: 1.45;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      background: var(--gray-50);
+      cursor: pointer;
+      line-height: 1.35;
+      font-size: 15px;
+    }
+    .option:hover { background: var(--gray-100); }
+    .option.correct {
+      background: var(--green-100);
+      border-color: var(--green-500);
+    }
+    .option.incorrect {
+      background: var(--red-100);
+      border-color: var(--red-500);
+    }
+    .explanation {
+      margin-top: 4px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      font-size: 14px;
+      line-height: 1.45;
+      display: none;
+    }
+    .explanation.show { display: block; }
+    .explanation p { margin: 0 0 8px; }
+    .explanation p:last-child { margin-bottom: 0; }
+    .green-text { color: var(--green-700); }
+    .red-text { color: var(--red-700); }
+    .option-explanations {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .nav button {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      background: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nav button:hover { background: var(--gray-100); }
+    .footer {
+      color: var(--gray-500);
+      font-size: 12px;
+      min-height: 16px;
+    }
+    @media (max-width: 640px) {
+      .container { padding: 14px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .progress-wrap { width: 100%; }
+      .status { width: 100%; justify-content: space-between; }
+      .meta { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="topbar">
+      <div class="progress-wrap">
+        <div class="progress" id="progress"></div>
+      </div>
+      <div class="status">
+        <div class="count" id="count"></div>
+        <div class="badges">
+          <div class="badge red"><span>×</span><span id="wrongCount">0</span></div>
+          <div class="badge green"><span>✓</span><span id="rightCount">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card">
+      <div class="meta">
+        <span id="questionNumber"></span>
+        <span id="topic"></span>
+      </div>
+      <p class="stem" id="stem"></p>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+      <div class="nav">
+        <button id="prevBtn">Previous</button>
+        <button id="nextBtn">Next</button>
+      </div>
+    </section>
+
+    <p class="footer"></p>
+  </main>
+
+  <script>
+    const questions = [
+      {
+            "id": 1,
+            "stem": "A family has several members with the same chronic disorder, but one monozygotic twin is severely affected while the other has mild disease after different environmental exposures. Which inheritance pattern best explains this phenotype",
+            "topic": "Complex inheritance",
+            "options": {
+                  "A": "Autosomal recessive single-enzyme defect",
+                  "B": "Multifactorial inheritance from multiple genes plus environment",
+                  "C": "Mitochondrial inheritance with homoplasmy",
+                  "D": "X-linked recessive inheritance"
+            },
+            "correct": "B",
+            "explanation": "Complex inheritance reflects multiple genetic factors plus environmental modifiers. It often shows familial aggregation, but discordance can occur because non-genetic factors modify disease severity.",
+            "optionExplanations": {
+                  "A": "AR enzyme defects usually show clearer Mendelian recurrence patterns, not broad modifier-dependent discordance.",
+                  "B": "Correct. Familial aggregation with variable severity from environmental modifiers is the key pattern.",
+                  "C": "Homoplasmy would imply all mitochondria carry the same genotype and would not explain this multifactorial pattern.",
+                  "D": "X-linked recessive disease usually affects males more severely and follows sex-linked transmission."
+            }
+      },
+      {
+            "id": 2,
+            "stem": "A cytogenetics lab stimulates peripheral blood lymphocytes, arrests them in metaphase, and stains chromosomes with Giemsa. A trainee asks what dark G-bands represent. Which answer is most accurate",
+            "topic": "Karyotype and G-banding",
+            "options": {
+                  "A": "GC-rich euchromatin that is actively transcribed",
+                  "B": "AT-rich condensed heterochromatin with relatively fewer genes",
+                  "C": "Centromeric satellite DNA only",
+                  "D": "Regions of active ribosomal RNA transcription"
+            },
+            "correct": "B",
+            "explanation": "Dark G-bands are AT-rich, gene-poor, condensed heterochromatin. Light G-bands are GC-rich, gene-rich, transcriptionally active euchromatin.",
+            "optionExplanations": {
+                  "A": "This describes light G-bands, not dark G-bands.",
+                  "B": "Correct. Dark G-bands are AT-rich, condensed, and relatively gene-poor.",
+                  "C": "Centromeric DNA is not the general definition of dark G-bands.",
+                  "D": "Ribosomal RNA transcription is not what G-banding primarily identifies."
+            }
+      },
+      {
+            "id": 3,
+            "stem": "A newborn has hypotonia, flat facial profile, epicanthal folds, and an atrioventricular septal defect. Later in life, the child is at increased risk for leukemia and early Alzheimer-type changes. Which chromosomal mechanism most commonly causes this condition",
+            "topic": "Down syndrome",
+            "options": {
+                  "A": "Meiotic nondisjunction causing trisomy 21",
+                  "B": "Paternal deletion of 15q11",
+                  "C": "5p deletion",
+                  "D": "7q deletion involving ELN"
+            },
+            "correct": "A",
+            "explanation": "Down syndrome is most commonly caused by trisomy 21 from meiotic nondisjunction. It is associated with intellectual disability, characteristic facies, AV septal defects, leukemia risk, and Alzheimer-type changes after age 40.",
+            "optionExplanations": {
+                  "A": "Correct. Most Down syndrome cases are full trisomy 21.",
+                  "B": "Paternal 15q11 loss causes Prader-Willi syndrome.",
+                  "C": "5p deletion causes Cri-du-chat syndrome.",
+                  "D": "7q deletion involving ELN causes Williams syndrome."
+            }
+      },
+      {
+            "id": 4,
+            "stem": "A phenotypically normal adult has 45 chromosomes because the long arm of chromosome 21 is fused to chromosome 14. The couple asks why their child could have Down syndrome despite the parent being unaffected. Which mechanism is involved",
+            "topic": "Robertsonian translocation Down syndrome",
+            "options": {
+                  "A": "Expansion of a CGG repeat during oogenesis",
+                  "B": "Maternal mitochondrial heteroplasmy",
+                  "C": "Balanced Robertsonian translocation with extra 21q material in the child",
+                  "D": "Deletion of contiguous genes on chromosome 22"
+            },
+            "correct": "C",
+            "explanation": "A balanced Robertsonian translocation carrier can be phenotypically normal with 45 chromosomes. Translocation Down syndrome can occur when the child inherits extra chromosome 21q material, often involving 14;21 fusion.",
+            "optionExplanations": {
+                  "A": "CGG expansion is associated with Fragile X, not translocation Down syndrome.",
+                  "B": "Mitochondrial heteroplasmy explains variable mitochondrial disease severity.",
+                  "C": "Correct. A balanced carrier can have an affected child with extra 21q material.",
+                  "D": "22q deletion causes DiGeorge/velocardiofacial spectrum."
+            }
+      },
+      {
+            "id": 5,
+            "stem": "A newborn has severe growth restriction, clenched fists with overlapping fingers, rocker-bottom feet, and multiple cardiac and limb malformations. Which diagnosis is most likely",
+            "topic": "Edwards syndrome",
+            "options": {
+                  "A": "Patau syndrome",
+                  "B": "Williams syndrome",
+                  "C": "Edwards syndrome",
+                  "D": "Cri-du-chat syndrome"
+            },
+            "correct": "C",
+            "explanation": "Edwards syndrome is trisomy 18 and classically causes growth restriction, clenched fists, rocker-bottom feet, cardiac and limb malformations, and poor survival.",
+            "optionExplanations": {
+                  "A": "Patau syndrome is trisomy 13 with holoprosencephaly and polydactyly.",
+                  "B": "Williams syndrome causes supravalvular aortic stenosis, elfin facies, and outgoing personality.",
+                  "C": "Correct. Clenched fists and rocker-bottom feet strongly suggest trisomy 18.",
+                  "D": "Cri-du-chat is a 5p deletion with cat-like cry and microcephaly."
+            }
+      },
+      {
+            "id": 6,
+            "stem": "An infant has holoprosencephaly, polydactyly, and severe brain, facial, and cardiac malformations. Which chromosomal abnormality best fits this presentation",
+            "topic": "Patau syndrome",
+            "options": {
+                  "A": "Trisomy 13",
+                  "B": "Trisomy 18",
+                  "C": "Trisomy 21",
+                  "D": "Monosomy 5p"
+            },
+            "correct": "A",
+            "explanation": "Patau syndrome is trisomy 13. High-yield findings include holoprosencephaly, polydactyly, and severe brain, facial, and heart malformations with poor survival.",
+            "optionExplanations": {
+                  "A": "Correct. Holoprosencephaly plus polydactyly is classic for trisomy 13.",
+                  "B": "Trisomy 18 causes clenched fists and rocker-bottom feet.",
+                  "C": "Trisomy 21 causes Down syndrome with AV septal defects and leukemia risk.",
+                  "D": "5p deletion causes Cri-du-chat syndrome."
+            }
+      },
+      {
+            "id": 7,
+            "stem": "A child has developmental delay and multiple congenital anomalies. Routine karyotype is unrevealing, but the clinician suspects a small chromosomal deletion involving several adjacent genes. What is the best initial test according to the lecture material",
+            "topic": "Microdeletion testing",
+            "options": {
+                  "A": "Southern blot for trinucleotide repeat length",
+                  "B": "Chromosomal microarray",
+                  "C": "Serum lactate level",
+                  "D": "Methylmalonic acid level"
+            },
+            "correct": "B",
+            "explanation": "Microdeletion syndromes are often too small for routine karyotype. In a child with developmental delay plus congenital anomalies, chromosomal microarray is the recommended first test in the slides.",
+            "optionExplanations": {
+                  "A": "Southern blot-like repeat testing is used for trinucleotide repeat disorders, not broad microdeletion detection.",
+                  "B": "Correct. Chromosomal microarray detects submicroscopic copy-number changes.",
+                  "C": "Serum lactate may support mitochondrial disease, not microdeletions broadly.",
+                  "D": "Methylmalonic acid evaluates B12 deficiency, not congenital microdeletion syndromes."
+            }
+      },
+      {
+            "id": 8,
+            "stem": "A newborn has a high-pitched cat-like cry, microcephaly, hypotonia, epicanthal folds, low-set ears, and intellectual disability. Which deletion is most likely",
+            "topic": "Cri-du-chat syndrome",
+            "options": {
+                  "A": "22q11.2 deletion",
+                  "B": "7q deletion involving ELN",
+                  "C": "11p imprinting defect",
+                  "D": "5p deletion"
+            },
+            "correct": "D",
+            "explanation": "Cri-du-chat syndrome results from 5p deletion and presents with cat-like cry, intellectual disability, microcephaly, epicanthal folds, low-set ears, and hypotonia.",
+            "optionExplanations": {
+                  "A": "22q11.2 deletion causes DiGeorge/velocardiofacial findings.",
+                  "B": "7q ELN deletion causes Williams syndrome.",
+                  "C": "Chromosome 11 imprinting dysregulation causes Beckwith-Wiedemann syndrome.",
+                  "D": "Correct. Cat-like cry is the key clue for 5p deletion."
+            }
+      },
+      {
+            "id": 9,
+            "stem": "A child has a conotruncal cardiac defect, recurrent viral infections from T-cell deficiency, and neonatal hypocalcemia. Which embryologic or organ-system abnormality best explains the immune and calcium findings",
+            "topic": "22q11.2 deletion syndrome",
+            "options": {
+                  "A": "Thymic and parathyroid hypoplasia",
+                  "B": "Pancreatic beta-cell destruction",
+                  "C": "Adrenal cortical dysgenesis",
+                  "D": "Lysosomal sphingomyelin accumulation"
+            },
+            "correct": "A",
+            "explanation": "22q11.2 deletion affects face, cardiac outflow tracts, thymus, and parathyroids. Thymic hypoplasia causes T-cell deficiency, and parathyroid hypoplasia causes hypocalcemia.",
+            "optionExplanations": {
+                  "A": "Correct. Thymus and parathyroid defects explain infection risk and hypocalcemia.",
+                  "B": "Beta-cell destruction would cause diabetes, not T-cell deficiency or hypocalcemia.",
+                  "C": "Adrenal dysgenesis does not match the 22q11.2 pattern.",
+                  "D": "Sphingomyelin accumulation describes Niemann-Pick disease, not 22q11.2 deletion."
+            }
+      },
+      {
+            "id": 10,
+            "stem": "A child has mild to moderate learning difficulty, very social behavior, broad forehead, wide mouth, small chin, and supravalvular aortic stenosis. Which gene is deleted in the syndrome most consistent with these findings",
+            "topic": "Williams syndrome",
+            "options": {
+                  "A": "FMR1",
+                  "B": "ELN",
+                  "C": "NF1",
+                  "D": "RET"
+            },
+            "correct": "B",
+            "explanation": "Williams syndrome is due to a 7q deletion involving ELN. Elastin loss causes vessel wall abnormalities, classically supravalvular aortic stenosis, with elfin facies and outgoing personality.",
+            "optionExplanations": {
+                  "A": "FMR1 CGG expansion causes Fragile X syndrome.",
+                  "B": "Correct. ELN deletion is the key genetic defect in Williams syndrome.",
+                  "C": "NF1 loss causes neurofibromatosis type 1.",
+                  "D": "RET gain-of-function causes MEN2A."
+            }
+      },
+      {
+            "id": 11,
+            "stem": "A boy has intellectual disability, long face, large everted ears, macro-orchidism, autism-spectrum features, and aggressive behavior. Testing shows more than 200 CGG repeats in FMR1. What mechanism causes the disease phenotype",
+            "topic": "Fragile X syndrome",
+            "options": {
+                  "A": "Toxic gain-of-function protein from CAG expansion",
+                  "B": "Mitochondrial iron accumulation from frataxin loss",
+                  "C": "Methylation-mediated gene silencing",
+                  "D": "Mismatch repair failure with microsatellite instability"
+            },
+            "correct": "C",
+            "explanation": "Fragile X syndrome is caused by CGG expansion in FMR1. Full mutation repeats lead to methylation and gene silencing, causing loss of FMR1 function and abnormal synaptic plasticity.",
+            "optionExplanations": {
+                  "A": "This describes Huntington disease from CAG expansion in HTT.",
+                  "B": "This describes Friedreich ataxia.",
+                  "C": "Correct. Fragile X is due to methylation and silencing of FMR1.",
+                  "D": "Mismatch repair failure causes Lynch syndrome."
+            }
+      },
+      {
+            "id": 12,
+            "stem": "A woman has 90 CGG repeats in FMR1 but does not have classic Fragile X syndrome. She later develops premature ovarian failure. Her father has tremor and ataxia. What best explains these findings",
+            "topic": "Fragile X premutation",
+            "options": {
+                  "A": "Premutation mRNA toxicity",
+                  "B": "Complete FMR1 deletion with no transcript produced",
+                  "C": "Loss of paternal 15q11 expression",
+                  "D": "Toxic huntingtin protein aggregation"
+            },
+            "correct": "A",
+            "explanation": "Fragile X premutation carriers have 55 to 200 repeats and do not have classic Fragile X. Premutation mRNA toxicity can cause Fragile X-associated tremor/ataxia syndrome and premature ovarian failure in carrier females.",
+            "optionExplanations": {
+                  "A": "Correct. Premutation toxicity explains FXTAS and premature ovarian failure.",
+                  "B": "Complete deletion is not the mechanism described in the slide section.",
+                  "C": "Paternal 15q11 loss causes Prader-Willi syndrome.",
+                  "D": "Toxic huntingtin aggregation causes Huntington disease."
+            }
+      },
+      {
+            "id": 13,
+            "stem": "A 42-year-old man develops progressive choreiform movements, irritability, psychiatric disturbance, and dementia. His father had similar symptoms at an older age. Which genetic feature most likely explains earlier onset in this patient",
+            "topic": "Huntington disease",
+            "options": {
+                  "A": "Maternal expansion bias during oogenesis",
+                  "B": "Paternal expansion bias during spermatogenesis",
+                  "C": "Random X-inactivation",
+                  "D": "Loss of imprinting on chromosome 11"
+            },
+            "correct": "B",
+            "explanation": "Huntington disease is an autosomal dominant CAG repeat expansion in HTT. Anticipation is often due to paternal expansion bias during spermatogenesis, leading to earlier or more severe disease in offspring.",
+            "optionExplanations": {
+                  "A": "Maternal expansion bias is emphasized for Fragile X, not Huntington disease.",
+                  "B": "Correct. Huntington anticipation is classically paternal.",
+                  "C": "Random X-inactivation affects X-linked carrier females, not Huntington disease.",
+                  "D": "Chromosome 11 imprinting dysregulation causes Beckwith-Wiedemann syndrome."
+            }
+      },
+      {
+            "id": 14,
+            "stem": "A 10-year-old develops progressive gait ataxia, weakness, sensory neuropathy, hypertrophic cardiomyopathy, and diabetes. Genetic testing reveals a GAA repeat expansion. What is the primary cellular consequence",
+            "topic": "Friedreich ataxia",
+            "options": {
+                  "A": "Mitochondrial iron accumulation with decreased ATP production",
+                  "B": "Excess amyloid-beta 42 production",
+                  "C": "Constitutive RET signaling in neural crest derivatives",
+                  "D": "Overexpression of BCL2 in germinal center B cells"
+            },
+            "correct": "A",
+            "explanation": "Friedreich ataxia is an autosomal recessive GAA repeat expansion in frataxin. Low frataxin causes mitochondrial iron accumulation, reactive oxygen species, mitochondrial DNA damage, and reduced oxidative phosphorylation.",
+            "optionExplanations": {
+                  "A": "Correct. High-energy tissues such as neurons, cardiomyocytes, and pancreatic beta cells are affected.",
+                  "B": "Increased amyloid-beta 42 is linked to early-onset Alzheimer genes.",
+                  "C": "RET gain-of-function causes MEN2A.",
+                  "D": "BCL2 overexpression is a lymphoma mechanism, not in this section's Friedreich ataxia."
+            }
+      },
+      {
+            "id": 15,
+            "stem": "A child with normal early development develops episodic stroke-like neurologic deficits that do not follow vascular territories. Labs show lactic acidosis and muscle weakness. Which principle explains why different tissues are affected to different degrees",
+            "topic": "MELAS and heteroplasmy",
+            "options": {
+                  "A": "Haploinsufficiency of contiguous nuclear genes",
+                  "B": "Variable proportions of normal and mutant mitochondria among tissues",
+                  "C": "Loss of imprinting on chromosome 15",
+                  "D": "Complete penetrance of an autosomal dominant mutation"
+            },
+            "correct": "B",
+            "explanation": "MELAS involves mitochondrial dysfunction causing impaired oxidative phosphorylation, increased lactate, and stroke-like episodes not confined to vascular territories. Variable severity is explained by heteroplasmy, a mixture of normal and mutant mitochondria.",
+            "optionExplanations": {
+                  "A": "This describes many microdeletion syndromes.",
+                  "B": "Correct. Heteroplasmy explains variable mitochondrial disease expression.",
+                  "C": "Chromosome 15 imprinting disorders include Prader-Willi and Angelman syndromes.",
+                  "D": "Complete penetrance does not explain tissue-specific mitochondrial variation."
+            }
+      },
+      {
+            "id": 16,
+            "stem": "A patient has myoclonic seizures and ataxia. Muscle biopsy shows abnormal mitochondrial aggregates described as ragged red fibers. Which disorder best matches these findings",
+            "topic": "MERRF",
+            "options": {
+                  "A": "MERRF",
+                  "B": "MELAS",
+                  "C": "Friedreich ataxia",
+                  "D": "Fragile X syndrome"
+            },
+            "correct": "A",
+            "explanation": "MERRF stands for myoclonic epilepsy with ragged red fibers. It presents with myoclonic seizures, ataxia, and ragged red fibers from abnormal mitochondrial aggregates in skeletal muscle.",
+            "optionExplanations": {
+                  "A": "Correct. Myoclonic epilepsy plus ragged red fibers is the defining clue.",
+                  "B": "MELAS causes lactic acidosis and stroke-like episodes.",
+                  "C": "Friedreich ataxia causes ataxia with hypertrophic cardiomyopathy and diabetes from frataxin loss.",
+                  "D": "Fragile X causes intellectual disability with long face, large ears, and macro-orchidism."
+            }
+      },
+      {
+            "id": 17,
+            "stem": "A child has neonatal hypotonia followed by hyperphagia, obesity risk, short stature, small hands and feet, intellectual disability, and hypogonadism. Which active chromosomal region is lost",
+            "topic": "Prader-Willi syndrome",
+            "options": {
+                  "A": "Maternal 15q11",
+                  "B": "Paternal 15q11",
+                  "C": "Maternal 7q ELN region",
+                  "D": "Paternal chromosome 11 growth-suppressor region"
+            },
+            "correct": "B",
+            "explanation": "Prader-Willi syndrome occurs with loss of the active paternal 15q11 region. Classic findings include hypotonia, hyperphagia, obesity risk, short stature, small hands and feet, hypogonadism, and intellectual disability.",
+            "optionExplanations": {
+                  "A": "Maternal 15q11 loss causes Angelman syndrome.",
+                  "B": "Correct. Prader-Willi is loss of paternal 15q11 expression.",
+                  "C": "7q ELN deletion causes Williams syndrome.",
+                  "D": "Chromosome 11 imprinting dysregulation causes Beckwith-Wiedemann syndrome."
+            }
+      },
+      {
+            "id": 18,
+            "stem": "A child has severe intellectual disability, ataxia, seizures, and frequent inappropriate laughter. Which parent-of-origin abnormality is most consistent with this presentation",
+            "topic": "Angelman syndrome",
+            "options": {
+                  "A": "Loss of maternal 15q11",
+                  "B": "Loss of paternal 15q11",
+                  "C": "Paternal expansion of HTT CAG repeats",
+                  "D": "Maternal transmission of mutant mitochondria to all children"
+            },
+            "correct": "A",
+            "explanation": "Angelman syndrome occurs with loss of the active maternal 15q11 region. It presents with intellectual disability, ataxia, seizures, and inappropriate laughter.",
+            "optionExplanations": {
+                  "A": "Correct. Angelman syndrome is maternal 15q11 loss.",
+                  "B": "Paternal 15q11 loss causes Prader-Willi syndrome.",
+                  "C": "Paternal CAG expansion is associated with Huntington anticipation.",
+                  "D": "Maternal mitochondrial transmission causes mitochondrial disorders, not Angelman syndrome."
+            }
+      },
+      {
+            "id": 19,
+            "stem": "A newborn has macrosomia, macroglossia, hemihyperplasia, and omphalocele. The pediatrician recommends tumor surveillance. Which tumors are most classically increased in this syndrome according to the lecture",
+            "topic": "Beckwith-Wiedemann syndrome",
+            "options": {
+                  "A": "Medullary thyroid carcinoma and pheochromocytoma",
+                  "B": "Wilms tumor and hepatoblastoma",
+                  "C": "Bilateral vestibular schwannomas and meningiomas",
+                  "D": "Sarcoma and early breast carcinoma"
+            },
+            "correct": "B",
+            "explanation": "Beckwith-Wiedemann syndrome results from dysregulated imprinting on chromosome 11 with growth-promoting imbalance such as increased IGF2 and/or decreased CDKN1C. It causes macrosomia, macroglossia, hemihyperplasia, omphalocele, and increased embryonal tumors including Wilms tumor and hepatoblastoma.",
+            "optionExplanations": {
+                  "A": "This tumor pattern is MEN2A.",
+                  "B": "Correct. Wilms tumor and hepatoblastoma are the key embryonal tumor risks.",
+                  "C": "These are characteristic of NF2.",
+                  "D": "This pattern suggests Li-Fraumeni syndrome."
+            }
+      },
+      {
+            "id": 20,
+            "stem": "A 52-year-old develops dementia and has a strong family history of similar symptoms before age 65. Genetic testing reveals a PSEN1 mutation. What mechanism most directly explains plaque accumulation in this form of disease",
+            "topic": "Early-onset Alzheimer disease genetics",
+            "options": {
+                  "A": "Reduced amyloid-beta clearance from APOE epsilon 4",
+                  "B": "Increased amyloid-beta production, especially Aβ42",
+                  "C": "Tau gene deletion from chromosome 22",
+                  "D": "Mitochondrial iron accumulation in neurons"
+            },
+            "correct": "B",
+            "explanation": "Early-onset Alzheimer disease before age 65 is often autosomal dominant and can result from APP, PSEN1, or PSEN2 mutations. These mutations directly increase amyloid-beta production, especially Aβ42, causing early aggressive extracellular amyloid plaque accumulation.",
+            "optionExplanations": {
+                  "A": "APOE epsilon 4 is a late-onset Alzheimer risk allele and mainly decreases amyloid-beta clearance.",
+                  "B": "Correct. PSEN1 is the most common early-onset AD gene in the slide section.",
+                  "C": "This is not the Alzheimer mechanism described.",
+                  "D": "Mitochondrial iron accumulation describes Friedreich ataxia."
+            }
+      },
+      {
+            "id": 21,
+            "stem": "A 78-year-old patient has late-onset Alzheimer disease risk counseling. Genetic testing shows two copies of APOE epsilon 4. Which mechanism is associated with this risk allele in the lecture material",
+            "topic": "Late-onset Alzheimer disease genetics",
+            "options": {
+                  "A": "Increased amyloid-beta clearance and reduced tau phosphorylation",
+                  "B": "Decreased amyloid-beta clearance, increased aggregation, and increased tau phosphorylation",
+                  "C": "Direct DNA crosslink repair failure",
+                  "D": "Loss of neurofibromin with increased Ras signaling"
+            },
+            "correct": "B",
+            "explanation": "Late-onset Alzheimer disease is multifactorial. APOE epsilon 4 increases risk by decreasing amyloid-beta clearance, increasing amyloid-beta aggregation, and increasing tau phosphorylation. APOE epsilon 2 is protective and epsilon 3 is neutral.",
+            "optionExplanations": {
+                  "A": "This is the opposite of the APOE epsilon 4 mechanism.",
+                  "B": "Correct. APOE epsilon 4 impairs clearance and promotes aggregation/tau pathology.",
+                  "C": "DNA crosslink repair failure describes Fanconi anemia.",
+                  "D": "NF1 loss causes neurofibromatosis type 1."
+            }
+      },
+      {
+            "id": 22,
+            "stem": "A 7-year-old with short stature, thumb/radial defects, cafe-au-lait spots, and progressive pancytopenia is diagnosed with the most common genetic cause of aplastic anemia in children. What is the underlying defect",
+            "topic": "Fanconi anemia",
+            "options": {
+                  "A": "Defective repair of DNA crosslinks causing chromosomal breakage",
+                  "B": "Mismatch repair failure causing right-sided colon cancer",
+                  "C": "RET proto-oncogene gain of function",
+                  "D": "APC loss causing beta-catenin accumulation"
+            },
+            "correct": "A",
+            "explanation": "Fanconi anemia is usually autosomal recessive and involves defective repair of DNA crosslinks. This causes chromosomal breakage, bone marrow stem cell depletion, congenital abnormalities such as thumb/radial defects and cafe-au-lait spots, pancytopenia, and increased AML/MDS/head-neck carcinoma risk.",
+            "optionExplanations": {
+                  "A": "Correct. DNA crosslink repair failure is the key mechanism.",
+                  "B": "Mismatch repair failure causes Lynch syndrome.",
+                  "C": "RET gain-of-function causes MEN2A.",
+                  "D": "APC loss causes FAP."
+            }
+      },
+      {
+            "id": 23,
+            "stem": "A child has multiple cafe-au-lait macules, iris Lisch nodules, cutaneous neurofibromas, learning issues, and an optic pathway tumor. Which tumor suppressor pathway is affected",
+            "topic": "Neurofibromatosis type 1",
+            "options": {
+                  "A": "Merlin loss causing loss of contact inhibition",
+                  "B": "Neurofibromin loss causing increased Ras signaling",
+                  "C": "Hamartin/tuberin loss causing increased mTOR activation",
+                  "D": "VHL loss causing abnormal hypoxia signaling"
+            },
+            "correct": "B",
+            "explanation": "NF1 is an autosomal dominant disorder caused by NF1 mutation on 17q11. The gene encodes neurofibromin, which inhibits Ras signaling. Loss causes increased proliferation, especially in Schwann cells, with cafe-au-lait macules, Lisch nodules, neurofibromas, and optic/juvenile pilocytic astrocytoma risk.",
+            "optionExplanations": {
+                  "A": "Merlin loss is NF2.",
+                  "B": "Correct. Neurofibromin normally downregulates Ras signaling.",
+                  "C": "TSC1/TSC2 loss causes tuberous sclerosis.",
+                  "D": "VHL loss causes von Hippel-Lindau syndrome."
+            }
+      },
+      {
+            "id": 24,
+            "stem": "A young adult has progressive hearing loss. MRI shows bilateral vestibular schwannomas, and additional workup reveals meningiomas and spinal ependymomas. Which gene is most likely mutated",
+            "topic": "Neurofibromatosis type 2",
+            "options": {
+                  "A": "NF2 on chromosome 22q12 encoding merlin",
+                  "B": "NF1 on chromosome 17q11 encoding neurofibromin",
+                  "C": "TSC2 encoding tuberin",
+                  "D": "VHL tumor suppressor gene"
+            },
+            "correct": "A",
+            "explanation": "NF2 is autosomal dominant and caused by mutation of NF2 on 22q12, which encodes merlin. Classic findings are bilateral vestibular schwannomas, meningiomas, and spinal ependymomas.",
+            "optionExplanations": {
+                  "A": "Correct. Bilateral vestibular schwannomas are the classic NF2 clue.",
+                  "B": "NF1 causes cafe-au-lait macules, Lisch nodules, and neurofibromas.",
+                  "C": "TSC2 mutation causes tuberous sclerosis with hamartomas and cortical tubers.",
+                  "D": "VHL causes CNS hemangioblastomas, RCC, pheochromocytoma, and cysts."
+            }
+      },
+      {
+            "id": 25,
+            "stem": "A child has seizures, autism features, intellectual disability, cortical tubers, and a subependymal giant cell astrocytoma. Which pathway is increased due to loss of hamartin or tuberin",
+            "topic": "Tuberous sclerosis",
+            "options": {
+                  "A": "Wnt-beta-catenin signaling",
+                  "B": "mTOR activation",
+                  "C": "RAS-MAPK signaling",
+                  "D": "DNA mismatch repair"
+            },
+            "correct": "B",
+            "explanation": "Tuberous sclerosis is an autosomal dominant hamartoma syndrome due to TSC1 or TSC2 loss. TSC1 encodes hamartin and TSC2 encodes tuberin; loss increases mTOR activation, causing cellular overgrowth and hamartomas.",
+            "optionExplanations": {
+                  "A": "Wnt-beta-catenin signaling is central to APC/FAP.",
+                  "B": "Correct. TSC1/TSC2 loss increases mTOR activity.",
+                  "C": "RAS-MAPK signaling is increased in NF1.",
+                  "D": "Mismatch repair defects cause Lynch syndrome."
+            }
+      },
+      {
+            "id": 26,
+            "stem": "A patient has CNS hemangioblastomas, renal cell carcinoma, pheochromocytoma, and cysts in the pancreas, liver, and kidneys. Which syndrome is most likely",
+            "topic": "Von Hippel-Lindau syndrome",
+            "options": {
+                  "A": "Li-Fraumeni syndrome",
+                  "B": "Von Hippel-Lindau syndrome",
+                  "C": "MEN1",
+                  "D": "Lynch syndrome"
+            },
+            "correct": "B",
+            "explanation": "Von Hippel-Lindau syndrome is autosomal dominant and associated with CNS hemangioblastomas, renal cell carcinoma, pheochromocytoma, and cysts in the pancreas, liver, and kidney.",
+            "optionExplanations": {
+                  "A": "Li-Fraumeni causes sarcoma, breast cancer, brain tumors, leukemia, and adrenocortical carcinoma.",
+                  "B": "Correct. Hemangioblastomas plus RCC plus pheochromocytoma is classic VHL.",
+                  "C": "MEN1 causes parathyroid, pituitary, and pancreatic islet cell tumors.",
+                  "D": "Lynch causes right-sided colon cancer and endometrial/ovarian cancer risk."
+            }
+      },
+      {
+            "id": 27,
+            "stem": "A patient has primary hyperparathyroidism with hypercalcemia, a pituitary adenoma, and a pancreatic islet cell tumor. Which genetic mechanism best matches this syndrome",
+            "topic": "MEN1",
+            "options": {
+                  "A": "RET proto-oncogene gain of function",
+                  "B": "MEN1 tumor suppressor loss of function",
+                  "C": "TP53 germline mutation",
+                  "D": "MSH2 mismatch repair mutation"
+            },
+            "correct": "B",
+            "explanation": "MEN1 is an autosomal dominant syndrome due to MEN1 tumor suppressor loss of function. It classically causes the 3 Ps: parathyroid hyperplasia, pituitary adenoma, and pancreatic islet cell tumors. Primary hyperparathyroidism is often the earliest/common manifestation.",
+            "optionExplanations": {
+                  "A": "RET gain-of-function causes MEN2A.",
+                  "B": "Correct. MEN1 is a tumor suppressor loss-of-function syndrome.",
+                  "C": "TP53 germline mutation causes Li-Fraumeni syndrome.",
+                  "D": "MSH2 mutation causes Lynch syndrome."
+            }
+      },
+      {
+            "id": 28,
+            "stem": "A patient has medullary thyroid carcinoma, pheochromocytoma, and parathyroid hyperplasia. Which mutation is expected",
+            "topic": "MEN2A",
+            "options": {
+                  "A": "RET gain-of-function mutation",
+                  "B": "APC loss-of-function mutation",
+                  "C": "FANCA loss-of-function mutation",
+                  "D": "PSEN1 mutation"
+            },
+            "correct": "A",
+            "explanation": "MEN2A is an autosomal dominant syndrome caused by RET proto-oncogene gain of function. It causes medullary thyroid carcinoma, pheochromocytoma, and parathyroid hyperplasia; medullary thyroid carcinoma occurs in almost all patients in the slide section.",
+            "optionExplanations": {
+                  "A": "Correct. RET gain-of-function is the key mutation in MEN2A.",
+                  "B": "APC loss causes FAP.",
+                  "C": "FANCA loss causes Fanconi anemia.",
+                  "D": "PSEN1 causes early-onset Alzheimer disease."
+            }
+      },
+      {
+            "id": 29,
+            "stem": "A 16-year-old girl has pleomorphic rhabdomyosarcoma. Her mother had breast cancer at 40, her aunt had osteosarcoma, and her grandfather had a brain tumor. Which management point is especially important for this inherited syndrome",
+            "topic": "Li-Fraumeni syndrome",
+            "options": {
+                  "A": "Avoid all colonoscopy because polyposis is absent",
+                  "B": "Prefer non-radiation imaging when possible due to radiation sensitivity",
+                  "C": "Perform prophylactic thyroidectomy for RET activation",
+                  "D": "Treat with chromosome 15 methylation therapy"
+            },
+            "correct": "B",
+            "explanation": "This pattern suggests Li-Fraumeni syndrome from germline TP53 mutation, with early sarcoma plus family history of breast, brain, and osteosarcoma. Management includes genetics referral, family testing, lifelong tumor surveillance, and preference for non-radiation imaging when possible due to radiation sensitivity.",
+            "optionExplanations": {
+                  "A": "Colonoscopy avoidance is not the management point; Li-Fraumeni surveillance is broad.",
+                  "B": "Correct. Radiation sensitivity makes non-radiation imaging preferable when feasible.",
+                  "C": "Prophylactic thyroidectomy relates to MEN2A/RET, not Li-Fraumeni.",
+                  "D": "Chromosome 15 imprinting disorders are Prader-Willi and Angelman, not Li-Fraumeni."
+            }
+      },
+      {
+            "id": 30,
+            "stem": "A 34-year-old has right-sided colon cancer without massive polyposis. Family history includes endometrial and ovarian cancers. Tumor testing suggests defective mismatch repair. Which genes are most likely involved",
+            "topic": "Lynch syndrome",
+            "options": {
+                  "A": "APC and CTNNB1",
+                  "B": "MSH2 and MLH1",
+                  "C": "BRCA2 and FANCA",
+                  "D": "TSC1 and TSC2"
+            },
+            "correct": "B",
+            "explanation": "Lynch syndrome/HNPCC is autosomal dominant and caused by DNA mismatch repair gene mutations, including MSH2 and MLH1. It causes early-onset, predominantly right-sided colon cancer without diffuse polyposis and increases endometrial and ovarian cancer risk.",
+            "optionExplanations": {
+                  "A": "APC pathway defects cause FAP with many colon polyps.",
+                  "B": "Correct. MSH2 and MLH1 are classic mismatch repair genes in Lynch syndrome.",
+                  "C": "FANCA/BRCA2 relate to DNA repair and Fanconi anemia pathways, not classic Lynch syndrome.",
+                  "D": "TSC1/TSC2 cause tuberous sclerosis."
+            }
+      }
+];
+
+    let currentIndex = 0;
+    const answers = {};
+
+    const progressEl = document.getElementById("progress");
+    const countEl = document.getElementById("count");
+    const wrongCountEl = document.getElementById("wrongCount");
+    const rightCountEl = document.getElementById("rightCount");
+    const questionNumberEl = document.getElementById("questionNumber");
+    const topicEl = document.getElementById("topic");
+    const stemEl = document.getElementById("stem");
+    const optionsEl = document.getElementById("options");
+    const explanationEl = document.getElementById("explanation");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function getScore() {
+      let right = 0;
+      let wrong = 0;
+      Object.keys(answers).forEach((qid) => {
+        const q = questions.find((item) => item.id === Number(qid));
+        if (q && answers[qid] === q.correct) right += 1;
+        if (q && answers[qid] !== q.correct) wrong += 1;
+      });
+      return { right, wrong };
+    }
+
+    function goToQuestion(index) {
+      let newIndex = index;
+      if (newIndex < 0) newIndex = questions.length - 1;
+      if (newIndex >= questions.length) newIndex = 0;
+      currentIndex = newIndex;
+      render();
+    }
+
+    function selectAnswer(letter) {
+      const q = questions[currentIndex];
+      answers[q.id] = letter;
+      render();
+    }
+
+    function renderProgress() {
+      progressEl.innerHTML = "";
+      questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "segment";
+        if (idx === currentIndex) btn.classList.add("active");
+        else if (answers[q.id] !== undefined) btn.classList.add("answered");
+        btn.setAttribute("aria-label", `Go to question ${idx + 1}`);
+        btn.title = q.topic || `Question ${idx + 1}`;
+        btn.addEventListener("click", () => goToQuestion(idx));
+        progressEl.appendChild(btn);
+      });
+    }
+
+    function render() {
+      const q = questions[currentIndex];
+      const selectedChoice = answers[q.id] !== undefined ? answers[q.id] : null;
+      const showExplanation = selectedChoice !== null;
+      const isCorrect = selectedChoice === q.correct;
+      const score = getScore();
+
+      renderProgress();
+      countEl.textContent = `${currentIndex + 1} / ${questions.length}`;
+      wrongCountEl.textContent = score.wrong;
+      rightCountEl.textContent = score.right;
+      questionNumberEl.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+      topicEl.textContent = q.topic ? `Topic: ${q.topic}` : "";
+      stemEl.textContent = q.stem + "?";
+
+      optionsEl.innerHTML = "";
+      Object.entries(q.options).forEach(([letter, text]) => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        if (showExplanation && letter === q.correct) btn.classList.add("correct");
+        else if (showExplanation && letter === selectedChoice && letter !== q.correct) btn.classList.add("incorrect");
+        btn.innerHTML = `<strong>${letter}.</strong> ${text}`;
+        btn.addEventListener("click", () => selectAnswer(letter));
+        optionsEl.appendChild(btn);
+      });
+
+      if (showExplanation) {
+        const optionDetails = Object.entries(q.optionExplanations)
+          .map(([letter, text]) => `<p><strong>${letter}.</strong> ${text}</p>`)
+          .join("");
+        explanationEl.className = "explanation show";
+        explanationEl.innerHTML = `
+          <p><strong>Correct answer: ${q.correct}</strong> (${q.options[q.correct]})</p>
+          <p class="${isCorrect ? "green-text" : "red-text"}">${isCorrect ? "Nice job. " : "Good attempt. "}${q.explanation}</p>
+          <div class="option-explanations">
+            <p><strong>Why each option is right or wrong:</strong></p>
+            ${optionDetails}
+          </div>
+        `;
+      } else {
+        explanationEl.className = "explanation";
+        explanationEl.innerHTML = "";
+      }
+    }
+
+    prevBtn.addEventListener("click", () => goToQuestion(currentIndex - 1));
+    nextBtn.addEventListener("click", () => goToQuestion(currentIndex + 1));
+
+    render();
+  </script>
+</body>
+</html>
